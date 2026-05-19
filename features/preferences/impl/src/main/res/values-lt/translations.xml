@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="screen_advanced_settings_choose_distributor_dialog_title_android">"Pasirinkite, kaip gauti pranešimus"</string>
+  <string name="screen_blocked_users_unblock_alert_action">"Atblokuoti"</string>
+  <string name="screen_blocked_users_unblock_alert_description">"Vėl galėsite matyti visas iš jų gautas žinutes."</string>
+  <string name="screen_blocked_users_unblock_alert_title">"Atblokuoti vartotoją"</string>
+  <string name="screen_notification_settings_system_notifications_action_required_content_link">"sistemos nustatymai"</string>
+  <string name="screen_notification_settings_title">"Pranešimai"</string>
+</resources>

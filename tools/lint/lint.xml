@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?><!--
+  ~ Copyright (c) 2025 Element Creations Ltd.
+  ~ Copyright 2022 New Vector Ltd.
+  ~
+  ~ SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Element-Commercial.
+  ~ Please see LICENSE files in the repository root for full details.
+  -->
+<lint>
+
+    <!-- Ensure this file does not contain unknown Ids -->
+    <issue id="UnknownIssueId" severity="warning" />
+
+    <!-- Modify some severity -->
+
+    <!-- Resource -->
+    <issue id="MissingTranslation" severity="ignore" />
+    <issue id="TypographyEllipsis" severity="error" />
+    <issue id="ImpliedQuantity" severity="error" />
+    <issue id="MissingQuantity" severity="warning" />
+    <issue id="UnusedQuantity" severity="error" />
+    <issue id="IconXmlAndPng" severity="error" />
+    <issue id="IconDipSize" severity="error" />
+    <issue id="IconDuplicatesConfig" severity="error" />
+    <issue id="IconDuplicates" severity="error" />
+    <issue id="IconExpectedSize" severity="error">
+        <ignore path="**/ic_launcher_monochrome.webp" />
+    </issue>
+    <issue id="LocaleFolder" severity="error" />
+
+    <!-- AlwaysShowAction is considered as an error to force ignoring the issue when detected -->
+    <issue id="AlwaysShowAction" severity="error" />
+
+    <issue id="TooManyViews" severity="warning">
+        <!-- Ignore TooManyViews in debug build type -->
+        <ignore path="**/src/debug/**" />
+    </issue>
+
+    <issue id="UnusedResources" severity="error">
+        <!-- Ignore unused strings resource from localazy -->
+        <ignore path="**/localazy.xml" />
+        <!-- Ignore unused resource in debug build type -->
+        <ignore path="**/src/debug/**" />
+        <!-- Ignore unused resources in designsystem since they're imported elsewhere through aliases and can't be properly detected -->
+        <ignore path="**/libraries/designsystem/src/main/res/**" />
+    </issue>
+
+    <!-- UX -->
+    <issue id="ButtonOrder" severity="error" />
+    <issue id="TextFields" severity="error" />
+
+    <!-- Accessibility -->
+    <issue id="LabelFor" severity="error" />
+    <issue id="ContentDescription" severity="error" />
+    <issue id="SpUsage" severity="error" />
+
+    <!-- Layout -->
+    <issue id="UnknownIdInLayout" severity="error" />
+    <issue id="StringFormatCount" severity="error" />
+    <issue id="HardcodedText" severity="error" />
+    <issue id="ObsoleteLayoutParam" severity="error" />
+    <issue id="InefficientWeight" severity="error" />
+    <issue id="DisableBaselineAlignment" severity="error" />
+    <issue id="ScrollViewSize" severity="error" />
+    <issue id="NegativeMargin" severity="error" />
+
+    <!-- RTL -->
+    <issue id="RtlEnabled" severity="error" />
+    <issue id="RtlHardcoded" severity="error" />
+    <issue id="RtlSymmetry" severity="error" />
+
+    <!-- Code -->
+    <issue id="NewApi" severity="error" />
+    <issue id="SetTextI18n" severity="error" />
+    <issue id="ViewConstructor" severity="error" />
+    <issue id="UseValueOf" severity="error" />
+    <issue id="ObsoleteSdkInt" severity="error" />
+    <issue id="Recycle" severity="error" />
+    <issue id="KotlinPropertyAccess" severity="error" />
+    <issue id="DefaultLocale" severity="error" />
+    <issue id="CheckResult" severity="error" />
+    <issue id="StaticFieldLeak" severity="error" />
+
+    <issue id="InvalidPackage">
+        <!-- Ignore error from HtmlCompressor lib -->
+        <ignore path="**/htmlcompressor-1.4.jar" />
+        <!-- Ignore error from dropbox-core-sdk-3.0.8 lib, which comes with Jitsi library -->
+        <ignore path="**/dropbox-core-sdk-3.0.8.jar" />
+    </issue>
+
+    <!-- Manifest -->
+    <issue id="PermissionImpliesUnsupportedChromeOsHardware" severity="error" />
+    <issue id="DataExtractionRules" severity="error" />
+
+    <!-- Performance -->
+    <issue id="UselessParent" severity="error" />
+
+    <!-- Dependencies -->
+    <issue id="KtxExtensionAvailable" severity="error" />
+
+    <!-- Timber -->
+    <!--    This rule is failing on CI because it's marked as unknwown rule id :/-->
+    <!--    <issue id="BinaryOperationInTimber" severity="error" />-->
+    <issue id="LogNotTimber" severity="error" />
+
+    <!-- Wording -->
+    <issue id="Typos" severity="error" />
+    <issue id="TypographyDashes" severity="error" />
+    <issue id="PluralsCandidate" severity="error" />
+
+    <!-- Notification -->
+    <issue id="LaunchActivityFromNotification" severity="error" />
+
+    <!-- We handle them manually -->
+    <issue id="EnsureInitializerMetadata" severity="ignore" />
+
+    <!-- DI -->
+    <!-- issue id="JvmStaticProvidesInObjectDetector" severity="error" /-->
+
+    <!-- Compose -->
+    <issue id="UnnecessaryComposedModifier" severity="error" />
+
+    <!-- There seems to be an issue with this check, it flags lots of false positives. -->
+    <!-- See https://issuetracker.google.com/issues/349411310 -->
+    <!-- TODO: check again in the near future. -->
+    <issue id="ProduceStateDoesNotAssignValue" severity="ignore" />
+</lint>

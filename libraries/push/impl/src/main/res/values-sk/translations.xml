@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="notification_channel_call">"Zavolať"</string>
+  <string name="notification_channel_listening_for_events">"Počúvanie udalostí"</string>
+  <string name="notification_channel_noisy">"Hlasité oznámenia"</string>
+  <string name="notification_channel_ringing_calls">"Vyzváňanie hovorov"</string>
+  <string name="notification_channel_silent">"Tiché oznámenia"</string>
+  <plurals name="notification_compat_summary_line_for_room">
+    <item quantity="one">"%1$s: %2$d správa"</item>
+    <item quantity="few">"%1$s: %2$d správy"</item>
+    <item quantity="other">"%1$s: %2$d správ"</item>
+  </plurals>
+  <plurals name="notification_compat_summary_title">
+    <item quantity="one">"%d oznámenie"</item>
+    <item quantity="few">"%d oznámenia"</item>
+    <item quantity="other">"%d oznámení"</item>
+  </plurals>
+  <string name="notification_error_unified_push_unregistered_android">"Distribútora oznámení UnifiedPush sa nepodarilo zaregistrovať, takže už nebudete dostávať oznámenia. Skontrolujte nastavenia oznámení v aplikácii a stav distribútora push oznámení."</string>
+  <string name="notification_fallback_content">"Máte nové správy."</string>
+  <string name="notification_incoming_call">"📹 Prichádzajúci hovor"</string>
+  <string name="notification_inline_reply_failed">"** Nepodarilo sa odoslať - prosím otvorte miestnosť"</string>
+  <string name="notification_invitation_action_join">"Pripojiť sa"</string>
+  <string name="notification_invitation_action_reject">"Odmietnuť"</string>
+  <plurals name="notification_invitations">
+    <item quantity="one">"%d pozvánka"</item>
+    <item quantity="few">"%d pozvánky"</item>
+    <item quantity="other">"%d pozvánok"</item>
+  </plurals>
+  <string name="notification_invite_body">"Vás pozval/a na konverzáciu"</string>
+  <string name="notification_invite_body_with_sender">"%1$s vás pozval/a na rozhovor"</string>
+  <string name="notification_mentioned_you_body">"Spomenul/a vás: %1$s"</string>
+  <string name="notification_new_messages">"Nové správy"</string>
+  <plurals name="notification_new_messages_for_room">
+    <item quantity="one">"%d nová správa"</item>
+    <item quantity="few">"%d nové správy"</item>
+    <item quantity="other">"%d nových správ"</item>
+  </plurals>
+  <string name="notification_reaction_body">"Reagoval/a s %1$s"</string>
+  <string name="notification_room_action_mark_as_read">"Označiť ako prečítané"</string>
+  <string name="notification_room_action_quick_reply">"Rýchla odpoveď"</string>
+  <string name="notification_room_invite_body">"Vás pozval do miestnosti"</string>
+  <string name="notification_room_invite_body_with_sender">"%1$s vás pozval/a, aby ste sa pripojili k miestnosti"</string>
+  <string name="notification_sender_me">"Ja"</string>
+  <string name="notification_sender_mention_reply">"%1$s spomenul/a alebo odpovedal/a"</string>
+  <string name="notification_space_invite_body">"Boli ste pozvaní, aby ste sa pripojili do priestoru"</string>
+  <string name="notification_space_invite_body_with_sender">"%1$s vás pozval/a, aby ste sa pripojili k priestoru"</string>
+  <string name="notification_test_push_notification_content">"Prezeráte si oznámenie! Kliknite na mňa!"</string>
+  <string name="notification_thread_in_room">"Vlákno v %1$s"</string>
+  <string name="notification_ticker_text_dm">"%1$s: %2$s"</string>
+  <string name="notification_ticker_text_group">"%1$s: %2$s %3$s"</string>
+  <plurals name="notification_unread_notified_messages">
+    <item quantity="one">"%d neprečítaná oznámená správa"</item>
+    <item quantity="few">"%d neprečítané oznámené správy"</item>
+    <item quantity="other">"%d neprečítaných oznámených správ"</item>
+  </plurals>
+  <string name="notification_unread_notified_messages_and_invitation">"%1$s a %2$s"</string>
+  <string name="notification_unread_notified_messages_in_room">"%1$s v %2$s"</string>
+  <string name="notification_unread_notified_messages_in_room_and_invitation">"%1$s v %2$s a %3$s"</string>
+  <plurals name="notification_unread_notified_messages_in_room_rooms">
+    <item quantity="one">"%d miestnosť"</item>
+    <item quantity="few">"%d miestnosti"</item>
+    <item quantity="other">"%d miestností"</item>
+  </plurals>
+  <string name="push_distributor_background_sync_android">"Synchronizácia na pozadí"</string>
+  <string name="push_distributor_firebase_android">"Služby Google"</string>
+  <string name="push_no_valid_google_play_services_apk_android">"Nenašli sa žiadne platné služby Google Play. Oznámenia nemusia fungovať správne."</string>
+  <string name="troubleshoot_notifications_test_blocked_users_description">"Kontrola blokovaných používateľov"</string>
+  <string name="troubleshoot_notifications_test_blocked_users_quick_fix">"Zobraziť blokovaných používateľov"</string>
+  <string name="troubleshoot_notifications_test_blocked_users_result_none">"Žiadni používatelia nie sú blokovaní."</string>
+  <plurals name="troubleshoot_notifications_test_blocked_users_result_some">
+    <item quantity="one">"Zablokovali ste %1$d používateľa. Nebudete dostávať oznámenia od tohto používateľa."</item>
+    <item quantity="few">"Zablokovali ste %1$d používateľov. Nebudete dostávať oznámenia od týchto používateľov."</item>
+    <item quantity="other">"Zablokovali ste %1$d používateľov. Nebudete dostávať oznámenia od týchto používateľov."</item>
+  </plurals>
+  <string name="troubleshoot_notifications_test_blocked_users_title">"Blokovaní používatelia"</string>
+  <string name="troubleshoot_notifications_test_current_push_provider_description">"Získaťe názov aktuálneho poskytovateľa."</string>
+  <string name="troubleshoot_notifications_test_current_push_provider_failure">"Nie sú vybraní žiadni poskytovatelia push."</string>
+  <string name="troubleshoot_notifications_test_current_push_provider_failure_distributor_not_found">"Aktuálny poskytovateľ push oznámení: %1$s a súčasný distribútor: %2$s. Ale distribútor %3$s sa nenašiel. Možno bola aplikácia odinštalovaná?"</string>
+  <string name="troubleshoot_notifications_test_current_push_provider_failure_no_distributor">"Aktuálny poskytovateľ push oznámení: %1$s, ale neboli nakonfigurovaní žiadni distribútori."</string>
+  <string name="troubleshoot_notifications_test_current_push_provider_success">"Aktuálny poskytovateľ push: %1$s."</string>
+  <string name="troubleshoot_notifications_test_current_push_provider_success_with_distributor">"Aktuálny poskytovateľ push oznámení: %1$s (%2$s)"</string>
+  <string name="troubleshoot_notifications_test_current_push_provider_title">"Aktuálny poskytovateľ push"</string>
+  <string name="troubleshoot_notifications_test_detect_push_provider_description">"Uistite sa, že aplikácia má aspoň jedného poskytovateľa push."</string>
+  <string name="troubleshoot_notifications_test_detect_push_provider_failure">"Nenašli sa žiadni poskytovatelia push."</string>
+  <plurals name="troubleshoot_notifications_test_detect_push_provider_success">
+    <item quantity="one">"Nájdený %1$d poskytovateľ služby push: %2$s"</item>
+    <item quantity="few">"Nájdení %1$d poskytovatelia služby push: %2$s"</item>
+    <item quantity="other">"Nájdených %1$d poskytovateľov služby push: %2$s"</item>
+  </plurals>
+  <string name="troubleshoot_notifications_test_detect_push_provider_success_2">"Aplikácia bola vytvorená s podporou pre: %1$s"</string>
+  <string name="troubleshoot_notifications_test_detect_push_provider_title">"Zistiť poskytovateľov push"</string>
+  <string name="troubleshoot_notifications_test_display_notification_description">"Skontrolujte, či aplikácia dokáže zobraziť upozornenie."</string>
+  <string name="troubleshoot_notifications_test_display_notification_failure">"Na oznámenie nebolo kliknuté."</string>
+  <string name="troubleshoot_notifications_test_display_notification_permission_failure">"Nie je možné zobraziť upozornenie."</string>
+  <string name="troubleshoot_notifications_test_display_notification_success">"Na oznámenie bolo kliknuté!"</string>
+  <string name="troubleshoot_notifications_test_display_notification_title">"Zobraziť upozornenie"</string>
+  <string name="troubleshoot_notifications_test_display_notification_waiting">"Kliknite na upozornenie a pokračujte v teste."</string>
+  <string name="troubleshoot_notifications_test_push_loop_back_description">"Uistite sa, že aplikácia prijíma push oznámenia."</string>
+  <string name="troubleshoot_notifications_test_push_loop_back_failure_1">"Chyba: pusher odmietol požiadavku."</string>
+  <string name="troubleshoot_notifications_test_push_loop_back_failure_2">"Chyba: %1$s."</string>
+  <string name="troubleshoot_notifications_test_push_loop_back_failure_3">"Chyba, nie je možné testovať push."</string>
+  <string name="troubleshoot_notifications_test_push_loop_back_failure_4">"Chyba, časový limit na push vypršal."</string>
+  <string name="troubleshoot_notifications_test_push_loop_back_success">"Push loop back trvalo %1$d ms."</string>
+  <string name="troubleshoot_notifications_test_push_loop_back_title">"Testovať Push loop back"</string>
+</resources>

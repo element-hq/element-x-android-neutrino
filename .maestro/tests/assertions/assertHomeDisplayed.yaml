@@ -1,0 +1,5 @@
+appId: ${MAESTRO_APP_ID}
+---
+- extendedWaitUntil:
+    visible: "Chats"
+    timeout: 10000

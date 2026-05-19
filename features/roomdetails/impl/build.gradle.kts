@@ -1,0 +1,85 @@
+import extension.setupDependencyInjection
+import extension.testCommonDependencies
+
+/*
+ * Copyright (c) 2025 Element Creations Ltd.
+ * Copyright 2023, 2024 New Vector Ltd.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Element-Commercial.
+ * Please see LICENSE files in the repository root for full details.
+ */
+
+plugins {
+    id("io.element.android-compose-library")
+    id("kotlin-parcelize")
+}
+
+android {
+    namespace = "io.element.android.features.roomdetails.impl"
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
+}
+
+setupDependencyInjection()
+
+dependencies {
+    implementation(projects.appconfig)
+    implementation(projects.libraries.core)
+    implementation(projects.libraries.architecture)
+    implementation(projects.libraries.matrix.api)
+    implementation(projects.libraries.matrixui)
+    implementation(projects.libraries.designsystem)
+    implementation(projects.libraries.uiStrings)
+    implementation(projects.libraries.androidutils)
+    implementation(projects.libraries.mediapickers.api)
+    implementation(projects.libraries.mediaupload.api)
+    implementation(projects.libraries.mediaviewer.api)
+    implementation(projects.libraries.featureflag.api)
+    implementation(projects.libraries.permissions.api)
+    implementation(projects.libraries.preferences.api)
+    implementation(projects.libraries.testtags)
+    api(projects.features.roomdetails.api)
+    api(projects.libraries.usersearch.api)
+    api(projects.services.apperror.api)
+    implementation(libs.coil.compose)
+    implementation(projects.features.call.api)
+    implementation(projects.features.startchat.api)
+    implementation(projects.features.leaveroom.api)
+    implementation(projects.features.userprofile.shared)
+    implementation(projects.services.analytics.compose)
+    implementation(projects.features.poll.api)
+    implementation(projects.features.messages.api)
+    implementation(projects.features.roomcall.api)
+    implementation(projects.features.knockrequests.api)
+    implementation(projects.features.verifysession.api)
+    implementation(projects.features.reportroom.api)
+    implementation(projects.features.roommembermoderation.api)
+    implementation(projects.features.rolesandpermissions.api)
+    implementation(projects.features.securityandprivacy.api)
+    implementation(projects.features.roomdetailsedit.api)
+    implementation(projects.features.invitepeople.api)
+
+    testCommonDependencies(libs, true)
+    testImplementation(projects.libraries.matrix.test)
+    testImplementation(projects.libraries.mediaupload.test)
+    testImplementation(projects.libraries.mediapickers.test)
+    testImplementation(projects.libraries.mediaviewer.test)
+    testImplementation(projects.libraries.permissions.test)
+    testImplementation(projects.libraries.preferences.test)
+    testImplementation(projects.libraries.usersearch.test)
+    testImplementation(projects.libraries.featureflag.test)
+    testImplementation(projects.features.call.test)
+    testImplementation(projects.features.rolesandpermissions.test)
+    testImplementation(projects.features.securityandprivacy.test)
+    testImplementation(projects.features.roomdetailsedit.test)
+    testImplementation(projects.features.knockrequests.test)
+    testImplementation(projects.features.messages.test)
+    testImplementation(projects.features.poll.test)
+    testImplementation(projects.features.reportroom.test)
+    testImplementation(projects.features.startchat.test)
+    testImplementation(projects.features.verifysession.test)
+    testImplementation(projects.services.analytics.test)
+}

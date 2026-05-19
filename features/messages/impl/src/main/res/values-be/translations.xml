@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="crypto_event_authenticity_not_guaranteed">"Сапраўднасць гэтага зашыфраванага паведамлення не можа быць гарантаваная на гэтай прыладзе."</string>
+  <string name="crypto_event_authenticity_previously_verified">"Зашыфравана раней правераным карыстальнікам."</string>
+  <string name="crypto_event_authenticity_sent_in_clear">"Не зашыфраваны."</string>
+  <string name="crypto_event_authenticity_unknown_device">"Зашыфравана невядомай ці выдаленай прыладай."</string>
+  <string name="crypto_event_authenticity_unsigned_device">"Зашыфравана прыладай, не пацверджанай яе ўладальнікам."</string>
+  <string name="crypto_event_authenticity_unverified_identity">"Зашыфравана неправераным карыстальнікам."</string>
+  <string name="emoji_picker_category_activity">"Актыўнасці"</string>
+  <string name="emoji_picker_category_flags">"Сцягі"</string>
+  <string name="emoji_picker_category_foods">"Ежа &amp; Напоі"</string>
+  <string name="emoji_picker_category_nature">"Жывёлы &amp; Прырода"</string>
+  <string name="emoji_picker_category_objects">"Аб\'екты"</string>
+  <string name="emoji_picker_category_people">"Усмешкі &amp; Удзельнікі"</string>
+  <string name="emoji_picker_category_places">"Падарожжы &amp; Месцы"</string>
+  <string name="emoji_picker_category_symbols">"Сімвалы"</string>
+  <string name="screen_media_upload_preview_error_failed_processing">"Не атрымалася апрацаваць медыяфайл для загрузкі, паспрабуйце яшчэ раз."</string>
+  <string name="screen_media_upload_preview_error_failed_sending">"Не атрымалася загрузіць медыяфайлы, паспрабуйце яшчэ раз."</string>
+  <string name="screen_report_content_block_user">"Заблакіраваць карыстальніка"</string>
+  <string name="screen_report_content_block_user_hint">"Адзначце, ці хочаце вы схаваць усе бягучыя і будучыя паведамленні ад гэтага карыстальніка"</string>
+  <string name="screen_report_content_explanation">"Гэтае паведамленне будзе перададзена адміністратару вашага хатняга сервера. Яны не змогуць прачытаць зашыфраваныя паведамленні."</string>
+  <string name="screen_report_content_hint">"Прычына, па якой вы паскардзіліся на гэты змест"</string>
+  <string name="screen_room_attachment_source_camera">"Камера"</string>
+  <string name="screen_room_attachment_source_camera_photo">"Зрабіць фота"</string>
+  <string name="screen_room_attachment_source_camera_video">"Запісаць відэа"</string>
+  <string name="screen_room_attachment_source_files">"Далучэнне"</string>
+  <string name="screen_room_attachment_source_gallery">"Бібліятэка фота &amp; відэа"</string>
+  <string name="screen_room_attachment_source_location">"Месцазнаходжанне"</string>
+  <string name="screen_room_attachment_source_poll">"Апытанне"</string>
+  <string name="screen_room_attachment_text_formatting">"Фармаціраванне тэксту"</string>
+  <string name="screen_room_encrypted_history_banner">"Гісторыя паведамленняў зараз недаступна."</string>
+  <string name="screen_room_encrypted_history_banner_unverified">"Гісторыя паведамленняў у гэтым пакоі недаступная. Праверце гэтую прыладу, каб убачыць гісторыю паведамленняў."</string>
+  <string name="screen_room_invite_again_alert_message">"Вы хочаце запрасіць іх назад?"</string>
+  <string name="screen_room_invite_again_alert_title">"Вы адзін у гэтым чаце"</string>
+  <string name="screen_room_mentions_at_room_subtitle">"Апавясціць увесь пакой"</string>
+  <string name="screen_room_mentions_at_room_title">"Усе"</string>
+  <string name="screen_room_retry_send_menu_send_again_action">"Адправіць зноў"</string>
+  <string name="screen_room_retry_send_menu_title">"Не ўдалося адправіць ваша паведамленне"</string>
+  <string name="screen_room_timeline_add_reaction">"Дадаць эмодзі"</string>
+  <string name="screen_room_timeline_beginning_of_room">"Гэта пачатак %1$s."</string>
+  <string name="screen_room_timeline_beginning_of_room_no_name">"Гэта пачатак гэтай размовы."</string>
+  <string name="screen_room_timeline_less_reactions">"Паказаць менш"</string>
+  <string name="screen_room_timeline_message_copied">"Паведамленне скапіравана"</string>
+  <string name="screen_room_timeline_no_permission_to_post">"У Вас няма дазволу на публікацыю ў гэтым пакоі"</string>
+  <string name="screen_room_timeline_reactions_show_less">"Паказаць менш"</string>
+  <string name="screen_room_timeline_reactions_show_more">"Паказаць больш"</string>
+  <string name="screen_room_timeline_read_marker_title">"Новае"</string>
+  <plurals name="screen_room_timeline_state_changes">
+    <item quantity="one">"%1$d змена ў пакоі"</item>
+    <item quantity="few">"%1$d змены ў пакоі"</item>
+    <item quantity="many">"%1$d змен у пакоі"</item>
+  </plurals>
+  <plurals name="screen_room_typing_many_members">
+    <item quantity="one">"%1$s, %2$s і %3$d іншы"</item>
+    <item quantity="many">"%1$s, %2$s і %3$d іншыя"</item>
+  </plurals>
+  <plurals name="screen_room_typing_notification">
+    <item quantity="one">"%1$s піша"</item>
+    <item quantity="few">"%1$s пішуць"</item>
+    <item quantity="many">"%1$s пішуць"</item>
+  </plurals>
+  <string name="screen_room_typing_two_members">"%1$s і %2$s"</string>
+</resources>

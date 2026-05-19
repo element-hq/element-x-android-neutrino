@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="banner_battery_optimization_submit_android">"Optimalisatie uitschakelen"</string>
+  <string name="banner_set_up_recovery_content">"Herstel je cryptografische identiteit en berichtengeschiedenis met een herstelsleutel voor als je al je bestaande apparaten kwijt bent."</string>
+  <string name="banner_set_up_recovery_submit">"Herstelmogelijkheid instellen"</string>
+  <string name="banner_set_up_recovery_title">"Herstel instellen om je account te beschermen"</string>
+  <string name="confirm_recovery_key_banner_message">"Bevestig je herstelsleutel om toegang te houden tot je sleutelopslag en berichtengeschiedenis."</string>
+  <string name="confirm_recovery_key_banner_title">"Je sleutelopslag is niet gesynchroniseerd"</string>
+  <string name="full_screen_intent_banner_message">"Pas je instellingen aan om meldingen op het volledige scherm toe te staan wanneer de telefoon is vergrendeld. Zo mis je nooit een belangrijk gesprek."</string>
+  <string name="full_screen_intent_banner_title">"Verbeter je gesprekservaring"</string>
+  <string name="screen_home_tab_chats">"Chats"</string>
+  <string name="screen_invites_decline_chat_message">"Weet je zeker dat je de uitnodiging om toe te treden tot %1$s wilt weigeren?"</string>
+  <string name="screen_invites_decline_chat_title">"Uitnodiging weigeren"</string>
+  <string name="screen_invites_decline_direct_chat_message">"Weet je zeker dat je deze privéchat met %1$s wilt weigeren?"</string>
+  <string name="screen_invites_decline_direct_chat_title">"Chat weigeren"</string>
+  <string name="screen_invites_empty_list">"Geen uitnodigingen"</string>
+  <string name="screen_invites_invited_you">"%1$s (%2$s) heeft je uitgenodigd"</string>
+  <string name="screen_migration_message">"Dit is een eenmalig proces, bedankt voor het wachten."</string>
+  <string name="screen_migration_title">"Je account instellen."</string>
+  <string name="screen_roomlist_a11y_create_message">"Begin een nieuw gesprek of maak een nieuwe kamer"</string>
+  <string name="screen_roomlist_empty_message">"Ga aan de slag door iemand een bericht te sturen."</string>
+  <string name="screen_roomlist_empty_title">"Nog geen chats."</string>
+  <string name="screen_roomlist_filter_favourites">"Favorieten"</string>
+  <string name="screen_roomlist_filter_favourites_empty_state_subtitle">"Je kunt een chat toevoegen aan je favorieten in de chatinstellingen.
+Voor nu kun je filters deselecteren om je andere chats te zien"</string>
+  <string name="screen_roomlist_filter_favourites_empty_state_title">"Je hebt nog geen favoriete chats"</string>
+  <string name="screen_roomlist_filter_invites">"Uitnodigingen"</string>
+  <string name="screen_roomlist_filter_invites_empty_state_title">"Je hebt geen openstaande uitnodigingen."</string>
+  <string name="screen_roomlist_filter_low_priority">"Lage prioriteit"</string>
+  <string name="screen_roomlist_filter_mixed_empty_state_subtitle">"Je kunt filters deselecteren om je andere chats te zien"</string>
+  <string name="screen_roomlist_filter_mixed_empty_state_title">"Je hebt geen chats voor deze selectie"</string>
+  <string name="screen_roomlist_filter_people">"Personen"</string>
+  <string name="screen_roomlist_filter_people_empty_state_title">"Je hebt nog geen directe chats"</string>
+  <string name="screen_roomlist_filter_rooms">"Kamers"</string>
+  <string name="screen_roomlist_filter_rooms_empty_state_title">"Je zit nog niet in een kamer"</string>
+  <string name="screen_roomlist_filter_unreads">"Ongelezen"</string>
+  <string name="screen_roomlist_filter_unreads_empty_state_title">"Gefeliciteerd!
+Je hebt geen ongelezen berichten!"</string>
+  <string name="screen_roomlist_knock_event_sent_description">"Verzoek om toe te treden verzonden"</string>
+  <string name="screen_roomlist_main_space_title">"Chats"</string>
+  <string name="screen_roomlist_mark_as_read">"Markeren als gelezen"</string>
+  <string name="screen_roomlist_mark_as_unread">"Markeren als ongelezen"</string>
+  <string name="session_verification_banner_message">"Het lijkt erop dat je een nieuw apparaat gebruikt. Verifieer met een ander apparaat om toegang te krijgen tot je versleutelde berichten."</string>
+  <string name="session_verification_banner_title">"Verifieer dat jij het bent"</string>
+</resources>

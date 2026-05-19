@@ -1,0 +1,28 @@
+# Copyright (c) 2025 Element Creations Ltd.
+# Copyright 2023-2024 New Vector Ltd.
+#
+# SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Element-Commercial.
+# Please see LICENSE files in the repository root for full details.
+
+# This file list String which are not allowed in resource.
+# Use Perl regex to write forbidden strings
+# Note: line cannot start with a space. Use \s instead.
+# It is possible to specify an authorized number of occurrence with === suffix. Default is 0
+# Example:
+# AuthorizedStringThreeTimes===3
+
+# Extension:xml
+
+### Empty tag detected. Empty translation or plurals?
+"></
+">""</
+
+### Rubbish from merge. Please delete those lines (sometimes in comment)
+<<<<<<<
+>>>>>>>
+
+### "DO NOT COMMIT" has been committed
+DO NOT COMMIT
+
+### Tab char is forbidden. Use only spaces
+\t

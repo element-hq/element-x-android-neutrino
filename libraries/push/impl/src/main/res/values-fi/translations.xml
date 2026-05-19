@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="notification_channel_call">"Puhelu"</string>
+  <string name="notification_channel_listening_for_events">"Tapahtumien kuuntelu"</string>
+  <string name="notification_channel_noisy">"Äänekkäät ilmoitukset"</string>
+  <string name="notification_channel_ringing_calls">"Soivat puhelut"</string>
+  <string name="notification_channel_silent">"Hiljaiset ilmoitukset"</string>
+  <plurals name="notification_compat_summary_line_for_room">
+    <item quantity="one">"%1$s: %2$d viesti"</item>
+    <item quantity="other">"%1$s: %2$d viestiä"</item>
+  </plurals>
+  <plurals name="notification_compat_summary_title">
+    <item quantity="one">"%d ilmoitus"</item>
+    <item quantity="other">"%d ilmoitusta"</item>
+  </plurals>
+  <string name="notification_error_unified_push_unregistered_android">"UnifiedPush ilmoitusten jakelijaa ei voitu rekisteröidä, joten et enää vastaanota ilmoituksia. Tarkista sovelluksen ilmoitusasetukset ja push-jakelijan tila."</string>
+  <string name="notification_fallback_content">"Sinulle on uusia viestejä."</string>
+  <plurals name="notification_fallback_n_content">
+    <item quantity="one">"Sinulla on %d uusi viesti."</item>
+    <item quantity="other">"Sinulla on %d uutta viestiä."</item>
+  </plurals>
+  <string name="notification_incoming_audio_call">"📞 Saapuva puhelu"</string>
+  <string name="notification_incoming_call">"📹 Saapuva puhelu"</string>
+  <string name="notification_inline_reply_failed">"** Lähetys epäonnistui - avaa huone"</string>
+  <string name="notification_invitation_action_join">"Liity"</string>
+  <string name="notification_invitation_action_reject">"Hylkää"</string>
+  <plurals name="notification_invitations">
+    <item quantity="one">"%d kutsu"</item>
+    <item quantity="other">"%d kutsua"</item>
+  </plurals>
+  <string name="notification_invite_body">"Kutsui sinut keskustelemaan"</string>
+  <string name="notification_invite_body_with_sender">"%1$s kutsui sinut keskustelemaan"</string>
+  <string name="notification_mentioned_you_body">"Mainitsi sinut: %1$s"</string>
+  <string name="notification_new_messages">"Uusia viestejä"</string>
+  <plurals name="notification_new_messages_for_room">
+    <item quantity="one">"%d uusi viesti"</item>
+    <item quantity="other">"%d uutta viestiä"</item>
+  </plurals>
+  <string name="notification_reaction_body">"Reaktio: %1$s"</string>
+  <string name="notification_room_action_mark_as_read">"Merkitse luetuksi"</string>
+  <string name="notification_room_action_quick_reply">"Pikavastaus"</string>
+  <string name="notification_room_invite_body">"Kutsui sinut liittymään huoneeseen"</string>
+  <string name="notification_room_invite_body_with_sender">"%1$s kutsui sinut liittymään huoneeseen"</string>
+  <string name="notification_sender_me">"Minä"</string>
+  <string name="notification_sender_mention_reply">"%1$s mainitsi tai vastasi"</string>
+  <string name="notification_space_invite_body">"Kutsui sinut liittymään tilaan"</string>
+  <string name="notification_space_invite_body_with_sender">"%1$s kutsui sinut liittymään tilaan"</string>
+  <string name="notification_test_push_notification_content">"Katselet ilmoitusta! Klikkaa minua!"</string>
+  <string name="notification_thread_in_room">"Viestiketju huoneessa %1$s"</string>
+  <string name="notification_ticker_text_dm">"%1$s: %2$s"</string>
+  <string name="notification_ticker_text_group">"%1$s: %2$s %3$s"</string>
+  <plurals name="notification_unread_notified_messages">
+    <item quantity="one">"%d lukematon viesti"</item>
+    <item quantity="other">"%d lukematonta viestiä"</item>
+  </plurals>
+  <string name="notification_unread_notified_messages_and_invitation">"%1$s ja %2$s"</string>
+  <string name="notification_unread_notified_messages_in_room">"%1$s %2$s"</string>
+  <string name="notification_unread_notified_messages_in_room_and_invitation">"%1$s %2$s ja %3$s"</string>
+  <plurals name="notification_unread_notified_messages_in_room_rooms">
+    <item quantity="one">"%d huoneessa"</item>
+    <item quantity="other">"%d huoneessa"</item>
+  </plurals>
+  <string name="push_distributor_background_sync_android">"Taustasynkronointi"</string>
+  <string name="push_distributor_firebase_android">"Googlen palvelut"</string>
+  <string name="push_no_valid_google_play_services_apk_android">"Kelvollisia Google Play -palveluita ei löytynyt. Ilmoitukset eivät ehkä toimi oikein."</string>
+  <string name="troubleshoot_notifications_test_blocked_users_description">"Estettyjen käyttäjien tarkistus"</string>
+  <string name="troubleshoot_notifications_test_blocked_users_quick_fix">"Näytä estetyt käyttäjät"</string>
+  <string name="troubleshoot_notifications_test_blocked_users_result_none">"Yhtään käyttäjää ei ole estetty."</string>
+  <plurals name="troubleshoot_notifications_test_blocked_users_result_some">
+    <item quantity="one">"Estit %1$d käyttäjän. Et saa ilmoituksia tältä käyttäjältä."</item>
+    <item quantity="other">"Estit %1$d käyttäjää. Et saa ilmoituksia näiltä käyttäjiltä."</item>
+  </plurals>
+  <string name="troubleshoot_notifications_test_blocked_users_title">"Estetyt käyttäjät"</string>
+  <string name="troubleshoot_notifications_test_current_push_provider_description">"Hakee nykyisen palveluntarjoajan nimen."</string>
+  <string name="troubleshoot_notifications_test_current_push_provider_failure">"Push-palveluntarjoajia ei ole valittu."</string>
+  <string name="troubleshoot_notifications_test_current_push_provider_failure_distributor_not_found">"Nykyinen push-palveluntarjoaja: %1$s ja nykyinen jakelija: %2$s. Mutta jakelijaa %3$s ei löydy. Ehkä sovellus on poistettu?"</string>
+  <string name="troubleshoot_notifications_test_current_push_provider_failure_no_distributor">"Nykyinen push-palveluntarjoaja: %1$s, mutta jakelijoita ei ole määritetty."</string>
+  <string name="troubleshoot_notifications_test_current_push_provider_success">"Nykyinen push-palveluntarjoaja: %1$s."</string>
+  <string name="troubleshoot_notifications_test_current_push_provider_success_with_distributor">"Nykyinen push-palveluntarjoaja: %1$s (%2$s)"</string>
+  <string name="troubleshoot_notifications_test_current_push_provider_title">"Nykyinen push-palveluntarjoaja"</string>
+  <string name="troubleshoot_notifications_test_detect_push_provider_description">"Varmistaa, että sovelluksella on vähintään yksi push-palveluntarjoaja."</string>
+  <string name="troubleshoot_notifications_test_detect_push_provider_failure">"Push-palveluntarjoajia ei löytynyt."</string>
+  <plurals name="troubleshoot_notifications_test_detect_push_provider_success">
+    <item quantity="one">"Löytyi %1$d push-palveluntarjoaja: %2$s"</item>
+    <item quantity="other">"Löytyi %1$d push-palveluntarjoajaa: %2$s"</item>
+  </plurals>
+  <string name="troubleshoot_notifications_test_detect_push_provider_success_2">"Sovellus on rakennettu tukemaan: %1$s"</string>
+  <string name="troubleshoot_notifications_test_detect_push_provider_title">"Push-palveluntarjoajien havaitseminen"</string>
+  <string name="troubleshoot_notifications_test_display_notification_description">"Tarkistaa, että sovellus voi näyttää ilmoituksen."</string>
+  <string name="troubleshoot_notifications_test_display_notification_failure">"Ilmoitusta ei ole klikattu."</string>
+  <string name="troubleshoot_notifications_test_display_notification_permission_failure">"Ilmoitusta ei voida näyttää."</string>
+  <string name="troubleshoot_notifications_test_display_notification_success">"Ilmoitusta on klikattu!"</string>
+  <string name="troubleshoot_notifications_test_display_notification_title">"Ilmoituksen näyttäminen"</string>
+  <string name="troubleshoot_notifications_test_display_notification_waiting">"Klikkaa ilmoitusta jatkaaksesi testiä."</string>
+  <string name="troubleshoot_notifications_test_push_loop_back_description">"Varmistaa, että sovellus vastaanottaa push-ilmoituksen."</string>
+  <string name="troubleshoot_notifications_test_push_loop_back_failure_1">"Virhe: pusher on hylännyt pyynnön."</string>
+  <string name="troubleshoot_notifications_test_push_loop_back_failure_2">"Virhe: %1$s."</string>
+  <string name="troubleshoot_notifications_test_push_loop_back_failure_3">"Virhe, push-ilmoitusta ei voi testata."</string>
+  <string name="troubleshoot_notifications_test_push_loop_back_failure_4">"Virhe, aikakatkaisu push-ilmoitusta odotellessa."</string>
+  <string name="troubleshoot_notifications_test_push_loop_back_success">"Push-ilmoituksella kesti %1$d ms palata takaisin."</string>
+  <string name="troubleshoot_notifications_test_push_loop_back_title">"Testaa push-ilmoituksen paluu"</string>
+</resources>

@@ -1,0 +1,220 @@
+/*
+ * Copyright (c) 2025 Element Creations Ltd.
+ * Copyright 2023-2025 New Vector Ltd.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Element-Commercial.
+ * Please see LICENSE files in the repository root for full details.
+ */
+
+package io.element.android.libraries.matrix.impl
+
+import dev.zacsweers.metro.Inject
+import io.element.android.libraries.core.coroutine.CoroutineDispatchers
+import io.element.android.libraries.core.data.ByteUnit
+import io.element.android.libraries.core.data.megaBytes
+import io.element.android.libraries.di.CacheDirectory
+import io.element.android.libraries.di.annotations.AppCoroutineScope
+import io.element.android.libraries.featureflag.api.FeatureFlagService
+import io.element.android.libraries.featureflag.api.FeatureFlags
+import io.element.android.libraries.matrix.impl.analytics.UtdTracker
+import io.element.android.libraries.matrix.impl.certificates.UserCertificatesProvider
+import io.element.android.libraries.matrix.impl.paths.SessionPaths
+import io.element.android.libraries.matrix.impl.paths.getSessionPaths
+import io.element.android.libraries.matrix.impl.proxy.ProxyProvider
+import io.element.android.libraries.matrix.impl.room.TimelineEventFilterFactory
+import io.element.android.libraries.matrix.impl.storage.SqliteStoreBuilderProvider
+import io.element.android.libraries.matrix.impl.util.anonymizedTokens
+import io.element.android.libraries.network.useragent.UserAgentProvider
+import io.element.android.libraries.sessionstorage.api.SessionData
+import io.element.android.libraries.sessionstorage.api.SessionStore
+import io.element.android.libraries.workmanager.api.WorkManagerScheduler
+import io.element.android.services.analytics.api.AnalyticsService
+import io.element.android.services.toolbox.api.systemclock.SystemClock
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.withContext
+import org.matrix.rustcomponents.sdk.Client
+import org.matrix.rustcomponents.sdk.ClientBuilder
+import org.matrix.rustcomponents.sdk.CrossProcessLockConfig
+import org.matrix.rustcomponents.sdk.RequestConfig
+import org.matrix.rustcomponents.sdk.Session
+import org.matrix.rustcomponents.sdk.SlidingSyncVersion
+import org.matrix.rustcomponents.sdk.SlidingSyncVersionBuilder
+import org.matrix.rustcomponents.sdk.use
+import timber.log.Timber
+import uniffi.matrix_sdk_base.DmRoomDefinition
+import uniffi.matrix_sdk_base.MediaRetentionPolicy
+import uniffi.matrix_sdk_crypto.CollectStrategy
+import uniffi.matrix_sdk_crypto.DecryptionSettings
+import uniffi.matrix_sdk_crypto.TrustRequirement
+import java.io.File
+import kotlin.time.Duration.Companion.days
+import kotlin.time.toJavaDuration
+
+@Inject
+class RustMatrixClientFactory(
+    @CacheDirectory private val cacheDirectory: File,
+    @AppCoroutineScope
+    private val appCoroutineScope: CoroutineScope,
+    private val coroutineDispatchers: CoroutineDispatchers,
+    private val sessionStore: SessionStore,
+    private val userAgentProvider: UserAgentProvider,
+    private val proxyProvider: ProxyProvider,
+    private val userCertificatesProvider: UserCertificatesProvider,
+    private val clock: SystemClock,
+    private val analyticsService: AnalyticsService,
+    private val featureFlagService: FeatureFlagService,
+    private val timelineEventFilterFactory: TimelineEventFilterFactory,
+    private val clientBuilderProvider: ClientBuilderProvider,
+    private val sqliteStoreBuilderProvider: SqliteStoreBuilderProvider,
+    private val workManagerScheduler: WorkManagerScheduler,
+) {
+    private val sessionDelegate = RustClientSessionDelegate(
+        sessionStore = sessionStore,
+        appCoroutineScope = appCoroutineScope,
+        analyticsService = analyticsService,
+        coroutineDispatchers = coroutineDispatchers
+    )
+
+    suspend fun create(sessionData: SessionData): RustMatrixClient = withContext(coroutineDispatchers.io) {
+        val client = getBaseClientBuilder(
+            sessionPaths = sessionData.getSessionPaths(),
+            passphrase = sessionData.passphrase,
+            slidingSyncType = ClientBuilderSlidingSync.Restored,
+        )
+            .homeserverUrl(sessionData.homeserverUrl)
+            .username(sessionData.userId)
+            .use { it.build() }
+
+        client.setMediaRetentionPolicy(
+            MediaRetentionPolicy(
+                // Make this 500MB instead of 400MB
+                maxCacheSize = 500.megaBytes.into(ByteUnit.BYTES).toULong(),
+                // This is the default value, but let's make it explicit
+                maxFileSize = 20.megaBytes.into(ByteUnit.BYTES).toULong(),
+                // Use 30 days instead of 60
+                lastAccessExpiry = 30.days.toJavaDuration(),
+                // This is the default value, but let's make it explicit
+                cleanupFrequency = 1.days.toJavaDuration(),
+            )
+        )
+
+        client.restoreSession(sessionData.toSession())
+
+        create(client)
+    }
+
+    suspend fun create(client: Client): RustMatrixClient {
+        val (anonymizedAccessToken, anonymizedRefreshToken) = client.session().anonymizedTokens()
+
+        // Must be called before creating the sync service, timelines etc.
+        if (featureFlagService.isFeatureEnabled(FeatureFlags.AutomaticBackPagination)) {
+            client.enableAutomaticBackpagination()
+        }
+
+        client.setUtdDelegate(UtdTracker(analyticsService))
+
+        val syncService = client.syncService()
+            .withSharePos(true)
+            .withOfflineMode()
+            .finish()
+
+        return RustMatrixClient(
+            innerClient = client,
+            sessionStore = sessionStore,
+            appCoroutineScope = appCoroutineScope,
+            sessionDelegate = sessionDelegate,
+            innerSyncService = syncService,
+            dispatchers = coroutineDispatchers,
+            baseCacheDirectory = cacheDirectory,
+            clock = clock,
+            timelineEventFilterFactory = timelineEventFilterFactory,
+            featureFlagService = featureFlagService,
+            analyticsService = analyticsService,
+            workManagerScheduler = workManagerScheduler,
+        ).also {
+            Timber.tag(it.toString()).d("Creating Client with access token '$anonymizedAccessToken' and refresh token '$anonymizedRefreshToken'")
+        }
+    }
+
+    internal suspend fun getBaseClientBuilder(
+        sessionPaths: SessionPaths,
+        passphrase: String?,
+        slidingSyncType: ClientBuilderSlidingSync,
+    ): ClientBuilder {
+        return clientBuilderProvider.provide()
+            .run {
+                sqliteStoreBuilderProvider.provide(sessionPaths)
+                    .passphrase(passphrase)
+                    .setupClientBuilder(this)
+            }
+            .setSessionDelegate(sessionDelegate)
+            .userAgent(userAgentProvider.provide())
+            .addRootCertificates(userCertificatesProvider.provides())
+            .autoEnableBackups(true)
+            .autoEnableCrossSigning(true)
+            .roomKeyRecipientStrategy(
+                strategy = if (featureFlagService.isFeatureEnabled(FeatureFlags.OnlySignedDeviceIsolationMode)) {
+                    CollectStrategy.IDENTITY_BASED_STRATEGY
+                } else {
+                    CollectStrategy.ERROR_ON_VERIFIED_USER_PROBLEM
+                }
+            )
+            .decryptionSettings(
+                DecryptionSettings(
+                    senderDeviceTrustRequirement = if (featureFlagService.isFeatureEnabled(FeatureFlags.OnlySignedDeviceIsolationMode)) {
+                        TrustRequirement.CROSS_SIGNED_OR_LEGACY
+                    } else {
+                        TrustRequirement.UNTRUSTED
+                    }
+                )
+            )
+            .enableShareHistoryOnInvite(true)
+            .threadsEnabled(featureFlagService.isFeatureEnabled(FeatureFlags.Threads), threadSubscriptions = false)
+            .dmRoomDefinition(DmRoomDefinition.TWO_MEMBERS)
+            .requestConfig(
+                RequestConfig(
+                    timeout = 30_000uL,
+                    // retryLimit must be non-zero for the SDK to retry API calls in case of error (including 429 Too Many Requests error).
+                    retryLimit = 3u,
+                    // Use default values for the rest
+                    maxConcurrentRequests = null,
+                    maxRetryTime = null,
+                )
+            )
+            // Make sure all built clients use the single process cross-process lock config
+            .crossProcessLockConfig(CrossProcessLockConfig.SingleProcess)
+            .run {
+                // Apply sliding sync version settings
+                when (slidingSyncType) {
+                    ClientBuilderSlidingSync.Restored -> this
+                    ClientBuilderSlidingSync.Discovered -> slidingSyncVersionBuilder(SlidingSyncVersionBuilder.DISCOVER_NATIVE)
+                    ClientBuilderSlidingSync.Native -> slidingSyncVersionBuilder(SlidingSyncVersionBuilder.NATIVE)
+                }
+            }
+            .run {
+                // Workaround for non-nullable proxy parameter in the SDK, since each call to the ClientBuilder returns a new reference we need to keep
+                proxyProvider.provides()?.let { proxy(it) } ?: this
+            }
+    }
+}
+
+sealed interface ClientBuilderSlidingSync {
+    // The proxy will be supplied when restoring the Session.
+    data object Restored : ClientBuilderSlidingSync
+
+    // A Native Sliding Sync instance must be discovered whilst building the session.
+    data object Discovered : ClientBuilderSlidingSync
+
+    // Force using Native Sliding Sync.
+    data object Native : ClientBuilderSlidingSync
+}
+
+fun SessionData.toSession() = Session(
+    accessToken = accessToken,
+    refreshToken = refreshToken,
+    userId = userId,
+    deviceId = deviceId,
+    homeserverUrl = homeserverUrl,
+    slidingSyncVersion = SlidingSyncVersion.NATIVE,
+    oauthData = oAuthData,
+)

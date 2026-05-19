@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="screen_signout_confirmation_dialog_content">"Er du sikker på, at ønsker at fjerne denne enhed?"</string>
+  <string name="screen_signout_confirmation_dialog_submit">"Fjern denne enhed"</string>
+  <string name="screen_signout_confirmation_dialog_title">"Fjern denne enhed"</string>
+  <string name="screen_signout_in_progress_dialog_content">"Fjerner enhed…"</string>
+  <string name="screen_signout_key_backup_disabled_subtitle">"Dette er din eneste enhed. Hvis du fjerner den, skal du bruge en gendannelsesnøgle for at bekræfte din digitale identitet og gendanne dine krypterede chats, næste gang du logger ind."</string>
+  <string name="screen_signout_key_backup_disabled_title">"Du er ved at miste adgangen til dine krypterede chats"</string>
+  <string name="screen_signout_key_backup_offline_subtitle">"Dine nøgler blev stadig sikkerhedskopieret, da du gik offline. Opret forbindelse igen, så dine nøgler kan sikkerhedskopieres, før du fjerner denne enhed."</string>
+  <string name="screen_signout_key_backup_offline_title">"Dine nøgler bliver stadig sikkerhedskopieret"</string>
+  <string name="screen_signout_key_backup_ongoing_subtitle">"Vent venligst, indtil dette er færdigt, før du fjerner denne enhed."</string>
+  <string name="screen_signout_key_backup_ongoing_title">"Dine nøgler bliver stadig sikkerhedskopieret"</string>
+  <string name="screen_signout_preference_item">"Fjern denne enhed"</string>
+  <string name="screen_signout_recovery_disabled_subtitle">"Dette er din eneste enhed. Hvis du fjerner den, skal du bruge en gendannelsesnøgle for at bekræfte din digitale identitet og gendanne dine krypterede chats, næste gang du logger ind."</string>
+  <string name="screen_signout_recovery_disabled_title">"Du er ved at miste adgangen til dine krypterede chats"</string>
+  <string name="screen_signout_save_recovery_key_subtitle">"Dette er din eneste enhed. Hvis du fjerner den, skal du bruge en gendannelsesnøgle for at bekræfte din digitale identitet og gendanne dine krypterede chats, næste gang du logger ind."</string>
+  <string name="screen_signout_save_recovery_key_title">"Sørg for, at du har adgang til din gendannelsesnøgle, før du fjerner denne enhed."</string>
+</resources>

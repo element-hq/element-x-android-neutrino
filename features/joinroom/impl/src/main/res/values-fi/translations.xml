@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="screen_join_room_ban_by_message">"%1$s antoi sinulle porttikiellon."</string>
+  <string name="screen_join_room_ban_message">"Sinulle on annettu porttikielto"</string>
+  <string name="screen_join_room_ban_reason">"Syy: %1$s."</string>
+  <string name="screen_join_room_cancel_knock_action">"Peruuta pyyntö"</string>
+  <string name="screen_join_room_cancel_knock_alert_confirmation">"Kyllä, peruuta"</string>
+  <string name="screen_join_room_cancel_knock_alert_description">"Haluatko varmasti peruuttaa pyyntösi liittyä tähän huoneeseen?"</string>
+  <string name="screen_join_room_cancel_knock_alert_title">"Peruuta liittymispyyntö"</string>
+  <string name="screen_join_room_decline_and_block_alert_confirmation">"Kyllä, hylkää ja estä"</string>
+  <string name="screen_join_room_decline_and_block_alert_message">"Oletko varma, että haluat kieltäytyä kutsusta liittyä tähän huoneeseen? Tämä estää myös käyttäjää %1$s ottamasta sinuun yhteyttä tai kutsumasta sinua huoneisiin."</string>
+  <string name="screen_join_room_decline_and_block_alert_title">"Hylkää kutsu ja estä"</string>
+  <string name="screen_join_room_decline_and_block_button_title">"Hylkää ja estä"</string>
+  <string name="screen_join_room_fail_message">"Liittyminen epäonnistui"</string>
+  <string name="screen_join_room_fail_reason">"Sinun on joko saatava kutsu liittyäksesi tai pääsyyn voi olla rajoituksia."</string>
+  <string name="screen_join_room_forget_action">"Unohda"</string>
+  <string name="screen_join_room_invite_required_message">"Tarvitset kutsun liittyäksesi"</string>
+  <string name="screen_join_room_invited_by">"Kutsuja"</string>
+  <string name="screen_join_room_join_action">"Liity"</string>
+  <string name="screen_join_room_join_restricted_message">"Saatat tarvita kutsun tai olla tilan jäsen, jotta voit liittyä."</string>
+  <string name="screen_join_room_knock_action">"Lähetä liittymispyyntö"</string>
+  <string name="screen_join_room_knock_message_characters_count">"%1$d merkkiä käytetty, %2$d merkkiä sallittu"</string>
+  <string name="screen_join_room_knock_message_description">"Viesti (valinnainen)"</string>
+  <string name="screen_join_room_knock_sent_description">"Saat kutsun liittyä huoneeseen, jos pyyntösi hyväksytään."</string>
+  <string name="screen_join_room_knock_sent_title">"Liittymispyyntö lähetetty"</string>
+  <string name="screen_join_room_loading_alert_message">"Emme voineet näyttää huoneen esikatselua. Tämä voi johtua verkko- tai palvelinongelmista."</string>
+  <string name="screen_join_room_loading_alert_title">"Emme voineet näyttää tämän huoneen esikatselua"</string>
+  <string name="screen_join_room_space_not_supported_description">"%1$s ei tue vielä tiloja. Voit käyttää tiloja selainversiolla."</string>
+  <string name="screen_join_room_space_not_supported_title">"Tiloja ei vielä tueta"</string>
+  <string name="screen_join_room_subtitle_knock">"Paina alla olevaa nappia ja huoneen ylläpitäjä saa ilmoituksen. Voit liittyä keskusteluun kun pyyntösi on hyväksytty."</string>
+  <string name="screen_join_room_subtitle_no_preview">"Sinun on oltava tämän huoneen jäsen, jotta voit nähdä viestihistorian."</string>
+  <string name="screen_join_room_title_knock">"Haluatko liittyä tähän huoneeseen?"</string>
+  <string name="screen_join_room_title_no_preview">"Esikatselu ei ole saatavilla"</string>
+</resources>

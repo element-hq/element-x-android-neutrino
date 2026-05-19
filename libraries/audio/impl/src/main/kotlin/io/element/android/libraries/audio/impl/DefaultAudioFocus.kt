@@ -1,0 +1,124 @@
+/*
+ * Copyright (c) 2025 Element Creations Ltd.
+ * Copyright 2025 New Vector Ltd.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Element-Commercial.
+ * Please see LICENSE files in the repository root for full details.
+ */
+
+package io.element.android.libraries.audio.impl
+
+import android.content.Context
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
+import android.os.Build
+import androidx.core.content.getSystemService
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
+import io.element.android.libraries.audio.api.AudioFocus
+import io.element.android.libraries.audio.api.AudioFocusRequester
+import io.element.android.libraries.di.annotations.ApplicationContext
+import timber.log.Timber
+
+@ContributesBinding(AppScope::class)
+class DefaultAudioFocus(
+    @ApplicationContext private val context: Context,
+) : AudioFocus {
+    private val audioManager = requireNotNull(context.getSystemService<AudioManager>())
+
+    private var audioFocusRequest: AudioFocusRequest? = null
+    private var audioFocusChangeListener: AudioManager.OnAudioFocusChangeListener? = null
+
+    @Suppress("DEPRECATION")
+    override fun requestAudioFocus(
+        requester: AudioFocusRequester,
+        onFocusLost: () -> Unit,
+    ) {
+        val listener = AudioManager.OnAudioFocusChangeListener {
+            when (it) {
+                AudioManager.AUDIOFOCUS_GAIN -> {
+                    // Do nothing
+                    Timber.d("AudioFocus: AUDIOFOCUS_GAIN")
+                }
+                AudioManager.AUDIOFOCUS_LOSS -> {
+                    // Permanent focus loss (e.g., phone call) — always stop/pause.
+                    Timber.d("AudioFocus: AUDIOFOCUS_LOSS")
+                    onFocusLost()
+                }
+                AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
+                AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
+                    // For recording, ignore transient focus losses (e.g., notification sounds).
+                    // The AudioRecord API keeps capturing regardless.
+                    if (requester != AudioFocusRequester.RecordVoiceMessage) {
+                        onFocusLost()
+                    }
+                }
+            }
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val audioAttributes = AudioAttributes.Builder()
+                .setUsage(requester.toAudioUsage())
+                .build()
+            val focusGain = if (requester == AudioFocusRequester.RecordVoiceMessage) {
+                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE
+            } else {
+                AudioManager.AUDIOFOCUS_GAIN
+            }
+            val request = AudioFocusRequest.Builder(focusGain)
+                .setAudioAttributes(audioAttributes)
+                .setOnAudioFocusChangeListener(listener)
+                .setWillPauseWhenDucked(requester.willPausedWhenDucked())
+                .build()
+            audioManager.requestAudioFocus(request)
+            audioFocusRequest = request
+        } else {
+            audioManager.requestAudioFocus(
+                listener,
+                requester.toAudioStream(),
+                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE,
+            )
+            audioFocusChangeListener = listener
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    override fun releaseAudioFocus() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            audioFocusRequest?.let { audioManager.abandonAudioFocusRequest(it) }
+        } else {
+            audioFocusChangeListener?.let { audioManager.abandonAudioFocus(it) }
+        }
+    }
+}
+
+private fun AudioFocusRequester.toAudioUsage(): Int {
+    return when (this) {
+        AudioFocusRequester.ElementCall,
+        AudioFocusRequester.VoiceMessage,
+        AudioFocusRequester.RecordVoiceMessage -> AudioAttributes.USAGE_VOICE_COMMUNICATION
+        AudioFocusRequester.MediaViewer -> AudioAttributes.USAGE_MEDIA
+    }
+}
+
+private fun AudioFocusRequester.toAudioStream(): Int {
+    return when (this) {
+        AudioFocusRequester.ElementCall,
+        AudioFocusRequester.VoiceMessage,
+        AudioFocusRequester.RecordVoiceMessage -> AudioManager.STREAM_VOICE_CALL
+        AudioFocusRequester.MediaViewer -> AudioManager.STREAM_MUSIC
+    }
+}
+
+private fun AudioFocusRequester.willPausedWhenDucked(): Boolean {
+    return when (this) {
+        // (note that for Element Call, there is no action when the focus is lost)
+        AudioFocusRequester.ElementCall,
+        AudioFocusRequester.VoiceMessage,
+        AudioFocusRequester.RecordVoiceMessage -> true
+        // For the MediaViewer, we let the system automatically handle the ducking
+        // https://developer.android.com/media/optimize/audio-focus#automatic-ducking
+        AudioFocusRequester.MediaViewer -> false
+    }
+}

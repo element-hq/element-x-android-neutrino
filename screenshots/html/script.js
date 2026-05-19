@@ -1,0 +1,364 @@
+/*
+ * Copyright (c) 2025 Element Creations Ltd.
+ * Copyright 2024, 2025 New Vector Ltd.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Element-Commercial.
+ * Please see LICENSE files in the repository root for full details.
+ */
+import { screenshots } from './data.js';
+
+const URL_PARAM_LANGUAGES = "l";
+const URL_PARAM_IMAGE_WIDTH = "w";
+const URL_PARAM_ALL_SCREENSHOTS = "a";
+const URL_PARAM_IF_MODIFIED_AFTER = "d";
+
+// Get the base url of the current page
+const baseUrl = window.location.href.split('/').slice(0, -1).join('/');
+// On localhost, get the English screenshots from the location `../tests/uitests/src/test/snapshots/images`
+const isLocalHost = window.location.hostname === "localhost"
+let englishBasePath
+if (isLocalHost) {
+  englishBasePath = `../tests/uitests/src/test/snapshots/images`
+} else {
+  englishBasePath = `en`
+}
+
+const dataLanguages = screenshots[0];
+
+// Read the URL params
+const urlParams = new URLSearchParams(window.location.search);
+
+// Get the wanted languages from the url params, or default to "de" and "fr", and ensure "en" is always there
+const wantedLanguages = [...new Set((urlParams.get(URL_PARAM_LANGUAGES) ? urlParams.get(URL_PARAM_LANGUAGES).split(',') : ['de', 'fr']).concat('en'))];
+// Map dataLanguages to visibleLanguages, set to 1 if the language is in wantedLanguages, 0 otherwise
+let visibleLanguages = dataLanguages.map((language) => wantedLanguages.includes(language) ? 1 : 0);
+// Read width from the url params, and ensure it's a multiple of 25 and is between 75 and 500
+const DEFAULT_WIDTH = 300;
+const MIN_WIDTH = 75;
+const MAX_WIDTH = 500;
+const WIDTH_STEP = 25;
+let imageWidth = DEFAULT_WIDTH
+let width = urlParams.get(URL_PARAM_IMAGE_WIDTH);
+if (width) {
+    // Ensure width is an integer, if not use the default value
+    width = parseInt(width) || DEFAULT_WIDTH;
+    imageWidth = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, Math.round(width / WIDTH_STEP) * WIDTH_STEP));
+}
+// Read showAllScreenshots from the url params
+let showAllScreenshots = urlParams.get(URL_PARAM_ALL_SCREENSHOTS) === "1";
+// Read the minimum date of modification from the url params
+let minModifiedDayTime = urlParams.get(URL_PARAM_IF_MODIFIED_AFTER);
+
+function updatePageUrl() {
+    // Update the URL displayed in the browser without loading again the page
+    var queryParams = new URLSearchParams(window.location.search);
+    // Add the languages to the url params, without "en"
+    const lg = dataLanguages.filter((language, i) => visibleLanguages[i] == 1).filter(l => l != "en").join(',');
+    if (lg) {
+        queryParams.set(URL_PARAM_LANGUAGES, lg);
+    } else {
+        queryParams.delete(URL_PARAM_LANGUAGES);
+    }
+    if (imageWidth != DEFAULT_WIDTH) {
+        queryParams.set(URL_PARAM_IMAGE_WIDTH, imageWidth);
+    } else {
+        queryParams.delete(URL_PARAM_IMAGE_WIDTH);
+    }
+    if (showAllScreenshots) {
+        queryParams.set(URL_PARAM_ALL_SCREENSHOTS, showAllScreenshots ? 1 : 0);
+    } else {
+        queryParams.delete(URL_PARAM_ALL_SCREENSHOTS);
+    }
+    if (minModifiedDayTime > 0) {
+        queryParams.set(URL_PARAM_IF_MODIFIED_AFTER, minModifiedDayTime);
+    } else {
+        queryParams.delete(URL_PARAM_IF_MODIFIED_AFTER);
+    }
+    // Replace the current URL with the new one, including the fragment
+    history.replaceState(null, '', `${window.location.pathname}?${queryParams}${window.location.hash}`);
+}
+
+function addForm() {
+  // Insert the form into the div with id form_container
+  const form = document.createElement('form');
+
+  const multiSelectDiv = document.createElement('div');
+  multiSelectDiv.className = 'multiselect';
+  form.appendChild(multiSelectDiv);
+
+  const selectBoxDiv = document.createElement('div');
+  selectBoxDiv.className = 'selectBox';
+  selectBoxDiv.onclick = () => {
+    const checkboxes = document.getElementById("checkboxes");
+    checkboxes.style.display = checkboxes.style.display === "block" ? "none" : "block";
+  };
+  multiSelectDiv.appendChild(selectBoxDiv);
+
+  const select = document.createElement('select');
+  const option = document.createElement('option');
+  option.textContent = "Select languages";
+  select.appendChild(option);
+  selectBoxDiv.appendChild(select);
+
+  const overSelectDiv = document.createElement('div');
+  overSelectDiv.className = 'overSelect';
+  selectBoxDiv.appendChild(overSelectDiv);
+
+  const checkboxesDiv = document.createElement('div');
+  checkboxesDiv.id = 'checkboxes';
+  multiSelectDiv.appendChild(checkboxesDiv);
+
+  for (let i = 0; i < dataLanguages.length; i++){
+    const label = document.createElement('label');
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    const language = dataLanguages[i];
+    input.disabled = language === "en";
+    input.name = language;
+    input.checked = visibleLanguages[i] == 1;
+    input.onchange = (e) => {
+      if (e.target.checked) {
+        visibleLanguages[i] = 1;
+      } else {
+        visibleLanguages[i] = 0;
+      }
+      updatePageUrl()
+      addTable();
+    };
+    label.appendChild(input);
+    label.appendChild(document.createTextNode(` ${language}`));
+    checkboxesDiv.appendChild(label);
+  }
+  // Add a label with the text "Width"
+  const label = document.createElement('label');
+  label.textContent = 'Width:';
+  form.appendChild(label);
+  // Add a input text to input the width of the image
+  const widthInput = document.createElement('input');
+  widthInput.id = 'width_input';
+  widthInput.type = 'number';
+  widthInput.min = MIN_WIDTH;
+  widthInput.max = MAX_WIDTH;
+  widthInput.step = WIDTH_STEP;
+  widthInput.value = imageWidth;
+  widthInput.onchange = (e) => {
+      imageWidth = e.target.value;
+      updatePageUrl();
+      addTable();
+  };
+  form.appendChild(widthInput);
+  // Add a label with the text "Show all screenshots"
+  const label2 = document.createElement('label');
+  label2.textContent = 'Show all:';
+  label2.title = 'Show all screenshots, including those with no translated versions.';
+  const input2 = document.createElement('input');
+  input2.type = 'checkbox';
+  input2.name = "test";
+  input2.checked = showAllScreenshots;
+  input2.onchange = (e) => {
+    showAllScreenshots = e.target.checked;
+    updatePageUrl()
+    addTable();
+  };
+  label2.appendChild(input2);
+  form.appendChild(label2);
+  /*
+  // Add a date picker to input the minimum date of modification
+  const label3 = document.createElement('label');
+  label3.textContent = 'If modified since:';
+  form.appendChild(label3);
+  const dateInput = document.createElement('input');
+  dateInput.type = 'date';
+  if (minModifiedDayTime > 0) {
+    dateInput.value = new Date(minModifiedDayTime * 86400000).toISOString().split('T')[0];
+  }
+  dateInput.onchange = (e) => {
+      if (e.target.value === "") {
+          minModifiedDayTime = 0;
+      } else {
+          minModifiedDayTime = new Date(e.target.value).getTime() / 86400000;
+      }
+      updatePageUrl();
+      addTable();
+  };
+  form.appendChild(dateInput);
+  */
+  // Add a span with id result to display the number of lines
+  const lines = document.createElement('span');
+  lines.id = 'lines';
+  lines.textContent = "...";
+  form.appendChild(lines);
+  document.getElementById('form_container').appendChild(form);
+}
+
+function getNiceName(name) {
+  var indices = [];
+  for(var i = 0; i < name.length; i++) {
+      if (name[i] === "_") indices.push(i);
+  }
+  return name.substring(indices[0] + 1, indices[1]);
+}
+
+function createMissingImageElement() {
+    const text = document.createElement('p');
+    text.className = "missing";
+    text.textContent = 'No image';
+    return text;
+}
+
+function createUpToDateImageElement() {
+    const text = document.createElement('p');
+    text.className = "missing";
+    text.textContent = 'Image not updated';
+    return text;
+}
+
+function convertToHumanReadableDate(modifiedDayTime) {
+    var date = new Date(modifiedDayTime * 86400000);
+    return date.toLocaleDateString();
+}
+
+function createImageElement(fullFile, modifiedDayTime) {
+    const img = document.createElement('img');
+    img.className = "screenshot";
+    img.src = `${baseUrl}/${fullFile}`;
+    if(modifiedDayTime > 0) {
+        img.title = fullFile + "\n\nModified on " + convertToHumanReadableDate(modifiedDayTime);
+    } else {
+        img.title = fullFile;
+    }
+    img.alt = "Missing image";
+    img.width = imageWidth;
+    return img;
+}
+
+function updateUrlAndScrollTo(id) {
+    // If the current URL already contains the fragment id, remove it, otherwise add it
+    if (window.location.hash === id) {
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+    } else {
+        history.replaceState(null, '', `${window.location.pathname}${window.location.search}#${id}`);
+    }
+    const element = document.getElementById(id);
+    if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+    }
+    // Also copy the URL to the clipboard
+    navigator.clipboard.writeText(window.location.href);
+    // And show a message that the URL has been copied to the clipboard
+    // First check if there is already a message, if so, remove it, or the shadow will accumulate.
+    const existingMessage = document.querySelector('.copy-message');
+    if (existingMessage) {
+        document.body.removeChild(existingMessage);
+    }
+    const message = document.createElement('div');
+    message.className = 'copy-message';
+    message.textContent = 'URL copied to clipboard!';
+    document.body.appendChild(message);
+    setTimeout(() => {
+        document.body.removeChild(message);
+    }, 2000);
+}
+
+function addTable() {
+  var linesCounter = 0;
+  // Remove any previous table
+  document.getElementById('screenshots_container').innerHTML = '';
+  // screenshots contains a table of screenshots, lets convert to an html table
+  const table = document.createElement('table');
+  const thead = document.createElement('thead');
+  const tbody = document.createElement('tbody');
+
+  // First item of screenshots contains the languages
+  // Build the languages row
+  const languagesHeaderRow = document.createElement('tr');
+  for (let languageIndex = 0; languageIndex < dataLanguages.length; languageIndex++) {
+    // Do not add the language if it is hidden
+    if (visibleLanguages[languageIndex] == 0) {
+        continue;
+    }
+    const th = document.createElement('th');
+    th.textContent = dataLanguages[languageIndex];
+    languagesHeaderRow.appendChild(th);
+  }
+  const numVisibleLanguages = languagesHeaderRow.childElementCount
+  // Next items are the data
+  var currentHeaderValue = "";
+  var screenshotCounter = 0;
+  for (let screenshotIndex = 1; screenshotIndex < screenshots.length; screenshotIndex++) {
+    let englishFile = screenshots[screenshotIndex][0];
+    let niceName = getNiceName(englishFile);
+    if (niceName != currentHeaderValue) {
+        screenshotCounter = 0;
+    }
+    const tr = document.createElement('tr');
+    tr.id = niceName + screenshotCounter;
+    tr.onclick = () => {
+        updateUrlAndScrollTo(tr.id);
+    }
+    let hasTranslatedFiles = false;
+    for (let languageIndex = 0; languageIndex < dataLanguages.length; languageIndex++) {
+      if (visibleLanguages[languageIndex] == 0) {
+        continue;
+      }
+      const td = document.createElement('td');
+      if (languageIndex == 0) {
+        // English file
+        td.appendChild(createImageElement(`${englishBasePath}/${englishFile}.png`, 0));
+      } else if (languageIndex == 1) {
+        // Dark English file
+        if (screenshots[screenshotIndex][1].length > 0) {
+          hasTranslatedFiles = true;
+          td.appendChild(createImageElement(`${englishBasePath}/${screenshots[screenshotIndex][1]}.png`, 0));
+        } else {
+          td.appendChild(createMissingImageElement());
+        }
+      } else {
+        let modifiedDayTime = screenshots[screenshotIndex][languageIndex];
+        if (modifiedDayTime === 0) {
+          td.appendChild(createMissingImageElement());
+        } else if(modifiedDayTime >= minModifiedDayTime) {
+          hasTranslatedFiles = true;
+          // Foreign file is the same as the english file, replacing the language
+          const foreignFile = englishFile.substring(0, englishFile.length-2) + dataLanguages[languageIndex];
+          const fullForeignFile = `${dataLanguages[languageIndex]}/${foreignFile}.png`;
+          td.appendChild(createImageElement(fullForeignFile, modifiedDayTime));
+        } else {
+          td.appendChild(createUpToDateImageElement());
+        }
+      }
+      tr.appendChild(td);
+    }
+    if (showAllScreenshots || hasTranslatedFiles) {
+      linesCounter++;
+      // Add a header for row, if different from previous
+      if (niceName != currentHeaderValue) {
+        currentHeaderValue = niceName;
+        const trHead = document.createElement('tr');
+        trHead.id = niceName;
+        trHead.onclick = () => {
+            updateUrlAndScrollTo(trHead.id);
+        }
+        const tdHead = document.createElement('td');
+        tdHead.colSpan = numVisibleLanguages;
+        tdHead.className = "view-header";
+        tdHead.textContent = niceName;
+        trHead.appendChild(tdHead);
+        tbody.appendChild(trHead);
+        tbody.appendChild(languagesHeaderRow.cloneNode(true));
+      }
+      tbody.appendChild(tr);
+    }
+    screenshotCounter++;
+  }
+  table.appendChild(thead);
+  table.appendChild(tbody);
+
+  // Add the table to the div with id screenshots_container
+  document.getElementById('screenshots_container').appendChild(table);
+  // Update the number of lines
+  document.getElementById('lines').textContent = `${linesCounter} lines`;
+}
+
+addForm();
+addTable();

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="notification_channel_call">"Chiamata"</string>
+  <string name="notification_channel_listening_for_events">"Eventi in ascolto"</string>
+  <string name="notification_channel_noisy">"Notifiche con suono"</string>
+  <string name="notification_channel_ringing_calls">"Squillo delle chiamate"</string>
+  <string name="notification_channel_silent">"Notifiche silenziose"</string>
+  <plurals name="notification_compat_summary_line_for_room">
+    <item quantity="one">"%1$s: %2$d messaggio"</item>
+    <item quantity="other">"%1$s: %2$d messaggi"</item>
+  </plurals>
+  <plurals name="notification_compat_summary_title">
+    <item quantity="one">"%d notifica"</item>
+    <item quantity="other">"%d notifiche"</item>
+  </plurals>
+  <string name="notification_error_unified_push_unregistered_android">"Non è stato possibile registrare il distributore di notifiche UnifiedPush, quindi non riceverai più notifiche. Controlla le impostazioni delle notifiche dell\'app e lo stato del distributore push."</string>
+  <string name="notification_fallback_content">"Hai nuovi messaggi."</string>
+  <plurals name="notification_fallback_n_content">
+    <item quantity="one">"Hai %d nuovo messaggio."</item>
+    <item quantity="other">"Hai %d nuovi messaggi."</item>
+  </plurals>
+  <string name="notification_incoming_audio_call">"📞 Chiamata in arrivo"</string>
+  <string name="notification_incoming_call">"📹 Chiamata in arrivo"</string>
+  <string name="notification_inline_reply_failed">"** Invio fallito - si prega di aprire la stanza"</string>
+  <string name="notification_invitation_action_join">"Entra"</string>
+  <string name="notification_invitation_action_reject">"Rifiuta"</string>
+  <plurals name="notification_invitations">
+    <item quantity="one">"%d invito"</item>
+    <item quantity="other">"%d inviti"</item>
+  </plurals>
+  <string name="notification_invite_body">"Ti ha invitato ad una conversazione"</string>
+  <string name="notification_invite_body_with_sender">"%1$s ti ha invitato ad una conversazione"</string>
+  <string name="notification_mentioned_you_body">"Ti ha menzionato: %1$s"</string>
+  <string name="notification_new_messages">"Nuovi messaggi"</string>
+  <plurals name="notification_new_messages_for_room">
+    <item quantity="one">"%d nuovo messaggio"</item>
+    <item quantity="other">"%d nuovi messaggi"</item>
+  </plurals>
+  <string name="notification_reaction_body">"Ha reagito con %1$s"</string>
+  <string name="notification_room_action_mark_as_read">"Segna come letto"</string>
+  <string name="notification_room_action_quick_reply">"Risposta rapida"</string>
+  <string name="notification_room_invite_body">"Ti ha invitato ad entrare nella stanza"</string>
+  <string name="notification_room_invite_body_with_sender">"%1$s ti ha invitato a unirti alla stanza"</string>
+  <string name="notification_sender_me">"Io"</string>
+  <string name="notification_sender_mention_reply">"%1$s ti ha menzionato o risposto"</string>
+  <string name="notification_space_invite_body">"Ti abbiamo invitato a unirti allo spazio"</string>
+  <string name="notification_space_invite_body_with_sender">"%1$s ti ha invitato a unirti allo spazio"</string>
+  <string name="notification_test_push_notification_content">"Stai visualizzando la notifica! Cliccami!"</string>
+  <string name="notification_thread_in_room">"Discussione in %1$s"</string>
+  <string name="notification_ticker_text_dm">"%1$s: %2$s"</string>
+  <string name="notification_ticker_text_group">"%1$s: %2$s %3$s"</string>
+  <plurals name="notification_unread_notified_messages">
+    <item quantity="one">"%d messaggio notificato non letto"</item>
+    <item quantity="other">"%d messaggi notificati non letti"</item>
+  </plurals>
+  <string name="notification_unread_notified_messages_and_invitation">"%1$s e %2$s"</string>
+  <string name="notification_unread_notified_messages_in_room">"%1$s in %2$s"</string>
+  <string name="notification_unread_notified_messages_in_room_and_invitation">"%1$s in %2$s e %3$s"</string>
+  <plurals name="notification_unread_notified_messages_in_room_rooms">
+    <item quantity="one">"%d stanza"</item>
+    <item quantity="other">"%d stanze"</item>
+  </plurals>
+  <string name="push_distributor_background_sync_android">"Sincronizzazione in background"</string>
+  <string name="push_distributor_firebase_android">"Servizi Google"</string>
+  <string name="push_no_valid_google_play_services_apk_android">"Google Play Services non trovato. Le notifiche non funzioneranno bene."</string>
+  <string name="troubleshoot_notifications_test_blocked_users_description">"Controllo degli utenti bloccati"</string>
+  <string name="troubleshoot_notifications_test_blocked_users_quick_fix">"Visualizza gli utenti bloccati"</string>
+  <string name="troubleshoot_notifications_test_blocked_users_result_none">"Nessun utente è bloccato."</string>
+  <plurals name="troubleshoot_notifications_test_blocked_users_result_some">
+    <item quantity="one">"Hai bloccato%1$d utente. Non riceverai notifiche da questo utente."</item>
+    <item quantity="other">"Hai bloccato%1$d utenti. Non riceverai notifiche da questi utenti."</item>
+  </plurals>
+  <string name="troubleshoot_notifications_test_blocked_users_title">"Utenti bloccati"</string>
+  <string name="troubleshoot_notifications_test_current_push_provider_description">"Ottieni il nome del fornitore attuale."</string>
+  <string name="troubleshoot_notifications_test_current_push_provider_failure">"Nessun provider push selezionato."</string>
+  <string name="troubleshoot_notifications_test_current_push_provider_failure_distributor_not_found">"Fornitore push attuale: %1$s e attuale distributore: %2$s Ma il distributore %3$s non viene trovato. Forse l\'applicazione è stata disinstallata?"</string>
+  <string name="troubleshoot_notifications_test_current_push_provider_failure_no_distributor">"Fornitore push attuale:%1$s , ma non è stato configurato alcun distributore."</string>
+  <string name="troubleshoot_notifications_test_current_push_provider_success">"Provider push attuale: %1$s."</string>
+  <string name="troubleshoot_notifications_test_current_push_provider_success_with_distributor">"Fornitore push attuale: %1$s (%2$s )"</string>
+  <string name="troubleshoot_notifications_test_current_push_provider_title">"Provider push attuale"</string>
+  <string name="troubleshoot_notifications_test_detect_push_provider_description">"Assicurati che l\'applicazione abbia almeno un fornitore push."</string>
+  <string name="troubleshoot_notifications_test_detect_push_provider_failure">"Nessun provider push trovato."</string>
+  <plurals name="troubleshoot_notifications_test_detect_push_provider_success">
+    <item quantity="one">"Provider %1$d push trovato: %2$s"</item>
+    <item quantity="other">"Provider %1$d push trovati: %2$s"</item>
+  </plurals>
+  <string name="troubleshoot_notifications_test_detect_push_provider_success_2">"L\'applicazione è stata creata con il supporto per: %1$s"</string>
+  <string name="troubleshoot_notifications_test_detect_push_provider_title">"Rileva i provider di servizi push"</string>
+  <string name="troubleshoot_notifications_test_display_notification_description">"Verifica che l\'applicazione possa mostrare una notifica."</string>
+  <string name="troubleshoot_notifications_test_display_notification_failure">"La notifica non è stata cliccata."</string>
+  <string name="troubleshoot_notifications_test_display_notification_permission_failure">"Impossibile visualizzare la notifica."</string>
+  <string name="troubleshoot_notifications_test_display_notification_success">"La notifica è stata cliccata!"</string>
+  <string name="troubleshoot_notifications_test_display_notification_title">"Mostra notifica"</string>
+  <string name="troubleshoot_notifications_test_display_notification_waiting">"Clicca sulla notifica per continuare il test."</string>
+  <string name="troubleshoot_notifications_test_push_loop_back_description">"Assicurati che l\'applicazione riceva le notifiche push"</string>
+  <string name="troubleshoot_notifications_test_push_loop_back_failure_1">"Errore: il servizio push ha rifiutato la richiesta."</string>
+  <string name="troubleshoot_notifications_test_push_loop_back_failure_2">"Errore: %1$s."</string>
+  <string name="troubleshoot_notifications_test_push_loop_back_failure_3">"Errore, impossibile testare le notifiche push."</string>
+  <string name="troubleshoot_notifications_test_push_loop_back_failure_4">"Errore, tempo scaduto in attesa della notifica push."</string>
+  <string name="troubleshoot_notifications_test_push_loop_back_success">"Il test push loop back ha impiegato %1$d ms."</string>
+  <string name="troubleshoot_notifications_test_push_loop_back_title">"Prova invio notifica push loop back"</string>
+</resources>

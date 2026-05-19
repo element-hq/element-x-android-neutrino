@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="screen_join_room_ban_by_message">"Vous avez été banni(e) par %1$s."</string>
+  <string name="screen_join_room_ban_message">"Vous avez été banni(e)"</string>
+  <string name="screen_join_room_ban_reason">"Motif: %1$s."</string>
+  <string name="screen_join_room_cancel_knock_action">"Annuler la demande"</string>
+  <string name="screen_join_room_cancel_knock_alert_confirmation">"Oui, annuler"</string>
+  <string name="screen_join_room_cancel_knock_alert_description">"Êtes-vous sûr de vouloir annuler votre demande d’accès à ce salon ?"</string>
+  <string name="screen_join_room_cancel_knock_alert_title">"Annuler la demande d’adhésion"</string>
+  <string name="screen_join_room_decline_and_block_alert_confirmation">"Oui, refuser et bloquer"</string>
+  <string name="screen_join_room_decline_and_block_alert_message">"Êtes-vous sûr de vouloir refuser l’invitation à rejoindre ce salon ? Cela empêchera également %1$s de vous contacter ou de vous inviter dans les salons."</string>
+  <string name="screen_join_room_decline_and_block_alert_title">"Refuser l’invitation et bloquer"</string>
+  <string name="screen_join_room_decline_and_block_button_title">"Refuser et bloquer"</string>
+  <string name="screen_join_room_fail_message">"L’opération a échoué."</string>
+  <string name="screen_join_room_fail_reason">"Soit vous devez être invité(e) pour rejoindre, soit il peut y avoir des restrictions d’accès."</string>
+  <string name="screen_join_room_forget_action">"Oublier"</string>
+  <string name="screen_join_room_invite_required_message">"Vous avez besoin d’une invitation pour pouvoir rejoindre"</string>
+  <string name="screen_join_room_invited_by">"Invité(e) par"</string>
+  <string name="screen_join_room_join_action">"Rejoindre"</string>
+  <string name="screen_join_room_join_restricted_message">"Il est possible que vous deviez être invité ou être membre d’un Espace pour pouvoir rejoindre le salon."</string>
+  <string name="screen_join_room_knock_action">"Demander à joindre"</string>
+  <string name="screen_join_room_knock_message_characters_count">"Caractères autorisés %1$d sur %2$d"</string>
+  <string name="screen_join_room_knock_message_description">"Message (facultatif)"</string>
+  <string name="screen_join_room_knock_sent_description">"Vous recevrez une invitation à rejoindre le salon si votre demande est acceptée."</string>
+  <string name="screen_join_room_knock_sent_title">"Demande de rejoindre le salon envoyée"</string>
+  <string name="screen_join_room_loading_alert_message">"Impossible d’afficher l’aperçu du salon. Cela peut être dû à des problèmes de réseau ou de serveur."</string>
+  <string name="screen_join_room_loading_alert_title">"Impossible d’afficher l’aperçu de ce salon"</string>
+  <string name="screen_join_room_space_not_supported_description">"Les Espaces ne sont pas encore pris en charge par %1$s. Vous pouvez voir les Espaces sur le Web."</string>
+  <string name="screen_join_room_space_not_supported_title">"Les Espaces ne sont pas encore pris en charge"</string>
+  <string name="screen_join_room_subtitle_knock">"Cliquez ci-dessous et un administrateur sera prévenu. Une fois votre demande approuvée, pour pourrez rejoindre la discussion."</string>
+  <string name="screen_join_room_subtitle_no_preview">"Vous devez être un membre du salon pour pouvoir lire l’historique des messages."</string>
+  <string name="screen_join_room_title_knock">"Vous souhaitez rejoindre ce salon ?"</string>
+  <string name="screen_join_room_title_no_preview">"La prévisualisation n’est pas disponible"</string>
+</resources>

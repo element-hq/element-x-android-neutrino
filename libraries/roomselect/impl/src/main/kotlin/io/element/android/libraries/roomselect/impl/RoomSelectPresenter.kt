@@ -1,0 +1,99 @@
+/*
+ * Copyright (c) 2025 Element Creations Ltd.
+ * Copyright 2023-2025 New Vector Ltd.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Element-Commercial.
+ * Please see LICENSE files in the repository root for full details.
+ */
+
+package io.element.android.libraries.roomselect.impl
+
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import dev.zacsweers.metro.Assisted
+import dev.zacsweers.metro.AssistedFactory
+import dev.zacsweers.metro.AssistedInject
+import io.element.android.libraries.architecture.Presenter
+import io.element.android.libraries.designsystem.theme.components.SearchBarResultState
+import io.element.android.libraries.matrix.ui.model.SelectRoomInfo
+import io.element.android.libraries.roomselect.api.RoomSelectMode
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.launch
+
+@AssistedInject
+class RoomSelectPresenter(
+    @Assisted private val mode: RoomSelectMode,
+    private val dataSourceFactory: RoomSelectSearchDataSource.Factory,
+) : Presenter<RoomSelectState> {
+    @AssistedFactory
+    fun interface Factory {
+        fun create(mode: RoomSelectMode): RoomSelectPresenter
+    }
+
+    @Composable
+    override fun present(): RoomSelectState {
+        var selectedRooms by remember { mutableStateOf(persistentListOf<SelectRoomInfo>()) }
+        val queryState = rememberTextFieldState()
+        var isSearchActive by remember { mutableStateOf(false) }
+
+        val coroutineScope = rememberCoroutineScope()
+        val dataSource = remember { dataSourceFactory.create(coroutineScope) }
+
+        val searchQuery = queryState.text.toString()
+        LaunchedEffect(searchQuery) {
+            dataSource.setSearchQuery(searchQuery)
+        }
+
+        val roomSummaryDetailsList by dataSource.roomInfoList.collectAsState(initial = persistentListOf())
+
+        val searchResults by remember<State<SearchBarResultState<ImmutableList<SelectRoomInfo>>>> {
+            derivedStateOf {
+                when {
+                    roomSummaryDetailsList.isNotEmpty() -> SearchBarResultState.Results(roomSummaryDetailsList.toImmutableList())
+                    isSearchActive -> SearchBarResultState.NoResultsFound()
+                    else -> SearchBarResultState.Initial()
+                }
+            }
+        }
+
+        fun handleEvent(event: RoomSelectEvents) {
+            when (event) {
+                is RoomSelectEvents.SetSelectedRoom -> {
+                    selectedRooms = persistentListOf(event.room)
+                    // Restore for multi-selection
+//                    val index = selectedRooms.indexOfFirst { it.roomId == event.room.roomId }
+//                    selectedRooms = if (index >= 0) {
+//                        selectedRooms.removeAt(index)
+//                    } else {
+//                        selectedRooms.add(event.room)
+//                    }
+                }
+                RoomSelectEvents.RemoveSelectedRoom -> selectedRooms = persistentListOf()
+                RoomSelectEvents.ToggleSearchActive -> isSearchActive = !isSearchActive
+                is RoomSelectEvents.UpdateVisibleRange -> coroutineScope.launch {
+                    dataSource.updateVisibleRange(event.range)
+                }
+            }
+        }
+
+        return RoomSelectState(
+            mode = mode,
+            resultState = searchResults,
+            searchQuery = queryState,
+            isSearchActive = isSearchActive,
+            selectedRooms = selectedRooms,
+            eventSink = ::handleEvent,
+        )
+    }
+}

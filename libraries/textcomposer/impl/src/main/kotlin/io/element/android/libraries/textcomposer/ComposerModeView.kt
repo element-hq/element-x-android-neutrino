@@ -1,0 +1,181 @@
+/*
+ * Copyright (c) 2025 Element Creations Ltd.
+ * Copyright 2024, 2025 New Vector Ltd.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Element-Commercial.
+ * Please see LICENSE files in the repository root for full details.
+ */
+
+package io.element.android.libraries.textcomposer
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ripple
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.dp
+import io.element.android.compound.theme.ElementTheme
+import io.element.android.compound.tokens.generated.CompoundIcons
+import io.element.android.libraries.designsystem.preview.ElementPreview
+import io.element.android.libraries.designsystem.preview.PreviewsDayNight
+import io.element.android.libraries.designsystem.theme.components.Icon
+import io.element.android.libraries.designsystem.theme.components.Text
+import io.element.android.libraries.matrix.ui.messages.reply.InReplyToDetails
+import io.element.android.libraries.matrix.ui.messages.reply.InReplyToView
+import io.element.android.libraries.textcomposer.model.MessageComposerMode
+import io.element.android.libraries.ui.strings.CommonStrings
+
+@Composable
+internal fun ComposerModeView(
+    composerMode: MessageComposerMode.Special,
+    onResetComposerMode: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    when (composerMode) {
+        is MessageComposerMode.Edit -> {
+            EditingModeView(
+                text = stringResource(CommonStrings.common_editing),
+                modifier = modifier,
+                onResetComposerMode = onResetComposerMode,
+            )
+        }
+        is MessageComposerMode.EditCaption -> {
+            EditingModeView(
+                text = stringResource(
+                    if (composerMode.content.isEmpty()) CommonStrings.common_adding_caption else CommonStrings.common_editing_caption
+                ),
+                modifier = modifier,
+                onResetComposerMode = onResetComposerMode,
+            )
+        }
+        is MessageComposerMode.Reply -> {
+            ReplyToModeView(
+                modifier = modifier.padding(top = 8.dp, start = 8.dp, end = 8.dp),
+                replyToDetails = composerMode.replyToDetails,
+                hideImage = composerMode.hideImage,
+                onResetComposerMode = onResetComposerMode,
+            )
+        }
+    }
+}
+
+@Composable
+private fun EditingModeView(
+    onResetComposerMode: () -> Unit,
+    text: String,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(start = 12.dp)
+    ) {
+        Icon(
+            imageVector = CompoundIcons.Edit(),
+            contentDescription = null,
+            tint = ElementTheme.colors.iconSecondary,
+            modifier = Modifier
+                .padding(vertical = 8.dp)
+                .size(16.dp),
+        )
+        Text(
+            text = text,
+            style = ElementTheme.typography.fontBodySmRegular,
+            textAlign = TextAlign.Start,
+            color = ElementTheme.colors.textSecondary,
+            modifier = Modifier
+                .padding(vertical = 8.dp)
+                .weight(1f)
+        )
+        Icon(
+            imageVector = CompoundIcons.Close(),
+            contentDescription = stringResource(CommonStrings.action_close),
+            tint = ElementTheme.colors.iconSecondary,
+            modifier = Modifier
+                .padding(top = 8.dp, bottom = 8.dp, start = 16.dp, end = 12.dp)
+                .size(16.dp)
+                .clickable(
+                    enabled = true,
+                    onClick = onResetComposerMode,
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = ripple(bounded = false)
+                ),
+        )
+    }
+}
+
+// This combination of density DPI and font scale is an approximation to a screen with little space to display the content
+private const val MAX_SCALING_VALUE = 3.5f
+
+/**
+ * https://www.figma.com/design/G1xy0HDZKJf5TCRFmKb5d5/Compound-Android-Components?node-id=2019-6286
+ */
+@Composable
+private fun ReplyToModeView(
+    replyToDetails: InReplyToDetails,
+    hideImage: Boolean,
+    onResetComposerMode: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier
+            .clip(RoundedCornerShape(6.dp))
+            .background(ElementTheme.colors.bgCanvasDefault)
+            .border(1.dp, ElementTheme.colors.separatorPrimary, RoundedCornerShape(6.dp))
+            .padding(4.dp)
+    ) {
+        // Larger density DPI and font scale means less space to display the content, so we limit it to 1 line to avoid overflow issues
+        val currentDensity = LocalDensity.current
+        val hasLowResolution = currentDensity.density * currentDensity.fontScale >= MAX_SCALING_VALUE
+        val maxReplyContentLines = if (hasLowResolution) 1 else 2
+        InReplyToView(
+            inReplyTo = replyToDetails,
+            hideImage = hideImage,
+            maxLines = maxReplyContentLines,
+            modifier = Modifier.weight(1f),
+        )
+        Icon(
+            imageVector = CompoundIcons.Close(),
+            contentDescription = stringResource(CommonStrings.action_close),
+            tint = ElementTheme.colors.iconSecondary,
+            modifier = Modifier
+                .padding(end = 4.dp, top = 4.dp, start = 8.dp, bottom = 16.dp)
+                .size(16.dp)
+                .clickable(
+                    enabled = true,
+                    onClick = onResetComposerMode,
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = ripple(bounded = false)
+                ),
+        )
+    }
+}
+
+@PreviewsDayNight
+@Composable
+internal fun ComposerModeViewPreview(
+    @PreviewParameter(MessageComposerModeSpecialProvider::class) mode: MessageComposerMode.Special
+) = ElementPreview {
+    ComposerModeView(
+        composerMode = mode,
+        onResetComposerMode = {},
+        modifier = Modifier.background(ElementTheme.colors.bgSubtleSecondary)
+    )
+}

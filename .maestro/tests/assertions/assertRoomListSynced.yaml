@@ -1,0 +1,5 @@
+appId: ${MAESTRO_APP_ID}
+---
+- extendedWaitUntil:
+    visible: ${MAESTRO_ROOM_NAME}
+    timeout: 10000

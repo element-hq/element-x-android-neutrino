@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="notification_channel_call">"Çağrı"</string>
+  <string name="notification_channel_listening_for_events">"Etkinlikleri dinlemek"</string>
+  <string name="notification_channel_noisy">"Gürültülü bildirimler"</string>
+  <string name="notification_channel_ringing_calls">"Çalan aramalar"</string>
+  <string name="notification_channel_silent">"Sessiz bildirimler"</string>
+  <plurals name="notification_compat_summary_line_for_room">
+    <item quantity="one">"%1$s: %2$d mesaj"</item>
+    <item quantity="other">"%1$s: %2$d mesaj"</item>
+  </plurals>
+  <plurals name="notification_compat_summary_title">
+    <item quantity="one">"%d bildirim"</item>
+    <item quantity="other">"%d bildirim"</item>
+  </plurals>
+  <string name="notification_fallback_content">"Yeni mesajlarınız var"</string>
+  <string name="notification_incoming_call">"📹 Gelen çağrı"</string>
+  <string name="notification_inline_reply_failed">"** Gönderilemedi - lütfen odayı açın"</string>
+  <string name="notification_invitation_action_join">"Katıl"</string>
+  <string name="notification_invitation_action_reject">"Reddet"</string>
+  <plurals name="notification_invitations">
+    <item quantity="one">"%d davet"</item>
+    <item quantity="other">"%d davet"</item>
+  </plurals>
+  <string name="notification_invite_body">"Sizi sohbete davet etti"</string>
+  <string name="notification_invite_body_with_sender">"%1$s sizi sohbete davet etti"</string>
+  <string name="notification_mentioned_you_body">"Senden bahsettim: %1$s"</string>
+  <string name="notification_new_messages">"Yeni Mesajlar"</string>
+  <plurals name="notification_new_messages_for_room">
+    <item quantity="one">"%d yeni mesaj"</item>
+    <item quantity="other">"%d yeni mesaj"</item>
+  </plurals>
+  <string name="notification_reaction_body">"%1$s ile tepki verildi"</string>
+  <string name="notification_room_action_mark_as_read">"Okundu olarak işaretle"</string>
+  <string name="notification_room_action_quick_reply">"Hızlı cevap"</string>
+  <string name="notification_room_invite_body">"Sizi odaya katılmaya davet etti"</string>
+  <string name="notification_room_invite_body_with_sender">"%1$s sizi odaya katılmaya davet etti"</string>
+  <string name="notification_sender_me">"Ben"</string>
+  <string name="notification_sender_mention_reply">"%1$s belirtildi veya yanıtlandı"</string>
+  <string name="notification_test_push_notification_content">"Bildirimi görüntülüyorsunuz! Beni tıklayın!"</string>
+  <string name="notification_ticker_text_dm">"%1$s: %2$s"</string>
+  <string name="notification_ticker_text_group">"%1$s: %2$s %3$s"</string>
+  <plurals name="notification_unread_notified_messages">
+    <item quantity="one">"%d okunmamış mesaj bildirimi"</item>
+    <item quantity="other">"%d okunmamış mesaj bildirimi"</item>
+  </plurals>
+  <string name="notification_unread_notified_messages_and_invitation">"%1$s ve %2$s"</string>
+  <string name="notification_unread_notified_messages_in_room">"%1$s içinde %2$s"</string>
+  <string name="notification_unread_notified_messages_in_room_and_invitation">"%1$s içinde %2$s ve %3$s"</string>
+  <plurals name="notification_unread_notified_messages_in_room_rooms">
+    <item quantity="one">"%d oda"</item>
+    <item quantity="other">"%d oda"</item>
+  </plurals>
+  <string name="push_distributor_background_sync_android">"Arkaplan senkronizasyonu"</string>
+  <string name="push_distributor_firebase_android">"Google Hizmetleri"</string>
+  <string name="push_no_valid_google_play_services_apk_android">"Geçerli bir Google Play Hizmeti bulunamadı. Bildirimler düzgün çalışmayabilir."</string>
+  <string name="troubleshoot_notifications_test_blocked_users_title">"Engellenen kullanıcılar"</string>
+  <string name="troubleshoot_notifications_test_current_push_provider_description">"Geçerli sağlayıcının adını al."</string>
+  <string name="troubleshoot_notifications_test_current_push_provider_failure">"Hiçbir gönderme sağlayıcısı seçilmedi."</string>
+  <string name="troubleshoot_notifications_test_current_push_provider_success">"Geçerli gönderme sağlayıcısı: %1$s."</string>
+  <string name="troubleshoot_notifications_test_current_push_provider_title">"Geçerli gönderme sağlayıcısı"</string>
+  <string name="troubleshoot_notifications_test_detect_push_provider_description">"Uygulamanın en az bir gönderme sağlayıcısına sahip olduğundan emin olun."</string>
+  <string name="troubleshoot_notifications_test_detect_push_provider_failure">"Gönderim sağlayıcısı bulunamadı."</string>
+  <plurals name="troubleshoot_notifications_test_detect_push_provider_success">
+    <item quantity="one">"%1$d gönderme sağlayıcısı bulundu: %2$s"</item>
+    <item quantity="other">"%1$d gönderme sağlayıcısı bulundu: %2$s"</item>
+  </plurals>
+  <string name="troubleshoot_notifications_test_detect_push_provider_title">"Gönderme sağlayıcılarını tespit et"</string>
+  <string name="troubleshoot_notifications_test_display_notification_description">"Uygulamanın bildirim görüntüleyebildiğini kontrol edin."</string>
+  <string name="troubleshoot_notifications_test_display_notification_failure">"Bildirime tıklanmadı."</string>
+  <string name="troubleshoot_notifications_test_display_notification_permission_failure">"Bildirim görüntülenemiyor."</string>
+  <string name="troubleshoot_notifications_test_display_notification_success">"Bildirime tıklandı!"</string>
+  <string name="troubleshoot_notifications_test_display_notification_title">"Bildirimi görüntüle"</string>
+  <string name="troubleshoot_notifications_test_display_notification_waiting">"Teste devam etmek için lütfen bildirime tıklayın."</string>
+  <string name="troubleshoot_notifications_test_push_loop_back_description">"Uygulamanın push aldığından emin olun."</string>
+  <string name="troubleshoot_notifications_test_push_loop_back_failure_1">"Hata: itici isteği reddetti."</string>
+  <string name="troubleshoot_notifications_test_push_loop_back_failure_2">"Hata: %1$s."</string>
+  <string name="troubleshoot_notifications_test_push_loop_back_failure_3">"Hata, itme test edilemiyor."</string>
+  <string name="troubleshoot_notifications_test_push_loop_back_failure_4">"Hata, push beklenirken zaman aşımı oluştu."</string>
+  <string name="troubleshoot_notifications_test_push_loop_back_success">"Geri itme döngüsü %1$d ms sürdü."</string>
+  <string name="troubleshoot_notifications_test_push_loop_back_title">"Test Geri İtme döngüsü"</string>
+</resources>

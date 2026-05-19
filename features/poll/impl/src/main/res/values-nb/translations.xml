@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="screen_create_poll_add_option_btn">"Legg til alternativ"</string>
+  <string name="screen_create_poll_anonymous_desc">"Vis resultater bare etter at avstemningen er avsluttet"</string>
+  <string name="screen_create_poll_anonymous_headline">"Skjul stemmer"</string>
+  <string name="screen_create_poll_answer_hint">"Alternativ %1$d"</string>
+  <string name="screen_create_poll_cancel_confirmation_content_android">"Endringene dine er ikke lagret. Er du sikker på at du vil gå tilbake?"</string>
+  <string name="screen_create_poll_delete_option_a11y">"Slett alternativet %1$s"</string>
+  <string name="screen_create_poll_question_desc">"Spørsmål eller emne"</string>
+  <string name="screen_create_poll_question_hint">"Hva handler avstemningen om?"</string>
+  <string name="screen_create_poll_title">"Opprett avstemning"</string>
+  <string name="screen_edit_poll_delete_confirmation">"Er du sikker på at du vil slette denne avstemningen?"</string>
+  <string name="screen_edit_poll_delete_confirmation_title">"Slett avstemning"</string>
+  <string name="screen_edit_poll_title">"Rediger avstemning"</string>
+  <string name="screen_polls_history_empty_ongoing">"Finner ingen pågående avstemninger."</string>
+  <string name="screen_polls_history_empty_past">"Kan ikke finne noen tidligere avstemninger."</string>
+  <string name="screen_polls_history_filter_ongoing">"Pågående"</string>
+  <string name="screen_polls_history_filter_past">"Fortid"</string>
+  <string name="screen_polls_history_title">"Avstemninger"</string>
+</resources>

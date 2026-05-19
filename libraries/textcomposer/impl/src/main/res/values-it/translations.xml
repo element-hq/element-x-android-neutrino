@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="rich_text_editor_a11y_add_attachment">"Aggiungi allegato"</string>
+  <string name="rich_text_editor_bullet_list">"Attiva/disattiva l\'elenco puntato"</string>
+  <string name="rich_text_editor_close_formatting_options">"Annullare e chiudere la formattazione del testo"</string>
+  <string name="rich_text_editor_code_block">"Attiva/disattiva il blocco di codice"</string>
+  <string name="rich_text_editor_composer_caption_placeholder">"Aggiungi una didascalia"</string>
+  <string name="rich_text_editor_composer_encrypted_placeholder">"Messaggio cifrato…"</string>
+  <string name="rich_text_editor_composer_placeholder">"Messaggio…"</string>
+  <string name="rich_text_editor_composer_unencrypted_placeholder">"Messaggio non cifrato…"</string>
+  <string name="rich_text_editor_create_link">"Crea un collegamento"</string>
+  <string name="rich_text_editor_edit_link">"Modifica collegamento"</string>
+  <string name="rich_text_editor_format_action">"%1$s stato: %2$s"</string>
+  <string name="rich_text_editor_format_bold">"Applica il formato grassetto"</string>
+  <string name="rich_text_editor_format_italic">"Applicare il formato corsivo"</string>
+  <string name="rich_text_editor_format_state_disabled">"disabilitato"</string>
+  <string name="rich_text_editor_format_state_off">"Disattivato"</string>
+  <string name="rich_text_editor_format_state_on">"Attivo"</string>
+  <string name="rich_text_editor_format_strikethrough">"Applica il formato barrato"</string>
+  <string name="rich_text_editor_format_underline">"Applicare il formato di sottolineatura"</string>
+  <string name="rich_text_editor_full_screen_toggle">"Attiva/disattiva la modalità a schermo intero"</string>
+  <string name="rich_text_editor_indent">"Rientro a destra"</string>
+  <string name="rich_text_editor_inline_code">"Applicare il formato codice inline"</string>
+  <string name="rich_text_editor_link">"Imposta collegamento"</string>
+  <string name="rich_text_editor_numbered_list">"Attiva/disattiva elenco numerato"</string>
+  <string name="rich_text_editor_open_compose_options">"Apri le opzioni di composizione"</string>
+  <string name="rich_text_editor_quote">"Attiva/disattiva citazione"</string>
+  <string name="rich_text_editor_remove_link">"Rimuovi collegamento"</string>
+  <string name="rich_text_editor_unindent">"Rientro a sinistra"</string>
+  <string name="rich_text_editor_url_placeholder">"Collegamento"</string>
+  <string name="screen_media_upload_preview_caption_warning">"Le didascalie potrebbero non essere visibili agli utenti di app meno recenti."</string>
+  <string name="screen_room_voice_message_tooltip">"Tieni premuto per registrare"</string>
+</resources>

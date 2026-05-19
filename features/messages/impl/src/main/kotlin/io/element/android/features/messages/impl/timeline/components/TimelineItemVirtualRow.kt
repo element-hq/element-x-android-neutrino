@@ -1,0 +1,74 @@
+/*
+ * Copyright (c) 2025 Element Creations Ltd.
+ * Copyright 2023-2025 New Vector Ltd.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Element-Commercial.
+ * Please see LICENSE files in the repository root for full details.
+ */
+
+package io.element.android.features.messages.impl.timeline.components
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Modifier
+import io.element.android.features.messages.impl.timeline.TimelineEvent
+import io.element.android.features.messages.impl.timeline.TimelineRoomInfo
+import io.element.android.features.messages.impl.timeline.components.virtual.TimelineItemDaySeparatorView
+import io.element.android.features.messages.impl.timeline.components.virtual.TimelineItemReadMarkerView
+import io.element.android.features.messages.impl.timeline.components.virtual.TimelineItemRoomBeginningView
+import io.element.android.features.messages.impl.timeline.components.virtual.TimelineLoadingMoreIndicator
+import io.element.android.features.messages.impl.timeline.model.TimelineItem
+import io.element.android.features.messages.impl.timeline.model.virtual.TimelineItemDaySeparatorModel
+import io.element.android.features.messages.impl.timeline.model.virtual.TimelineItemLastForwardIndicatorModel
+import io.element.android.features.messages.impl.timeline.model.virtual.TimelineItemLoadingIndicatorModel
+import io.element.android.features.messages.impl.timeline.model.virtual.TimelineItemReadMarkerModel
+import io.element.android.features.messages.impl.timeline.model.virtual.TimelineItemRoomBeginningModel
+import io.element.android.features.messages.impl.timeline.model.virtual.TimelineItemTypingNotificationModel
+import io.element.android.features.messages.impl.typing.TypingNotificationView
+import timber.log.Timber
+
+@Composable
+fun TimelineItemVirtualRow(
+    virtual: TimelineItem.Virtual,
+    timelineRoomInfo: TimelineRoomInfo,
+    eventSink: (TimelineEvent.TimelineItemEvent) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = modifier) {
+        when (virtual.model) {
+            is TimelineItemDaySeparatorModel -> TimelineItemDaySeparatorView(virtual.model)
+            TimelineItemReadMarkerModel -> TimelineItemReadMarkerView()
+            TimelineItemRoomBeginningModel -> {
+                TimelineItemRoomBeginningView(
+                    predecessorRoom = timelineRoomInfo.predecessorRoom,
+                    roomName = timelineRoomInfo.name,
+                    isDm = timelineRoomInfo.isDm,
+                    onPredecessorRoomClick = { roomId ->
+                        eventSink(TimelineEvent.NavigateToPredecessorOrSuccessorRoom(roomId))
+                    },
+                )
+            }
+            is TimelineItemLoadingIndicatorModel -> {
+                TimelineLoadingMoreIndicator(virtual.model.direction)
+                val latestEventSink by rememberUpdatedState(eventSink)
+                LaunchedEffect(virtual.model.timestamp) {
+                    Timber.d("Pagination triggered by load more indicator")
+                    latestEventSink(TimelineEvent.LoadMore(virtual.model.direction))
+                }
+            }
+            // Empty model trick to avoid timeline jumping during forward pagination.
+            is TimelineItemLastForwardIndicatorModel -> {
+                Spacer(modifier = Modifier)
+            }
+            is TimelineItemTypingNotificationModel -> {
+                TypingNotificationView(
+                    state = timelineRoomInfo.typingNotificationState,
+                )
+            }
+        }
+    }
+}

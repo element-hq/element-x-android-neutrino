@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2025 Element Creations Ltd.
+  ~ Copyright 2023 New Vector Ltd.
+  ~
+  ~ SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Element-Commercial.
+  ~ Please see LICENSE files in the repository root for full details.
+  -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
+    <application>
+        <service android:name=".push.FetchPushForegroundService"
+            android:foregroundServiceType="shortService"
+            android:exported="false"
+            android:enabled="true" />
+
+        <receiver
+            android:name=".notifications.TestNotificationReceiver"
+            android:exported="false" />
+        <receiver
+            android:name=".notifications.NotificationBroadcastReceiver"
+            android:enabled="true"
+            android:exported="false" />
+
+        <provider
+            android:name=".notifications.NotificationsFileProvider"
+            android:authorities="${applicationId}.notifications.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/notifications_provider_paths" />
+        </provider>
+
+    </application>
+
+</manifest>

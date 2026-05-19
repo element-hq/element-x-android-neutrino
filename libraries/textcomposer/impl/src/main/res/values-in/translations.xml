@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="rich_text_editor_a11y_add_attachment">"Tambahkan lampiran"</string>
+  <string name="rich_text_editor_bullet_list">"Alihkan daftar poin"</string>
+  <string name="rich_text_editor_close_formatting_options">"Batalkan dan tutup pemformatan teks"</string>
+  <string name="rich_text_editor_code_block">"Alihkan blok kode"</string>
+  <string name="rich_text_editor_composer_caption_placeholder">"Keterangan opsional…"</string>
+  <string name="rich_text_editor_composer_encrypted_placeholder">"Pesan terenkripsi…"</string>
+  <string name="rich_text_editor_composer_placeholder">"Kirim pesan…"</string>
+  <string name="rich_text_editor_composer_unencrypted_placeholder">"Pesan tidak terenkripsi…"</string>
+  <string name="rich_text_editor_create_link">"Buat tautan"</string>
+  <string name="rich_text_editor_edit_link">"Edit tautan"</string>
+  <string name="rich_text_editor_format_action">"%1$s, keadaan: %2$s"</string>
+  <string name="rich_text_editor_format_bold">"Terapkan format tebal"</string>
+  <string name="rich_text_editor_format_italic">"Terapkan format miring"</string>
+  <string name="rich_text_editor_format_state_disabled">"dinonaktifkan"</string>
+  <string name="rich_text_editor_format_state_off">"mati"</string>
+  <string name="rich_text_editor_format_state_on">"nyala"</string>
+  <string name="rich_text_editor_format_strikethrough">"Terapkan format coret"</string>
+  <string name="rich_text_editor_format_underline">"Terapkan format garis bawah"</string>
+  <string name="rich_text_editor_full_screen_toggle">"Alihkan mode layar penuh"</string>
+  <string name="rich_text_editor_indent">"Beri indentasi"</string>
+  <string name="rich_text_editor_inline_code">"Terapkan format kode dalam baris"</string>
+  <string name="rich_text_editor_link">"Tetapkan tautan"</string>
+  <string name="rich_text_editor_numbered_list">"Alihkan daftar bernomor"</string>
+  <string name="rich_text_editor_open_compose_options">"Buka opsi penulisan"</string>
+  <string name="rich_text_editor_quote">"Alihkan kutipan"</string>
+  <string name="rich_text_editor_remove_link">"Hapus tautan"</string>
+  <string name="rich_text_editor_unindent">"Hapus indentasi"</string>
+  <string name="rich_text_editor_url_placeholder">"Tautan"</string>
+  <string name="screen_media_upload_preview_caption_warning">"Keterangan mungkin tidak terlihat oleh orang yang menggunakan aplikasi lama."</string>
+  <string name="screen_room_voice_message_tooltip">"Tahan untuk merekam"</string>
+</resources>
