@@ -72,6 +72,7 @@ import io.element.android.services.analytics.api.AnalyticsLongRunningTransaction
 import io.element.android.services.analytics.api.AnalyticsService
 import io.element.android.services.analytics.api.watchers.AnalyticsColdStartWatcher
 import io.element.android.services.appnavstate.api.ROOM_OPENED_FROM_NOTIFICATION
+import io.element.android.services.neutrino.api.NeutrinoService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
@@ -100,6 +101,7 @@ class RootFlowNode(
     private val announcementService: AnnouncementService,
     private val analyticsService: AnalyticsService,
     private val analyticsColdStartWatcher: AnalyticsColdStartWatcher,
+    private val neutrinoService: NeutrinoService,
     @AppCoroutineScope private val appCoroutineScope: CoroutineScope,
 ) : BaseFlowNode<RootFlowNode.NavTarget>(
     backstack = BackStack(
@@ -111,6 +113,7 @@ class RootFlowNode(
 ) {
     override fun onBuilt() {
         analyticsColdStartWatcher.start()
+        neutrinoService.start()
         appCoroutineScope.launch {
             matrixSessionCache.restoreWithSavedState(buildContext.savedStateMap)
             if (buildContext.savedStateMap != null) {

@@ -146,6 +146,7 @@ fun DependencyHandlerScope.allServicesImpl() {
     implementation(project(":services:apperror:impl"))
     implementation(project(":services:appnavstate:impl"))
     implementation(project(":services:toolbox:impl"))
+    implementation(project(":services:neutrino:impl"))
 }
 
 fun DependencyHandlerScope.allEnterpriseImpl(project: Project) = addAll(

@@ -55,6 +55,7 @@ dependencies {
     implementation(projects.services.apperror.api)
     implementation(projects.services.appnavstate.api)
     implementation(projects.services.analytics.api)
+    implementation(projects.services.neutrino.api)
 
     testCommonDependencies(libs)
     testImplementation(projects.features.login.test)
