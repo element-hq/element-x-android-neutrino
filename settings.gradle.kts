@@ -66,7 +66,6 @@ fun includeProjects(directory: File, path: String, maxDepth: Int = 1) {
     }
 }
 
-includeProjects(File(rootDir, "enterprise"), ":enterprise", maxDepth = 2)
 includeProjects(File(rootDir, "features"), ":features")
 includeProjects(File(rootDir, "libraries"), ":libraries")
 includeProjects(File(rootDir, "services"), ":services")

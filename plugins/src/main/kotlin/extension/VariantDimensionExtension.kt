@@ -21,6 +21,17 @@ fun VariantDimension.buildConfigFieldStr(
     )
 }
 
+fun VariantDimension.buildConfigFieldNullableStr(
+    name: String,
+    value: String?,
+) {
+    buildConfigField(
+        type = "String",
+        name = name,
+        value = value?.let { "\"$it\"" } ?: "null"
+    )
+}
+
 fun VariantDimension.buildConfigFieldBoolean(
     name: String,
     value: Boolean,

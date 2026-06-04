@@ -30,33 +30,18 @@ android {
         )
         buildConfigFieldStr(
             name = "MAPTILER_API_KEY",
-            value = if (isEnterpriseBuild) {
-                BuildTimeConfig.SERVICES_MAPTILER_APIKEY
-            } else {
-                System.getenv("ELEMENT_ANDROID_MAPTILER_API_KEY")
-                    ?: readLocalProperty("services.maptiler.apikey")
-            }
+            value = readLocalProperty("services.maptiler.apikey")
                 ?: ""
         )
         buildConfigFieldStr(
             name = "MAPTILER_LIGHT_MAP_ID",
-            value = if (isEnterpriseBuild) {
-                BuildTimeConfig.SERVICES_MAPTILER_LIGHT_MAPID
-            } else {
-                System.getenv("ELEMENT_ANDROID_MAPTILER_LIGHT_MAP_ID")
-                    ?: readLocalProperty("services.maptiler.lightMapId")
-            }
+            value = readLocalProperty("services.maptiler.lightMapId")
             // fall back to maptiler's default light map.
                 ?: "basic-v2"
         )
         buildConfigFieldStr(
             name = "MAPTILER_DARK_MAP_ID",
-            value = if (isEnterpriseBuild) {
-                BuildTimeConfig.SERVICES_MAPTILER_DARK_MAPID
-            } else {
-                System.getenv("ELEMENT_ANDROID_MAPTILER_DARK_MAP_ID")
-                    ?: readLocalProperty("services.maptiler.darkMapId")
-            }
+            value = readLocalProperty("services.maptiler.darkMapId")
             // fall back to maptiler's default dark map.
                 ?: "basic-v2-dark"
         )

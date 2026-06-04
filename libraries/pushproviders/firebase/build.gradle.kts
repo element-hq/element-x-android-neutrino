@@ -35,15 +35,6 @@ android {
                 value = BuildTimeConfig.GOOGLE_APP_ID_DEBUG,
             )
         }
-        register("nightly") {
-            consumerProguardFiles("consumer-proguard-rules.pro")
-            matchingFallbacks += listOf("release")
-            resValue(
-                type = "string",
-                name = "google_app_id",
-                value = BuildTimeConfig.GOOGLE_APP_ID_NIGHTLY,
-            )
-        }
     }
 }
 

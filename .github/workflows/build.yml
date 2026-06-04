@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        variant: [debug, release, nightly]
+        variant: [debug, release]
       fail-fast: false
     # Allow all jobs on develop. Just one per PR.
     concurrency:
@@ -72,6 +72,3 @@ jobs:
       - name: Compile release sources
         if: ${{ matrix.variant == 'release' }}
         run: ./gradlew bundleGplayRelease -PallWarningsAsErrors=true $CI_GRADLE_ARG_PROPERTIES
-      - name: Compile nightly sources
-        if: ${{ matrix.variant == 'nightly' }}
-        run: ./gradlew compileGplayNightlySources -PallWarningsAsErrors=true $CI_GRADLE_ARG_PROPERTIES
