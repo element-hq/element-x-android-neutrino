@@ -18,9 +18,6 @@ jobs:
   build:
     name: Build APKs
     runs-on: ubuntu-latest
-    permissions:
-      # For NejcZdovc/comment-pr
-      pull-requests: write
     strategy:
       matrix:
         variant: [debug, release, nightly]
@@ -61,16 +58,6 @@ jobs:
           cache-read-only: ${{ github.ref != 'refs/heads/develop' }}
       - name: Assemble debug APKs
         if: ${{ matrix.variant == 'debug' }}
-        env:
-          ELEMENT_ANDROID_MAPTILER_API_KEY: ${{ secrets.MAPTILER_KEY }}
-          ELEMENT_ANDROID_MAPTILER_LIGHT_MAP_ID: ${{ secrets.MAPTILER_LIGHT_MAP_ID }}
-          ELEMENT_ANDROID_MAPTILER_DARK_MAP_ID: ${{ secrets.MAPTILER_DARK_MAP_ID }}
-          ELEMENT_ANDROID_SENTRY_DSN: ${{ secrets.ELEMENT_ANDROID_SENTRY_DSN }}
-          ELEMENT_SDK_SENTRY_DSN: ${{ secrets.ELEMENT_SDK_SENTRY_DSN }}
-          ELEMENT_CALL_SENTRY_DSN: ${{ secrets.ELEMENT_CALL_SENTRY_DSN }}
-          ELEMENT_CALL_POSTHOG_API_HOST: ${{ secrets.ELEMENT_CALL_POSTHOG_API_HOST }}
-          ELEMENT_CALL_POSTHOG_API_KEY: ${{ secrets.ELEMENT_CALL_POSTHOG_API_KEY }}
-          ELEMENT_CALL_RAGESHAKE_URL: ${{ secrets.ELEMENT_CALL_RAGESHAKE_URL }}
         run: ./gradlew :app:assembleGplayDebug app:assembleFDroidDebug -PallWarningsAsErrors=true $CI_GRADLE_ARG_PROPERTIES
       - name: Upload debug APKs
         if: ${{ matrix.variant == 'debug' }}
@@ -80,28 +67,6 @@ jobs:
           path: |
             app/build/outputs/apk/gplay/debug/*-universal-debug.apk
             app/build/outputs/apk/fdroid/debug/*-universal-debug.apk
-      - uses: rnkdsh/action-upload-diawi@4e1421305be7cfc510d05f47850262eeaf345108 # v1.5.12
-        id: diawi
-        # Do not fail the whole build if Diawi upload fails
-        continue-on-error: true
-        env:
-          token: ${{ secrets.DIAWI_TOKEN }}
-        if: ${{ matrix.variant == 'debug' && github.event_name == 'pull_request' && env.token != '' }}
-        with:
-          token: ${{ env.token }}
-          file: app/build/outputs/apk/gplay/debug/app-gplay-arm64-v8a-debug.apk
-      - name: Add or update PR comment with QR Code to download APK.
-        if: ${{ matrix.variant == 'debug' && github.event_name == 'pull_request' && steps.diawi.conclusion == 'success' }}
-        uses: NejcZdovc/comment-pr@a423635d183a8259308e80593c96fecf31539c26 # v2.1.0
-        with:
-          message: |
-            :iphone: Scan the QR code below to install the build (arm64 only) for this PR.
-            ![QR code](${{ steps.diawi.outputs['qrcode'] }})
-            If you can't scan the QR code you can install the build via this link: ${{ steps.diawi.outputs['url'] }}
-          # Enables to identify and update existing Ad-hoc release message on new commit in the PR
-          identifier: "GITHUB_COMMENT_QR_CODE"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Compile release sources
         if: ${{ matrix.variant == 'release' }}
         run: ./gradlew bundleGplayRelease -PallWarningsAsErrors=true $CI_GRADLE_ARG_PROPERTIES
