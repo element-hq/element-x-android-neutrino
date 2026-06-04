@@ -40,7 +40,6 @@ Its aim is to help new developers to understand the overall project and where to
 Other useful documentation:
 
 - all the docs in this folder!
-- the [contributing doc](../CONTRIBUTING.md), that you should also read carefully.
 
 ### Quick introduction to Matrix
 

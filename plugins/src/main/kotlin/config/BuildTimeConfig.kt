@@ -13,7 +13,6 @@ object BuildTimeConfig {
     const val APPLICATION_NAME = "Element X"
     const val GOOGLE_APP_ID_RELEASE = ""
     const val GOOGLE_APP_ID_DEBUG = ""
-    const val GOOGLE_APP_ID_NIGHTLY = ""
 
     val METADATA_HOST_REVERSED: String? = null
     val URL_WEBSITE: String? = null

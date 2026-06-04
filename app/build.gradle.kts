@@ -82,15 +82,6 @@ android {
             storeFile = file("./signature/debug.keystore")
             storePassword = "android"
         }
-        register("nightly") {
-            keyAlias = System.getenv("ELEMENT_ANDROID_NIGHTLY_KEYID")
-                ?: project.property("signing.element.nightly.keyId") as? String?
-            keyPassword = System.getenv("ELEMENT_ANDROID_NIGHTLY_KEYPASSWORD")
-                ?: project.property("signing.element.nightly.keyPassword") as? String?
-            storeFile = file("./signature/nightly.keystore")
-            storePassword = System.getenv("ELEMENT_ANDROID_NIGHTLY_STOREPASSWORD")
-                ?: project.property("signing.element.nightly.storePassword") as? String?
-        }
     }
 
     val baseAppName = BuildTimeConfig.APPLICATION_NAME
@@ -98,7 +89,7 @@ android {
     logger.warnInBox("Building ${defaultConfig.applicationId} ($baseAppName) [$buildType]")
 
     buildTypes {
-        val oAuthRedirectSchemeBase = BuildTimeConfig.METADATA_HOST_REVERSED ?: "io.element.android"
+        val oAuthRedirectSchemeBase = BuildTimeConfig.METADATA_HOST_REVERSED ?: "io.element.android.xneutrino"
         getByName("debug") {
             resValue("string", "app_name", "$baseAppName dbg")
             resValue(
@@ -141,21 +132,6 @@ android {
                     }
                 }
             }
-        }
-
-        register("nightly") {
-            val release = getByName("release")
-            initWith(release)
-            applicationIdSuffix = ".nightly"
-            versionNameSuffix = "-nightly"
-            resValue("string", "app_name", "$baseAppName nightly")
-            resValue(
-                "string",
-                "login_redirect_scheme",
-                "$oAuthRedirectSchemeBase.nightly",
-            )
-            matchingFallbacks += listOf("release")
-            signingConfig = signingConfigs.getByName("nightly")
         }
     }
 

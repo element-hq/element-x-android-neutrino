@@ -33,7 +33,6 @@ android {
         val elementClassicPackageKey = "elementClassicPackage"
         val elementClassicPackage = "im.vector.app"
         val elementClassicPackageDebug = "$elementClassicPackage.debug"
-        val elementClassicPackageNightly = "$elementClassicPackage.nightly"
         getByName("release") {
             manifestPlaceholders[elementClassicPackageKey] = elementClassicPackage
             buildConfigFieldStr(elementClassicPackageKey, elementClassicPackage)
@@ -41,11 +40,6 @@ android {
         getByName("debug") {
             manifestPlaceholders[elementClassicPackageKey] = elementClassicPackageDebug
             buildConfigFieldStr(elementClassicPackageKey, elementClassicPackageDebug)
-        }
-        register("nightly") {
-            matchingFallbacks += listOf("release")
-            manifestPlaceholders[elementClassicPackageKey] = elementClassicPackageNightly
-            buildConfigFieldStr(elementClassicPackageKey, elementClassicPackageNightly)
         }
     }
 }
