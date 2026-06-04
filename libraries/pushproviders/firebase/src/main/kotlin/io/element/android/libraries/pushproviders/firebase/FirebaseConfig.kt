@@ -12,8 +12,9 @@ object FirebaseConfig {
     /**
      * It is the push gateway for firebase.
      * Note: pusher_http_url should have path '/_matrix/push/v1/notify' -->
+     * This fork has no default push gateway; one must be provided explicitly to use Firebase push.
      */
-    const val PUSHER_HTTP_URL: String = "https://matrix.org/_matrix/push/v1/notify"
+    val PUSHER_HTTP_URL: String? = null
 
     const val INDEX = 0
     const val NAME = "Firebase"
