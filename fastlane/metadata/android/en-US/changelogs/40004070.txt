@@ -1,2 +1,0 @@
-Main changes in this version: Enable the feature "RoomList filters" and "Mark as unread".
-Full changelog: https://github.com/element-hq/element-x-android/releases
