@@ -1,0 +1,38 @@
+/*
+ * Copyright (c) 2026 Element Creations Ltd.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Element-Commercial.
+ * Please see LICENSE files in the repository root for full details.
+ */
+
+package io.element.android.services.neutrino.impl
+
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.SingleIn
+import dev.zacsweers.metro.binding
+import io.element.android.services.neutrino.api.NeutrinoService
+import io.element.neutrino.NeutrinoHandle
+import timber.log.Timber
+
+@SingleIn(AppScope::class)
+@ContributesBinding(AppScope::class, binding = binding<NeutrinoService>())
+class DefaultNeutrinoService : NeutrinoService {
+    var handle: NeutrinoHandle? = null
+
+    override fun start() {
+        if (handle != null) {
+            return
+        }
+        Timber.i("Starting embedded Neutrino server...")
+        try {
+            handle = io.element.neutrino.start()
+        } catch (t: Throwable) {
+            Timber.e(t, "Neutrino failed to start")
+        }
+    }
+
+    override fun isRunning(): Boolean {
+        return handle != null
+    }
+}
