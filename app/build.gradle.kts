@@ -33,6 +33,10 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+base {
+    archivesName = "element-x-android-neutrino"
+}
+
 android {
     namespace = "io.element.android.x"
 
