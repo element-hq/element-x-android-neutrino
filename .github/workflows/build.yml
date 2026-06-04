@@ -7,7 +7,9 @@ on:
   push:
     branches: [ develop ]
 
-permissions: {}
+# The repository is private, so jobs need contents read access for actions/checkout to work.
+permissions:
+  contents: read
 
 # Enrich gradle.properties for CI/CD
 env:
