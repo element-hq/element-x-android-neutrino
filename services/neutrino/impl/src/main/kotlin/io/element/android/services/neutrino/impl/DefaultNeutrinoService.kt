@@ -7,17 +7,21 @@
 
 package io.element.android.services.neutrino.impl
 
+import android.content.Context
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
+import io.element.android.libraries.di.annotations.ApplicationContext
 import io.element.android.services.neutrino.api.NeutrinoService
 import io.element.neutrino.NeutrinoHandle
 import timber.log.Timber
 
 @SingleIn(AppScope::class)
 @ContributesBinding(AppScope::class, binding = binding<NeutrinoService>())
-class DefaultNeutrinoService : NeutrinoService {
+class DefaultNeutrinoService(
+    @ApplicationContext private val context: Context,
+) : NeutrinoService {
     var handle: NeutrinoHandle? = null
 
     override fun start() {
@@ -26,7 +30,13 @@ class DefaultNeutrinoService : NeutrinoService {
         }
         Timber.i("Starting embedded Neutrino server...")
         try {
-            handle = io.element.neutrino.start()
+            handle = io.element.neutrino.start(io.element.neutrino.NeutrinoConfig(
+                serverName = "localhost:8008",
+                bindAddr = "localhost:8008",
+                localpart = "alice",
+                storageDir = context.filesDir.resolve("data").path,
+                outboundConcurrency = 4u,
+            ))
         } catch (t: Throwable) {
             Timber.e(t, "Neutrino failed to start")
         }
