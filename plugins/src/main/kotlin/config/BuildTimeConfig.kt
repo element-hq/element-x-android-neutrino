@@ -10,7 +10,7 @@ package config
 
 object BuildTimeConfig {
     const val APPLICATION_ID = "io.element.android.xneutrino"
-    const val APPLICATION_NAME = "Element X"
+    const val APPLICATION_NAME = "Element X Neutrino"
     const val GOOGLE_APP_ID_RELEASE = ""
     const val GOOGLE_APP_ID_DEBUG = ""
 

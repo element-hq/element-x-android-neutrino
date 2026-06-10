@@ -95,7 +95,9 @@ private fun Throwable.getReason(): String? {
             }
         }
         is PusherRegistrationFailure.AccountNotVerified -> null
-        is PusherRegistrationFailure.NoDistributorsAvailable -> "No distributors available"
+        // The embedded Neutrino build ships no push distributor (no FCM, no UnifiedPush
+        // app on the emulator), so suppress this error rather than alarming the user.
+        is PusherRegistrationFailure.NoDistributorsAvailable -> null
         is PusherRegistrationFailure.NoProvidersAvailable -> "No providers available"
         else -> "Other error: $message"
     }
