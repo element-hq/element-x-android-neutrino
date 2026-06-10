@@ -31,3 +31,31 @@ internal fun selectLanServerHost(candidates: List<InetAddress>): String? {
         .firstOrNull { it.isSiteLocalAddress }
         ?.hostAddress
 }
+
+/**
+ * The `server_name` + `bind_addr` pair for a Neutrino launch.
+ *
+ * - [serverName] is the federation identity baked into the user's MXID
+ *   (`@localpart:serverName`). For the LAN demo it is a literal `ip:port`.
+ * - [bindAddr] is the socket the server listens on.
+ */
+internal data class NeutrinoEndpoint(
+    val serverName: String,
+    val bindAddr: String,
+)
+
+/**
+ * Build the federation endpoint for a launch.
+ *
+ * With a LAN [host] the server advertises that literal `host:port` identity and
+ * binds all interfaces (`0.0.0.0`) so peers can connect. With no LAN address it
+ * falls back to loopback, so the local client still works offline (no peer can
+ * reach it, but the device talks to its own server over loopback regardless).
+ */
+internal fun serverIdentity(host: String?, port: Int = NEUTRINO_PORT): NeutrinoEndpoint {
+    return if (host == null) {
+        NeutrinoEndpoint(serverName = "localhost:$port", bindAddr = "localhost:$port")
+    } else {
+        NeutrinoEndpoint(serverName = "$host:$port", bindAddr = "0.0.0.0:$port")
+    }
+}

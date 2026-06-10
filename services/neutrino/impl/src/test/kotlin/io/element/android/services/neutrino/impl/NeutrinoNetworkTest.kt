@@ -48,4 +48,18 @@ class NeutrinoNetworkTest {
     fun `selectLanServerHost returns null for an empty list`() {
         assertThat(selectLanServerHost(emptyList())).isNull()
     }
+
+    @Test
+    fun `serverIdentity advertises the LAN host and binds all interfaces`() {
+        val endpoint = serverIdentity(host = "192.168.1.5", port = 8008)
+        assertThat(endpoint.serverName).isEqualTo("192.168.1.5:8008")
+        assertThat(endpoint.bindAddr).isEqualTo("0.0.0.0:8008")
+    }
+
+    @Test
+    fun `serverIdentity falls back to loopback when there is no LAN host`() {
+        val endpoint = serverIdentity(host = null, port = 8008)
+        assertThat(endpoint.serverName).isEqualTo("localhost:8008")
+        assertThat(endpoint.bindAddr).isEqualTo("localhost:8008")
+    }
 }
