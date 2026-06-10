@@ -31,7 +31,7 @@ class DefaultNeutrinoService(
         }
         val host = selectLanServerHost(networkAddressProvider.currentAddresses())
         val endpoint = serverIdentity(host)
-        Timber.i("Starting embedded Neutrino server as %s (bind %s)", endpoint.serverName, endpoint.bindAddr)
+        Timber.i("Starting embedded Neutrino server as ${endpoint.serverName} (bind ${endpoint.bindAddr})")
         try {
             handle = io.element.neutrino.start(io.element.neutrino.NeutrinoConfig(
                 serverName = endpoint.serverName,
