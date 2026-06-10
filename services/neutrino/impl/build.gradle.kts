@@ -1,4 +1,5 @@
 import extension.setupDependencyInjection
+import extension.testCommonDependencies
 
 /*
  * Copyright (c) 2026 Element Creations Ltd.
@@ -25,4 +26,6 @@ dependencies {
 
     api(projects.services.neutrino.api)
     implementation(libs.neutrino)
+
+    testCommonDependencies(libs)
 }
