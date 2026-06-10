@@ -10,6 +10,7 @@ package io.element.android.services.neutrino.impl
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.binding
+import io.element.android.libraries.core.extensions.runCatchingExceptions
 import java.net.InetAddress
 import java.net.NetworkInterface
 
@@ -29,7 +30,7 @@ interface NetworkAddressProvider {
 @ContributesBinding(AppScope::class, binding = binding<NetworkAddressProvider>())
 class NetworkInterfaceAddressProvider : NetworkAddressProvider {
     override fun currentAddresses(): List<InetAddress> {
-        return runCatching {
+        return runCatchingExceptions {
             NetworkInterface.getNetworkInterfaces()
                 ?.toList()
                 .orEmpty()
