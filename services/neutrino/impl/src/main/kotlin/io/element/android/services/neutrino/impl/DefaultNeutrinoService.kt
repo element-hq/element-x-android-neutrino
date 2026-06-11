@@ -8,6 +8,7 @@
 package io.element.android.services.neutrino.impl
 
 import android.content.Context
+import android.net.ConnectivityManager
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
@@ -24,6 +25,10 @@ class DefaultNeutrinoService(
     private val networkAddressProvider: NetworkAddressProvider,
 ) : NeutrinoService {
     var handle: NeutrinoHandle? = null
+
+    // Held so its NetworkCallback is not garbage-collected. Registered once, on
+    // first successful start; lives for the app-singleton's process lifetime.
+    private var connectivityKicker: ConnectivityKicker? = null
 
     override fun start() {
         if (handle != null) {
@@ -42,7 +47,14 @@ class DefaultNeutrinoService(
             ))
         } catch (t: Throwable) {
             Timber.e(t, "Neutrino failed to start")
+            return
         }
+        // The server is up. Reset its outbound federation backoff whenever the
+        // device regains connectivity, so a returning-online device reconnects
+        // promptly instead of waiting out a long backoff.
+        val connectivityManager = context.getSystemService(ConnectivityManager::class.java)
+        connectivityKicker = ConnectivityKicker(connectivityManager) { handle?.kickBackoff() }
+            .also { it.register() }
     }
 
     override fun isRunning(): Boolean {

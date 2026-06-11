@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-11
 **Repo:** `element-x-android-neutrino`
-**Scope:** `services/neutrino/impl` only — no public API change, no manifest change, no upstream Element X edits.
+**Scope:** `services/neutrino/impl` only — no public API change, no upstream Element X edits. (One `uses-permission` manifest is added within this module; see Permission.)
 
 ## Goal
 
@@ -21,7 +21,9 @@ federation promptly instead of idling in backoff.
 
 - **Self-contained in `services/neutrino/impl`.** Keep the fork's diff against
   upstream Element X minimal: no edits to `appnav`, `app`, `features/*`, or
-  shared libraries; no change to the `NeutrinoService` API; no new manifest.
+  shared libraries; no change to the `NeutrinoService` API. (A one-line
+  `uses-permission` manifest is added inside this module — still within the
+  fork's own service module, not an upstream edit; see Permission.)
 - **No reuse of `NetworkMonitor`.** `NetworkMonitor` lives in
   `features/networkmonitor` and its `api` pulls in `designsystem`/`uiStrings`.
   A `service` depending on a `feature` would invert the module layering, so
@@ -94,10 +96,14 @@ wired to anything in this change.
 
 ### Permission
 
-`ConnectivityManager` callbacks require `ACCESS_NETWORK_STATE`. This is already
-declared in `libraries/androidutils`'s manifest, which `services/neutrino/impl`
-depends on, so the manifest merger includes it in the final app manifest. No
-new manifest or permission declaration is required.
+`ConnectivityManager` callbacks require `ACCESS_NETWORK_STATE`. Although
+`libraries/androidutils` declares it (so the final app APK has it at runtime),
+dependency permissions merge only at the **application** manifest level — not
+into a library module's own merged manifest. Lint's `MissingPermission` check
+runs per-module, so `registerDefaultNetworkCallback` in `services/neutrino/impl`
+needs the permission declared in *this* module's manifest. This mirrors
+`features/networkmonitor/impl`, which declares the same permission for the same
+reason. A minimal `services/neutrino/impl/src/main/AndroidManifest.xml` adds it.
 
 ## Testing
 
@@ -127,6 +133,8 @@ new manifest or permission declaration is required.
 - **New:** `services/neutrino/impl/.../impl/ConnectivityKicker.kt`
   (contains `ConnectivityKicker` and the internal `ReconnectDetector`).
 - **New (test):** `services/neutrino/impl/src/test/.../impl/ReconnectDetectorTest.kt`.
+- **New:** `services/neutrino/impl/src/main/AndroidManifest.xml`
+  (declares `ACCESS_NETWORK_STATE`; see Permission).
 - **Edit:** `services/neutrino/impl/.../impl/DefaultNeutrinoService.kt`
   (construct + `register()` the kicker in `start()`, hold it in a field).
 
