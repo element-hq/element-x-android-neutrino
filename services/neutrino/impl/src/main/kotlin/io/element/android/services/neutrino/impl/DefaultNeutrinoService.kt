@@ -21,6 +21,7 @@ import timber.log.Timber
 @ContributesBinding(AppScope::class, binding = binding<NeutrinoService>())
 class DefaultNeutrinoService(
     @ApplicationContext private val context: Context,
+    private val networkAddressProvider: NetworkAddressProvider,
 ) : NeutrinoService {
     var handle: NeutrinoHandle? = null
 
@@ -28,11 +29,13 @@ class DefaultNeutrinoService(
         if (handle != null) {
             return
         }
-        Timber.i("Starting embedded Neutrino server...")
+        val host = selectLanServerHost(networkAddressProvider.currentAddresses())
+        val endpoint = serverIdentity(host)
+        Timber.i("Starting embedded Neutrino server as ${endpoint.serverName} (bind ${endpoint.bindAddr})")
         try {
             handle = io.element.neutrino.start(io.element.neutrino.NeutrinoConfig(
-                serverName = "localhost:8008",
-                bindAddr = "localhost:8008",
+                serverName = endpoint.serverName,
+                bindAddr = endpoint.bindAddr,
                 localpart = "alice",
                 storageDir = context.filesDir.resolve("data").path,
                 outboundConcurrency = 4u,
