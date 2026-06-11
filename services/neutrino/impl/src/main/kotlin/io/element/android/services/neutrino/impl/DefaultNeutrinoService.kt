@@ -53,8 +53,10 @@ class DefaultNeutrinoService(
         // device regains connectivity, so a returning-online device reconnects
         // promptly instead of waiting out a long backoff.
         val connectivityManager = context.getSystemService(ConnectivityManager::class.java)
-        connectivityKicker = ConnectivityKicker(connectivityManager) { handle?.kickBackoff() }
-            .also { it.register() }
+        connectivityKicker = ConnectivityKicker(connectivityManager) {
+            Timber.i("Connectivity regained; sending KickBackoff to Neutrino")
+            handle?.kickBackoff()
+        }.also { it.register() }
     }
 
     override fun isRunning(): Boolean {

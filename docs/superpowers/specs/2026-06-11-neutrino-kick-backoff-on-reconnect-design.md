@@ -63,7 +63,9 @@ federation promptly instead of idling in backoff.
 3. **`DefaultNeutrinoService`** (existing — minimal edit)
    - After a successful `io.element.neutrino.start(...)` in `start()`, construct
      a `ConnectivityKicker` from `context.getSystemService(ConnectivityManager)`
-     with `onReconnect = { handle?.kickBackoff() }`, and call `register()`.
+     with `onReconnect = { Timber.i(...); handle?.kickBackoff() }`, and call
+     `register()`. The single Timber line (no PII) records each kick send; the
+     Neutrino-specific log lives here rather than in the generic kicker.
    - Hold the kicker in a field so it (and its callback) is not GC'd.
    - The existing `if (handle != null) return` guard at the top of `start()`
      keeps registration to exactly once.
