@@ -29,6 +29,7 @@ class LoginPasswordNode(
 ) : Node(buildContext, plugins = plugins) {
     data class Inputs(
         val initialLogin: String,
+        val canNavigateBack: Boolean,
     ) : NodeInputs
 
     private val inputs: Inputs = inputs()
@@ -40,6 +41,7 @@ class LoginPasswordNode(
         LoginPasswordView(
             state = state,
             modifier = modifier,
+            canNavigateBack = inputs.canNavigateBack,
             onBackClick = ::navigateUp,
         )
     }

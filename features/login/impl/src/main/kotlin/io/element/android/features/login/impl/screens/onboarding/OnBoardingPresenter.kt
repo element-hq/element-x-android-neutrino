@@ -9,6 +9,7 @@
 package io.element.android.features.login.impl.screens.onboarding
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -86,7 +87,8 @@ class OnBoardingPresenter(
             forcedAccountProvider ?: linkAccountProvider
         }
         val canLoginWithQrCode by produceState(initialValue = false, linkAccountProvider) {
-            value = linkAccountProvider == null
+            // No QR login when a homeserver is forced (embedded Neutrino).
+            value = forcedAccountProvider == null && linkAccountProvider == null
         }
         val canReportBug by remember { rageshakeFeatureAvailability.isAvailable() }.collectAsState(false)
         var showReportBug by rememberSaveable { mutableStateOf(false) }
@@ -99,6 +101,22 @@ class OnBoardingPresenter(
         }
 
         val loginMode by loginHelper.collectLoginMode()
+
+        // When a homeserver is forced (embedded Neutrino), skip the onboarding screen
+        // entirely: resolve the server immediately so the flow advances straight to the
+        // login screen. LoginFlowNode replaces this node in the back stack, so this runs
+        // once and the welcome screen is never shown to the user.
+        if (forcedAccountProvider != null) {
+            LaunchedEffect(forcedAccountProvider) {
+                accountProviderDataSource.setUrl(forcedAccountProvider)
+                loginHelper.submit(
+                    isAccountCreation = false,
+                    homeserverUrl = forcedAccountProvider,
+                    resolvedHomeserverUrl = null,
+                    loginHint = null,
+                )
+            }
+        }
 
         fun handleEvent(event: OnBoardingEvents) {
             when (event) {

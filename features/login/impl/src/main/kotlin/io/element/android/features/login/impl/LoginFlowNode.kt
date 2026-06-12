@@ -139,6 +139,7 @@ class LoginFlowNode(
         @Parcelize
         data class LoginPassword(
             val initialLogin: String = "",
+            val canNavigateBack: Boolean = true,
         ) : NavTarget
 
         @Parcelize
@@ -210,7 +211,11 @@ class LoginFlowNode(
                     }
 
                     override fun navigateToLoginPassword() {
-                        backstack.push(NavTarget.LoginPassword())
+                        // Forced embedded Neutrino: the onboarding screen is auto-skipped, so
+                        // replace it rather than push. This leaves the login screen as the only
+                        // back-stack entry, so it is terminal (hardware back exits the app) and
+                        // cannot navigate back to onboarding.
+                        backstack.replace(NavTarget.LoginPassword(canNavigateBack = false))
                     }
 
                     override fun onDone() {
@@ -321,6 +326,7 @@ class LoginFlowNode(
             is NavTarget.LoginPassword -> {
                 val inputs = LoginPasswordNode.Inputs(
                     initialLogin = navTarget.initialLogin,
+                    canNavigateBack = navTarget.canNavigateBack,
                 )
                 createNode<LoginPasswordNode>(buildContext, plugins = listOf(inputs))
             }

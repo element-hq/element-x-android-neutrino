@@ -229,12 +229,16 @@ class OnBoardingPresenterTest {
             )
         )
         presenter.test {
-            skipItems(1)
+            // A single forced account provider (embedded Neutrino) is auto-submitted to skip
+            // the onboarding screen: QR login is hidden and account creation is unavailable.
+            // The first emitted state already reflects the forced provider; ignore the
+            // subsequent loginMode transitions driven by the auto-submit.
             awaitItem().also {
                 assertThat(it.defaultAccountProvider).isEqualTo(ACCOUNT_PROVIDER_FROM_CONFIG)
-                assertThat(it.canLoginWithQrCode).isTrue()
+                assertThat(it.canLoginWithQrCode).isFalse()
                 assertThat(it.canCreateAccount).isFalse()
             }
+            cancelAndIgnoreRemainingEvents()
         }
     }
 

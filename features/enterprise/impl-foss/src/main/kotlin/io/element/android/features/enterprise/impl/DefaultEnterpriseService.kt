@@ -24,7 +24,10 @@ class DefaultEnterpriseService : EnterpriseService {
 
     override suspend fun isEnterpriseUser(sessionId: SessionId) = false
     override suspend fun tweakMasUrl(url: String, homeserver: String) = url
-    override fun defaultHomeserverList(): List<String> = emptyList()
+    // Force the embedded Neutrino homeserver as the only account provider.
+    // Plain localhost is correct because Neutrino runs in-process (not a separate
+    // host the emulator must reach), so this applies regardless of emulation.
+    override fun defaultHomeserverList(): List<String> = listOf("http://localhost:8008")
     override suspend fun isAllowedToConnectToHomeserver(homeserverUrl: String) = true
 
     override suspend fun overrideBrandColor(sessionId: SessionId?, brandColor: String?) = Unit

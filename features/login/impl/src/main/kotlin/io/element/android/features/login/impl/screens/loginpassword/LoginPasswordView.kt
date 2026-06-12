@@ -73,10 +73,14 @@ fun LoginPasswordView(
     state: LoginPasswordState,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
+    canNavigateBack: Boolean = true,
 ) {
     val autofillManager = LocalAutofillManager.current
 
-    BackHandler {
+    // When back navigation is disabled (forced embedded Neutrino, terminal login screen),
+    // do not consume the back press: it propagates up the (single-entry) back stack and
+    // exits the app, which is the default Android behaviour for a root screen.
+    BackHandler(enabled = canNavigateBack) {
         autofillManager?.cancel()
         onBackClick()
     }
@@ -103,10 +107,12 @@ fun LoginPasswordView(
             TopAppBar(
                 title = {},
                 navigationIcon = {
-                    BackButton(onClick = {
-                        autofillManager?.cancel()
-                        onBackClick()
-                    })
+                    if (canNavigateBack) {
+                        BackButton(onClick = {
+                            autofillManager?.cancel()
+                            onBackClick()
+                        })
+                    }
                 },
             )
         }
@@ -126,10 +132,7 @@ fun LoginPasswordView(
             IconTitleSubtitleMolecule(
                 modifier = Modifier.padding(top = 20.dp, start = 16.dp, end = 16.dp),
                 iconStyle = BigIcon.Style.Default(CompoundIcons.UserProfileSolid()),
-                title = stringResource(
-                    id = R.string.screen_account_provider_signin_title,
-                    state.accountProvider.title
-                ),
+                title = stringResource(id = R.string.screen_login_neutrino_title),
                 subTitle = stringResource(id = R.string.screen_login_subtitle)
             )
             Spacer(Modifier.height(40.dp))
