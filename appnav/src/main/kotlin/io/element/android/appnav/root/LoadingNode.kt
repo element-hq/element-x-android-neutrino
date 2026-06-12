@@ -22,8 +22,6 @@ import com.bumble.appyx.core.node.Node
 import com.bumble.appyx.core.node.node
 import io.element.android.appnav.R
 import io.element.android.compound.theme.ElementTheme
-import io.element.android.libraries.designsystem.preview.ElementPreview
-import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.CircularProgressIndicator
 import io.element.android.libraries.designsystem.theme.components.Text
 
@@ -56,10 +54,4 @@ private fun LoadingView(
         CircularProgressIndicator()
         Text(text = stringResource(id = R.string.screen_loading_neutrino))
     }
-}
-
-@PreviewsDayNight
-@Composable
-internal fun LoadingViewPreview() = ElementPreview {
-    LoadingView(Modifier)
 }
