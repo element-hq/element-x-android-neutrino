@@ -14,6 +14,7 @@ import com.android.build.gradle.tasks.GenerateBuildConfig
 import config.BuildTimeConfig
 import extension.AssetCopyTask
 import extension.GitBranchNameValueSource
+import extension.GitCommitCountValueSource
 import extension.GitRevisionValueSource
 import extension.allEnterpriseImpl
 import extension.allFeaturesImpl
@@ -33,8 +34,15 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+// Full version name: <app version>-r<build>+neutrino.<neutrino version>, e.g.
+// 26.05.2-r1234+neutrino.0.3.0. The build number is the git commit count; the Neutrino
+// version comes from the version catalog. Used for both versionName and the APK file name.
+val neutrinoVersion = libs.versions.neutrino.get()
+val buildNumber = providers.of(GitCommitCountValueSource::class.java) {}.get()
+val fullVersionName = "${Versions.VERSION_NAME}-r$buildNumber+neutrino.$neutrinoVersion"
+
 base {
-    archivesName = "element-x-android-neutrino-${libs.versions.neutrino.get()}"
+    archivesName = "element-x-android-neutrino-$fullVersionName"
 }
 
 android {
@@ -44,7 +52,7 @@ android {
         applicationId = BuildTimeConfig.APPLICATION_ID
         targetSdk = Versions.TARGET_SDK
         versionCode = Versions.VERSION_CODE
-        versionName = Versions.VERSION_NAME
+        versionName = fullVersionName
 
         // Keep abiFilter for the universalApk
         ndk {

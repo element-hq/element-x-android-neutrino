@@ -14,6 +14,7 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
 import io.element.android.libraries.di.annotations.ApplicationContext
+import io.element.android.services.neutrino.api.NetworkAddressProvider
 import io.element.android.services.neutrino.api.NeutrinoService
 import io.element.neutrino.NeutrinoHandle
 import timber.log.Timber
@@ -41,7 +42,9 @@ class DefaultNeutrinoService(
             handle = io.element.neutrino.start(io.element.neutrino.NeutrinoConfig(
                 serverName = endpoint.serverName,
                 bindAddr = endpoint.bindAddr,
-                localpart = "alice",
+                // The single forced user. The login flow auto-logs-in as this localpart
+                // (see LoginFlowNode's forced-provider path).
+                localpart = "n",
                 storageDir = context.filesDir.resolve("data").path,
                 outboundConcurrency = 4u,
             ))

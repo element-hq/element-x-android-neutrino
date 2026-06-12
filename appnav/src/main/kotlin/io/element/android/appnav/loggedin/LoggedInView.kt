@@ -15,14 +15,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.lifecycle.Lifecycle
 import io.element.android.appnav.R
 import io.element.android.libraries.architecture.AsyncData
 import io.element.android.libraries.designsystem.components.dialogs.ErrorDialog
 import io.element.android.libraries.designsystem.components.dialogs.ErrorDialogWithDoNotShowAgain
-import io.element.android.libraries.designsystem.preview.ElementPreview
-import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.utils.OnLifecycleEvent
 import io.element.android.libraries.matrix.api.exception.isNetworkError
 import io.element.android.libraries.push.api.PusherRegistrationFailure
@@ -114,14 +111,5 @@ private fun ForceNativeSlidingSyncMigrationDialog(
         submitText = stringResource(R.string.banner_migrate_to_native_sliding_sync_action),
         onSubmit = onSubmit,
         canDismiss = false,
-    )
-}
-
-@PreviewsDayNight
-@Composable
-internal fun LoggedInViewPreview(@PreviewParameter(LoggedInStateProvider::class) state: LoggedInState) = ElementPreview {
-    LoggedInView(
-        state = state,
-        navigateToNotificationTroubleshoot = {},
     )
 }

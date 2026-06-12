@@ -9,6 +9,7 @@
 package io.element.android.features.login.impl.screens.loginpassword
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -27,16 +28,21 @@ import io.element.android.libraries.matrix.api.core.SessionId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
+/** Placeholder password used for the automatic login against the embedded Neutrino server, which ignores it. */
+private const val AUTO_LOGIN_PASSWORD = "neutrino"
+
 @AssistedInject
 class LoginPasswordPresenter(
     @Assisted
     private val initialLogin: String,
+    @Assisted
+    private val autoSubmit: Boolean,
     private val authenticationService: MatrixAuthenticationService,
     private val accountProviderDataSource: AccountProviderDataSource,
 ) : Presenter<LoginPasswordState> {
     @AssistedFactory
     interface Factory {
-        fun create(initialLogin: String): LoginPasswordPresenter
+        fun create(initialLogin: String, autoSubmit: Boolean): LoginPasswordPresenter
     }
 
     @Composable
@@ -68,6 +74,19 @@ class LoginPasswordPresenter(
                     localCoroutineScope.submit(formState.value, loginAction)
                 }
                 LoginPasswordEvents.ClearError -> loginAction.value = AsyncData.Uninitialized
+            }
+        }
+
+        // Embedded Neutrino performs no authentication on the CS API, so when the flow
+        // requests it we log in automatically with the forced localpart and a placeholder
+        // password (the server ignores it). Runs once; on success the logged-in session
+        // observer advances the app. On failure the form is shown for a manual retry.
+        if (autoSubmit) {
+            LaunchedEffect(Unit) {
+                localCoroutineScope.submit(
+                    LoginFormState(login = initialLogin, password = AUTO_LOGIN_PASSWORD),
+                    loginAction,
+                )
             }
         }
 

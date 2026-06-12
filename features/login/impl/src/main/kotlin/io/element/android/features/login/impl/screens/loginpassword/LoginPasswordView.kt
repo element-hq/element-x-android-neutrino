@@ -42,7 +42,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
@@ -56,8 +55,6 @@ import io.element.android.libraries.designsystem.components.button.BackButton
 import io.element.android.libraries.designsystem.components.dialogs.ErrorDialog
 import io.element.android.libraries.designsystem.components.form.textFieldState
 import io.element.android.libraries.designsystem.modifiers.onTabOrEnterKeyFocusNext
-import io.element.android.libraries.designsystem.preview.ElementPreview
-import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.Button
 import io.element.android.libraries.designsystem.theme.components.Icon
 import io.element.android.libraries.designsystem.theme.components.Scaffold
@@ -73,10 +70,14 @@ fun LoginPasswordView(
     state: LoginPasswordState,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
+    canNavigateBack: Boolean = true,
 ) {
     val autofillManager = LocalAutofillManager.current
 
-    BackHandler {
+    // When back navigation is disabled (forced embedded Neutrino, terminal login screen),
+    // do not consume the back press: it propagates up the (single-entry) back stack and
+    // exits the app, which is the default Android behaviour for a root screen.
+    BackHandler(enabled = canNavigateBack) {
         autofillManager?.cancel()
         onBackClick()
     }
@@ -103,10 +104,12 @@ fun LoginPasswordView(
             TopAppBar(
                 title = {},
                 navigationIcon = {
-                    BackButton(onClick = {
-                        autofillManager?.cancel()
-                        onBackClick()
-                    })
+                    if (canNavigateBack) {
+                        BackButton(onClick = {
+                            autofillManager?.cancel()
+                            onBackClick()
+                        })
+                    }
                 },
             )
         }
@@ -126,10 +129,7 @@ fun LoginPasswordView(
             IconTitleSubtitleMolecule(
                 modifier = Modifier.padding(top = 20.dp, start = 16.dp, end = 16.dp),
                 iconStyle = BigIcon.Style.Default(CompoundIcons.UserProfileSolid()),
-                title = stringResource(
-                    id = R.string.screen_account_provider_signin_title,
-                    state.accountProvider.title
-                ),
+                title = stringResource(id = R.string.screen_login_neutrino_title),
                 subTitle = stringResource(id = R.string.screen_login_subtitle)
             )
             Spacer(Modifier.height(40.dp))
@@ -285,14 +285,5 @@ private fun LoginErrorDialog(error: Throwable, onDismiss: () -> Unit) {
         title = stringResource(id = CommonStrings.dialog_title_error),
         content = stringResource(loginError(error)),
         onSubmit = onDismiss
-    )
-}
-
-@PreviewsDayNight
-@Composable
-internal fun LoginPasswordViewPreview(@PreviewParameter(LoginPasswordStateProvider::class) state: LoginPasswordState) = ElementPreview {
-    LoginPasswordView(
-        state = state,
-        onBackClick = {},
     )
 }

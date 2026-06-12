@@ -156,10 +156,12 @@ class LoginPasswordPresenterTest {
 
     private fun createLoginPasswordPresenter(
         initialLogin: String = "",
+        autoSubmit: Boolean = false,
         authenticationService: FakeMatrixAuthenticationService = FakeMatrixAuthenticationService(),
         accountProviderDataSource: AccountProviderDataSource = AccountProviderDataSource(FakeEnterpriseService()),
     ): LoginPasswordPresenter = LoginPasswordPresenter(
         initialLogin = initialLogin,
+        autoSubmit = autoSubmit,
         authenticationService = authenticationService,
         accountProviderDataSource = accountProviderDataSource,
     )
