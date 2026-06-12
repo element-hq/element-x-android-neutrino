@@ -35,6 +35,19 @@ abstract class GitBranchNameValueSource : ValueSource<String, ValueSourceParamet
     }
 }
 
+/**
+ * Number of commits reachable from HEAD, used as a monotonic build number in the version name.
+ * Note: a shallow clone (e.g. CI with limited fetch depth) reports a truncated count.
+ */
+abstract class GitCommitCountValueSource : ValueSource<String, ValueSourceParameters.None> {
+    @get:Inject
+    abstract val execOperations: ExecOperations
+
+    override fun obtain(): String? {
+        return execOperations.runCommand("git rev-list --count HEAD")
+    }
+}
+
 private fun ExecOperations.runCommand(cmd: String): String {
     val outputStream = ByteArrayOutputStream()
     val errorStream = ByteArrayOutputStream()
