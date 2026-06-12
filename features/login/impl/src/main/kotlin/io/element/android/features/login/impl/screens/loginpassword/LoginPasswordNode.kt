@@ -30,10 +30,11 @@ class LoginPasswordNode(
     data class Inputs(
         val initialLogin: String,
         val canNavigateBack: Boolean,
+        val autoSubmit: Boolean,
     ) : NodeInputs
 
     private val inputs: Inputs = inputs()
-    private val presenter = presenterFactory.create(inputs.initialLogin)
+    private val presenter = presenterFactory.create(inputs.initialLogin, inputs.autoSubmit)
 
     @Composable
     override fun View(modifier: Modifier) {

@@ -41,7 +41,9 @@ class DefaultNeutrinoService(
             handle = io.element.neutrino.start(io.element.neutrino.NeutrinoConfig(
                 serverName = endpoint.serverName,
                 bindAddr = endpoint.bindAddr,
-                localpart = "alice",
+                // The single forced user. The login flow auto-logs-in as this localpart
+                // (see LoginFlowNode's forced-provider path).
+                localpart = "n",
                 storageDir = context.filesDir.resolve("data").path,
                 outboundConcurrency = 4u,
             ))

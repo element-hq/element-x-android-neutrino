@@ -40,6 +40,7 @@ import io.element.android.appnav.room.RoomNavigationTarget
 import io.element.android.appnav.root.RootNavStateFlowFactory
 import io.element.android.appnav.root.RootPresenter
 import io.element.android.appnav.root.RootView
+import io.element.android.appnav.root.loadingNode
 import io.element.android.features.announcement.api.AnnouncementService
 import io.element.android.features.login.api.LoginParams
 import io.element.android.features.login.api.accesscontrol.AccountProviderAccessControl
@@ -57,6 +58,7 @@ import io.element.android.libraries.deeplink.api.DeeplinkData
 import io.element.android.libraries.di.annotations.AppCoroutineScope
 import io.element.android.libraries.featureflag.api.FeatureFlagService
 import io.element.android.libraries.featureflag.api.FeatureFlags
+import io.element.android.libraries.matrix.api.auth.MatrixAuthenticationService
 import io.element.android.libraries.matrix.api.core.EventId
 import io.element.android.libraries.matrix.api.core.SessionId
 import io.element.android.libraries.matrix.api.core.ThreadId
@@ -82,6 +84,13 @@ import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import timber.log.Timber
 
+// The embedded Neutrino homeserver is reached over loopback and performs no
+// authentication on the CS API, so we log in headlessly with a fixed localpart and
+// skip the login UI entirely. The password is ignored by the server.
+private const val NEUTRINO_HOMESERVER_URL = "http://localhost:8008"
+private const val NEUTRINO_LOCALPART = "n"
+private const val NEUTRINO_AUTO_LOGIN_PASSWORD = "neutrino"
+
 @ContributesNode(AppScope::class)
 @AssistedInject
 class RootFlowNode(
@@ -102,6 +111,7 @@ class RootFlowNode(
     private val analyticsService: AnalyticsService,
     private val analyticsColdStartWatcher: AnalyticsColdStartWatcher,
     private val neutrinoService: NeutrinoService,
+    private val authenticationService: MatrixAuthenticationService,
     @AppCoroutineScope private val appCoroutineScope: CoroutineScope,
 ) : BaseFlowNode<RootFlowNode.NavTarget>(
     backstack = BackStack(
@@ -155,7 +165,7 @@ class RootFlowNode(
                         }
                     }
                     LoggedInState.NotLoggedIn -> {
-                        switchToNotLoggedInFlow(null)
+                        autoLoginToEmbeddedNeutrino()
                     }
                 }
             }
@@ -203,6 +213,26 @@ class RootFlowNode(
     private fun switchToNotLoggedInFlow(params: LoginParams?) {
         matrixSessionCache.removeAll()
         backstack.safeRoot(NavTarget.NotLoggedInFlow(params))
+    }
+
+    /**
+     * Headlessly log in to the embedded Neutrino homeserver so the user never sees the
+     * login UI. While this runs the splash screen stays up; on success the session write
+     * makes the nav-state flow re-emit [LoggedInState.LoggedIn], routing into the app.
+     *
+     * The embedded server is in-process and reached over loopback, so it is always
+     * reachable — there is no fallback. A failure is only logged for diagnosis.
+     */
+    private fun autoLoginToEmbeddedNeutrino() {
+        lifecycleScope.launch {
+            authenticationService.setHomeserver(NEUTRINO_HOMESERVER_URL)
+                .mapCatching {
+                    authenticationService.login(NEUTRINO_LOCALPART, NEUTRINO_AUTO_LOGIN_PASSWORD).getOrThrow()
+                }
+                .onFailure { error ->
+                    Timber.e(error, "Neutrino auto-login failed")
+                }
+        }
     }
 
     private fun switchToSignedOutFlow(sessionId: SessionId) {
@@ -339,7 +369,7 @@ class RootFlowNode(
                     ),
                 )
             }
-            NavTarget.SplashScreen -> emptyNode(buildContext)
+            NavTarget.SplashScreen -> loadingNode(buildContext)
             NavTarget.BugReport -> {
                 val callback = object : BugReportEntryPoint.Callback {
                     override fun onDone() {
