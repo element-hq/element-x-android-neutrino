@@ -56,7 +56,7 @@ class DefaultNeutrinoService(
         connectivityKicker = ConnectivityKicker(connectivityManager) {
             Timber.i("Connectivity regained; sending KickBackoff to Neutrino")
             handle?.kickBackoff()
-        }.also { it.register() }
+        }.apply { register() }
     }
 
     override fun isRunning(): Boolean {
