@@ -24,6 +24,7 @@ class DefaultEnterpriseService : EnterpriseService {
 
     override suspend fun isEnterpriseUser(sessionId: SessionId) = false
     override suspend fun tweakMasUrl(url: String, homeserver: String) = url
+
     // Force the embedded Neutrino homeserver as the only account provider.
     // Plain localhost is correct because Neutrino runs in-process (not a separate
     // host the emulator must reach), so this applies regardless of emulation.

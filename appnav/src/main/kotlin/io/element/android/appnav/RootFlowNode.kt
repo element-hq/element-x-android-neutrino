@@ -53,6 +53,7 @@ import io.element.android.libraries.architecture.BaseFlowNode
 import io.element.android.libraries.architecture.appyx.rememberDelegateTransitionHandler
 import io.element.android.libraries.architecture.createNode
 import io.element.android.libraries.architecture.waitForChildAttached
+import io.element.android.libraries.core.extensions.mapCatchingExceptions
 import io.element.android.libraries.core.uri.ensureProtocol
 import io.element.android.libraries.deeplink.api.DeeplinkData
 import io.element.android.libraries.di.annotations.AppCoroutineScope
@@ -226,7 +227,7 @@ class RootFlowNode(
     private fun autoLoginToEmbeddedNeutrino() {
         lifecycleScope.launch {
             authenticationService.setHomeserver(NEUTRINO_HOMESERVER_URL)
-                .mapCatching {
+                .mapCatchingExceptions {
                     authenticationService.login(NEUTRINO_LOCALPART, NEUTRINO_AUTO_LOGIN_PASSWORD).getOrThrow()
                 }
                 .onFailure { error ->
