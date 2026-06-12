@@ -34,7 +34,7 @@ plugins {
 }
 
 base {
-    archivesName = "element-x-android-neutrino"
+    archivesName = "element-x-android-neutrino-${libs.versions.neutrino.get()}"
 }
 
 android {
