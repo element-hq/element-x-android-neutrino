@@ -47,6 +47,9 @@ class DefaultNeutrinoService(
                 localpart = "n",
                 storageDir = context.filesDir.resolve("data").path,
                 outboundConcurrency = 4u,
+                // Run the in-process low-bandwidth (CoAP/UDP) federation sidecar on
+                // the federation port; null would mean direct federation instead.
+                lbFederationPort = NEUTRINO_FEDERATION_PORT.toUShort(),
             ))
         } catch (t: Throwable) {
             Timber.e(t, "Neutrino failed to start")
