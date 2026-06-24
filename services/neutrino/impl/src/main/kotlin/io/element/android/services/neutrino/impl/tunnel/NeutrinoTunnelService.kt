@@ -148,10 +148,9 @@ class NeutrinoTunnelService : VpnService() {
                     if (length < 0) {
                         break // EOF: fd closed.
                     }
-                    if (length == 0) {
-                        continue
+                    if (length > 0) {
+                        Timber.d("Neutrino tunnel tx: ${IpPacket.describe(buffer, length)}")
                     }
-                    Timber.d("Neutrino tunnel tx: ${IpPacket.describe(buffer, length)}")
                 }
             } catch (e: IOException) {
                 // Closing the fd in onDestroy unblocks read() with an IOException.

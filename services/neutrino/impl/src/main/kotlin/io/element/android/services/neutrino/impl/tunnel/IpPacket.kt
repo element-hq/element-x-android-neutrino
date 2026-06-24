@@ -32,7 +32,7 @@ internal object IpPacket {
 
     fun describe(buffer: ByteArray, length: Int): String {
         if (length < 1) return "empty packet"
-        return when (val version = (buffer[0].toInt() ushr 4) and 0x0F) {
+        return when (val version = buffer[0].toInt() ushr 4 and 0x0F) {
             4 -> describeIpv4(buffer, length)
             6 -> describeIpv6(buffer, length)
             else -> "unknown IP version $version ($length bytes)"
@@ -78,7 +78,7 @@ internal object IpPacket {
     }
 
     private fun u16(buffer: ByteArray, offset: Int): Int =
-        ((buffer[offset].toInt() and 0xFF) shl 8) or (buffer[offset + 1].toInt() and 0xFF)
+        buffer[offset].toInt() and 0xFF shl 8 or (buffer[offset + 1].toInt() and 0xFF)
 
     // The length guards in describeIpv4/describeIpv6 guarantee [size] is exactly 4
     // or 16 here, so InetAddress.getByAddress never throws UnknownHostException.

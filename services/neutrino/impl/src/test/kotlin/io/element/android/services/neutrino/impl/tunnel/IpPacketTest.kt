@@ -11,6 +11,9 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import java.net.InetAddress
 
+// Byte arrays are laid out as IP header rows (4 bytes per line with field comments) for
+// readability, so suppress argument-list-wrapping which would explode them one byte per line.
+@Suppress("ktlint:standard:argument-list-wrapping")
 class IpPacketTest {
     @Test
     fun `decodes an IPv4 UDP packet with ports`() {
