@@ -39,6 +39,7 @@ fun aDeveloperSettingsState(
     clearCacheAction: AsyncAction<Unit> = AsyncAction.Uninitialized,
     isEnterpriseBuild: Boolean = false,
     showColorPicker: Boolean = false,
+    packetTunnelEnabled: Boolean = false,
     eventSink: (DeveloperSettingsEvents) -> Unit = {},
 ) = DeveloperSettingsState(
     appDeveloperSettingsState = appDeveloperSettingsState,
@@ -47,5 +48,7 @@ fun aDeveloperSettingsState(
     clearCacheAction = clearCacheAction,
     isEnterpriseBuild = isEnterpriseBuild,
     showColorPicker = showColorPicker,
+    packetTunnelEnabled = packetTunnelEnabled,
+    packetTunnelConsentIntent = null,
     eventSink = eventSink,
 )

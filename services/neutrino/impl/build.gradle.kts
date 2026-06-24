@@ -23,6 +23,7 @@ dependencies {
     implementation(projects.libraries.androidutils)
     implementation(projects.libraries.core)
     implementation(projects.libraries.di)
+    implementation(libs.androidx.corektx)
 
     api(projects.services.neutrino.api)
     implementation(libs.neutrino)
