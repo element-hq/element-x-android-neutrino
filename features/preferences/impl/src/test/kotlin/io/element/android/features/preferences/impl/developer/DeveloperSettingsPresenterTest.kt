@@ -161,6 +161,16 @@ class DeveloperSettingsPresenterTest {
     }
 
     @Test
+    fun `present - packet tunnel toggle reflects the already-running tunnel on entry`() = runTest {
+        val neutrinoTunnel = FakeNeutrinoTunnel(initiallyRunning = true)
+        val presenter = createDeveloperSettingsPresenter(neutrinoTunnel = neutrinoTunnel)
+        presenter.test {
+            assertThat(awaitItem().packetTunnelEnabled).isTrue()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
     fun `present - disabling packet tunnel stops it`() = runTest {
         val neutrinoTunnel = FakeNeutrinoTunnel(consentIntentResult = null)
         val presenter = createDeveloperSettingsPresenter(neutrinoTunnel = neutrinoTunnel)

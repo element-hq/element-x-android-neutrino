@@ -35,6 +35,13 @@ import java.io.IOException
  */
 class NeutrinoTunnelService : VpnService() {
     companion object {
+        // Whether the tunnel is currently established. Process-global (the VPN cannot
+        // outlive the process), so it is a safe source of truth for the UI to read
+        // back on screen (re)entry. Set true once the interface is up, false on teardown.
+        @Volatile
+        var isActive: Boolean = false
+            private set
+
         private const val NOTIFICATION_CHANNEL_ID = "neutrino_tunnel_channel"
 
         // Must be non-zero for startForeground.
@@ -56,12 +63,21 @@ class NeutrinoTunnelService : VpnService() {
         // the buffer well above the MTU to avoid truncating a read.
         private const val READ_BUFFER_SIZE = 32_767
 
+        private const val ACTION_STOP = "io.element.android.services.neutrino.impl.tunnel.STOP"
+
         fun start(context: Context) {
             ContextCompat.startForegroundService(context, Intent(context, NeutrinoTunnelService::class.java))
         }
 
         fun stop(context: Context) {
-            context.stopService(Intent(context, NeutrinoTunnelService::class.java))
+            // Deliver an explicit stop command so the running instance closes its TUN
+            // fd itself. The system binds to an established VpnService, so a plain
+            // stopService() does not reach onDestroy until the fd is closed — so close
+            // it from onStartCommand, which is reliably invoked.
+            ContextCompat.startForegroundService(
+                context,
+                Intent(context, NeutrinoTunnelService::class.java).apply { action = ACTION_STOP },
+            )
         }
     }
 
@@ -76,6 +92,12 @@ class NeutrinoTunnelService : VpnService() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (intent?.action == ACTION_STOP) {
+            Timber.i("Neutrino tunnel: stop requested")
+            teardown()
+            stopSelf()
+            return START_NOT_STICKY
+        }
         establishTunnel()
         return START_NOT_STICKY
     }
@@ -106,6 +128,7 @@ class NeutrinoTunnelService : VpnService() {
             return
         }
         tunInterface = pfd
+        isActive = true
         Timber.i("Neutrino tunnel established: fd=${pfd.fd}, mtu=$TUN_MTU, app=$packageName")
         startReadLoop(pfd)
     }
@@ -146,14 +169,21 @@ class NeutrinoTunnelService : VpnService() {
     }
 
     override fun onDestroy() {
+        teardown()
+        super.onDestroy()
+    }
+
+    // Idempotent: invoked from the explicit stop command and again from onDestroy.
+    private fun teardown() {
+        isActive = false
         running = false
-        // Closing the descriptor unblocks the read loop; the thread then exits.
+        // Closing the descriptor tears down the VPN interface (removing the system VPN)
+        // and unblocks the read loop; the thread then exits.
         runCatchingExceptions { tunInterface?.close() }
         readThread?.interrupt()
         tunInterface = null
         readThread = null
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
-        super.onDestroy()
     }
 
     private fun startForeground() {

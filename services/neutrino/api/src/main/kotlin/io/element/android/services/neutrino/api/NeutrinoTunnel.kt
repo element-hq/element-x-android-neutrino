@@ -37,4 +37,7 @@ interface NeutrinoTunnel {
 
     /** Stop the tunnel foreground service. */
     fun stop()
+
+    /** Whether the tunnel is currently established. */
+    fun isRunning(): Boolean
 }

@@ -27,4 +27,6 @@ class DefaultNeutrinoTunnel(
     override fun start() = NeutrinoTunnelService.start(context)
 
     override fun stop() = NeutrinoTunnelService.stop(context)
+
+    override fun isRunning(): Boolean = NeutrinoTunnelService.isActive
 }

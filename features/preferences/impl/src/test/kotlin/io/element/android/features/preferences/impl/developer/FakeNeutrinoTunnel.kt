@@ -12,19 +12,25 @@ import io.element.android.services.neutrino.api.NeutrinoTunnel
 
 class FakeNeutrinoTunnel(
     private val consentIntentResult: Intent? = null,
+    initiallyRunning: Boolean = false,
 ) : NeutrinoTunnel {
     var startCount = 0
         private set
     var stopCount = 0
         private set
+    private var running = initiallyRunning
 
     override fun consentIntent(): Intent? = consentIntentResult
 
     override fun start() {
         startCount++
+        running = true
     }
 
     override fun stop() {
         stopCount++
+        running = false
     }
+
+    override fun isRunning(): Boolean = running
 }

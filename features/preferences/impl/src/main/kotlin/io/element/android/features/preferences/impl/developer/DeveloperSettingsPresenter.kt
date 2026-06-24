@@ -64,8 +64,10 @@ class DeveloperSettingsPresenter(
         var showColorPicker by remember {
             mutableStateOf(false)
         }
+        // Initialise from the actual tunnel state so the toggle reflects reality on
+        // (re)entry, rather than a presenter-local flag that resets to false.
         var packetTunnelEnabled by remember {
-            mutableStateOf(false)
+            mutableStateOf(neutrinoTunnel.isRunning())
         }
         var packetTunnelConsentIntent by remember {
             mutableStateOf<Intent?>(null)
