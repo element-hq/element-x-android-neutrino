@@ -4,6 +4,11 @@
 
 ---
 
+## Running in a sandbox
+
+You are running in a sandbox unless told otherwise.
+Builds/tests Android projects OFFLINE. Host SDK + Gradle caches are mounted read-only. Use './gradlew --offline testDebugUnitTest' for unit tests, './gradlew --offline assembleDebug' to build, './gradlew --offline lintDebug' for lint. Instrumented tests (connectedAndroidTest) are NOT supported — no device/KVM.
+
 ## Strong Conventions
 
 PRs must meet these rules.
