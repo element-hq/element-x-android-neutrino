@@ -27,6 +27,7 @@ import io.element.android.libraries.matrix.api.analytics.SdkStoreSizes
 import io.element.android.libraries.matrix.api.core.SessionId
 import io.element.android.libraries.matrix.test.A_SESSION_ID
 import io.element.android.tests.testutils.WarmUpRule
+import io.element.android.tests.testutils.consumeItemsUntilPredicate
 import io.element.android.tests.testutils.lambda.lambdaRecorder
 import io.element.android.tests.testutils.lambda.value
 import io.element.android.tests.testutils.test
@@ -144,6 +145,48 @@ class DeveloperSettingsPresenterTest {
         }
     }
 
+    @Test
+    fun `present - enabling packet tunnel with consent already granted starts it`() = runTest {
+        val neutrinoTunnel = FakeNeutrinoTunnel(consentIntentResult = null)
+        val presenter = createDeveloperSettingsPresenter(neutrinoTunnel = neutrinoTunnel)
+        presenter.test {
+            val initialState = consumeItemsUntilPredicate { !it.packetTunnelEnabled }.last()
+            initialState.eventSink(DeveloperSettingsEvents.SetPacketTunnelEnabled(true))
+            val enabledState = consumeItemsUntilPredicate { it.packetTunnelEnabled }.last()
+            assertThat(enabledState.packetTunnelEnabled).isTrue()
+            assertThat(enabledState.packetTunnelConsentIntent).isNull()
+            assertThat(neutrinoTunnel.startCount).isEqualTo(1)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `present - packet tunnel toggle reflects the already-running tunnel on entry`() = runTest {
+        val neutrinoTunnel = FakeNeutrinoTunnel(initiallyRunning = true)
+        val presenter = createDeveloperSettingsPresenter(neutrinoTunnel = neutrinoTunnel)
+        presenter.test {
+            assertThat(awaitItem().packetTunnelEnabled).isTrue()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `present - disabling packet tunnel stops it`() = runTest {
+        val neutrinoTunnel = FakeNeutrinoTunnel(consentIntentResult = null)
+        val presenter = createDeveloperSettingsPresenter(neutrinoTunnel = neutrinoTunnel)
+        presenter.test {
+            val initialState = consumeItemsUntilPredicate { !it.packetTunnelEnabled }.last()
+            initialState.eventSink(DeveloperSettingsEvents.SetPacketTunnelEnabled(true))
+            consumeItemsUntilPredicate { it.packetTunnelEnabled }
+                .last()
+                .eventSink(DeveloperSettingsEvents.SetPacketTunnelEnabled(false))
+            val disabledState = consumeItemsUntilPredicate { !it.packetTunnelEnabled }.last()
+            assertThat(disabledState.packetTunnelEnabled).isFalse()
+            assertThat(neutrinoTunnel.stopCount).isEqualTo(1)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     private fun createDeveloperSettingsPresenter(
         sessionId: SessionId = A_SESSION_ID,
         cacheSizeUseCase: FakeComputeCacheSizeUseCase = FakeComputeCacheSizeUseCase(),
@@ -151,6 +194,7 @@ class DeveloperSettingsPresenterTest {
         enterpriseService: EnterpriseService = FakeEnterpriseService(),
         vacuumStoresUseCase: VacuumStoresUseCase = VacuumStoresUseCase {},
         databaseSizesUseCase: GetDatabaseSizesUseCase = GetDatabaseSizesUseCase { Result.success(SdkStoreSizes(null, null, null, null)) },
+        neutrinoTunnel: FakeNeutrinoTunnel = FakeNeutrinoTunnel(),
     ): DeveloperSettingsPresenter {
         return DeveloperSettingsPresenter(
             appDeveloperSettingsPresenter = { anAppDeveloperSettingsState() },
@@ -161,6 +205,7 @@ class DeveloperSettingsPresenterTest {
             vacuumStoresUseCase = vacuumStoresUseCase,
             databaseSizesUseCase = databaseSizesUseCase,
             fileSizeFormatter = FakeFileSizeFormatter(),
+            neutrinoTunnel = neutrinoTunnel,
         )
     }
 }

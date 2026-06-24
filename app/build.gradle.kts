@@ -38,7 +38,9 @@ plugins {
 // 26.05.2-r1234+neutrino.0.3.0. The build number is the git commit count; the Neutrino
 // version comes from the version catalog. Used for both versionName and the APK file name.
 val neutrinoVersion = libs.versions.neutrino.get()
-val buildNumber = providers.of(GitCommitCountValueSource::class.java) {}.get()
+val buildNumber = providers.of(GitCommitCountValueSource::class.java) {
+    parameters.workingDir.set(rootProject.layout.projectDirectory)
+}.get()
 val fullVersionName = "${Versions.VERSION_NAME}-r$buildNumber+neutrino.$neutrinoVersion"
 
 base {
@@ -255,8 +257,12 @@ dependencies {
 
 tasks.withType<GenerateBuildConfig>().configureEach {
     outputs.upToDateWhen { false }
-    val gitRevision = providers.of(GitRevisionValueSource::class.java) {}.get()
-    val gitBranchName = providers.of(GitBranchNameValueSource::class.java) {}.get()
+    val gitRevision = providers.of(GitRevisionValueSource::class.java) {
+        parameters.workingDir.set(rootProject.layout.projectDirectory)
+    }.get()
+    val gitBranchName = providers.of(GitBranchNameValueSource::class.java) {
+        parameters.workingDir.set(rootProject.layout.projectDirectory)
+    }.get()
     android.defaultConfig.buildConfigFieldStr("GIT_REVISION", gitRevision)
     android.defaultConfig.buildConfigFieldStr("GIT_BRANCH_NAME", gitBranchName)
 }

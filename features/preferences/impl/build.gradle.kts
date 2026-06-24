@@ -84,6 +84,7 @@ dependencies {
     implementation(projects.services.analytics.api)
     implementation(projects.services.analytics.compose)
     implementation(projects.services.appnavstate.api)
+    implementation(projects.services.neutrino.api)
     implementation(projects.services.toolbox.api)
     implementation(libs.datetime)
     implementation(libs.coil.compose)
