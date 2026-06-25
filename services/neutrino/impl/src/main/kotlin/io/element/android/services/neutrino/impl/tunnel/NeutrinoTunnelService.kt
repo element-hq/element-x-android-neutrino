@@ -12,28 +12,39 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.net.VpnService
 import android.os.Build
-import android.os.ParcelFileDescriptor
+import android.system.Os
+import android.system.OsConstants
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
+import dev.zacsweers.metro.Inject
+import io.element.android.libraries.architecture.bindings
 import io.element.android.libraries.core.extensions.runCatchingExceptions
+import io.element.android.services.neutrino.api.NeutrinoService
 import timber.log.Timber
-import java.io.FileInputStream
-import java.io.IOException
 
 /**
  * A [VpnService] that opens a TUN interface, restricts it to *this application's*
- * traffic, and logs every IP packet the OS routes into the TUN.
+ * traffic, and hands the TUN file descriptor to the embedded Neutrino homeserver,
+ * which reads and logs every IP packet the OS routes into the TUN.
  *
  * Nothing is forwarded yet: this is the capture-and-log spike that precedes wiring
  * up a transport (BLE) and the embedded Neutrino homeserver. Only traffic this app
  * sends to the virtual TUN subnet ([TUN_SUBNET_IPV4] / [TUN_SUBNET_IPV6]) is routed
  * into the TUN (and dropped); every other destination bypasses it, so the app keeps
  * normal connectivity.
+ *
+ * The packet read loop lives in native code (the `neutrino` library): we transfer
+ * ownership of the fd to it via [NeutrinoService.attachTunnel] and it owns the fd
+ * from then on, closing it (and so tearing down the TUN interface) on
+ * [NeutrinoService.detachTunnel] or when the homeserver stops.
  */
 class NeutrinoTunnelService : VpnService() {
+    @Inject
+    lateinit var neutrinoService: NeutrinoService
+
     companion object {
         // Whether the tunnel is currently established. Process-global (the VPN cannot
         // outlive the process), so it is a safe source of truth for the UI to read
@@ -58,11 +69,6 @@ class NeutrinoTunnelService : VpnService() {
         private const val TUN_SUBNET_IPV6 = "fd00::"
         private const val TUN_MTU = 1280
 
-        // Generous upper bound for a single read; TUN packets are MTU-bounded in
-        // practice, but the kernel may hand up larger frames (e.g. GRO), so size
-        // the buffer well above the MTU to avoid truncating a read.
-        private const val READ_BUFFER_SIZE = 32_767
-
         private const val ACTION_STOP = "io.element.android.services.neutrino.impl.tunnel.STOP"
 
         fun start(context: Context) {
@@ -81,13 +87,15 @@ class NeutrinoTunnelService : VpnService() {
         }
     }
 
+    // Guards against re-establishing on a redundant onStartCommand within this
+    // instance. Ownership of the fd is transferred to native code, so the service
+    // does not retain the ParcelFileDescriptor.
     @Volatile
-    private var running = false
-    private var tunInterface: ParcelFileDescriptor? = null
-    private var readThread: Thread? = null
+    private var tunnelStarted = false
 
     override fun onCreate() {
         super.onCreate()
+        bindings<NeutrinoTunnelServiceBindings>().inject(this)
         startForeground()
     }
 
@@ -103,7 +111,7 @@ class NeutrinoTunnelService : VpnService() {
     }
 
     private fun establishTunnel() {
-        if (tunInterface != null) {
+        if (tunnelStarted) {
             return
         }
         val builder = Builder()
@@ -127,38 +135,27 @@ class NeutrinoTunnelService : VpnService() {
             stopSelf()
             return
         }
-        tunInterface = pfd
-        isActive = true
-        Timber.i("Neutrino tunnel established: fd=${pfd.fd}, mtu=$TUN_MTU, app=$packageName")
-        startReadLoop(pfd)
-    }
-
-    private fun startReadLoop(pfd: ParcelFileDescriptor) {
-        running = true
-        readThread = Thread({ readLoop(pfd) }, "neutrino-tun-read").apply { start() }
-    }
-
-    private fun readLoop(pfd: ParcelFileDescriptor) {
-        val buffer = ByteArray(READ_BUFFER_SIZE)
-        // Reading the fd yields the IP packets this app sends to the virtual subnet.
-        FileInputStream(pfd.fileDescriptor).use { input ->
-            try {
-                while (running) {
-                    val length = input.read(buffer)
-                    if (length < 0) {
-                        break // EOF: fd closed.
-                    }
-                    if (length > 0) {
-                        Timber.d("Neutrino tunnel tx: ${IpPacket.describe(buffer, length)}")
-                    }
-                }
-            } catch (e: IOException) {
-                // Closing the fd in onDestroy unblocks read() with an IOException.
-                if (running) {
-                    Timber.w(e, "Neutrino tunnel: read loop ended unexpectedly")
-                }
-            }
+        // The native reader registers the fd with the tokio reactor, which requires
+        // it to be non-blocking. Set O_NONBLOCK while we still own the descriptor.
+        val nonBlocking = runCatchingExceptions {
+            val flags = Os.fcntlInt(pfd.fileDescriptor, OsConstants.F_GETFL, 0)
+            Os.fcntlInt(pfd.fileDescriptor, OsConstants.F_SETFL, flags or OsConstants.O_NONBLOCK)
+        }.onFailure {
+            Timber.e(it, "Neutrino tunnel: failed to set O_NONBLOCK; not starting tunnel")
+        }.isSuccess
+        if (!nonBlocking) {
+            pfd.close()
+            stopSelf()
+            return
         }
+        // Transfer ownership of the fd to native code: it reads + logs packets and
+        // closes the fd on teardown. After detachFd the ParcelFileDescriptor is spent,
+        // so we do not retain or close it here.
+        val fd = pfd.detachFd()
+        tunnelStarted = true
+        isActive = true
+        Timber.i("Neutrino tunnel established: fd=$fd, mtu=$TUN_MTU, app=$packageName")
+        neutrinoService.attachTunnel(fd, TUN_MTU)
     }
 
     override fun onRevoke() {
@@ -175,13 +172,11 @@ class NeutrinoTunnelService : VpnService() {
     // Idempotent: invoked from the explicit stop command and again from onDestroy.
     private fun teardown() {
         isActive = false
-        running = false
-        // Closing the descriptor tears down the VPN interface (removing the system VPN)
-        // and unblocks the read loop; the thread then exits.
-        runCatchingExceptions { tunInterface?.close() }
-        readThread?.interrupt()
-        tunInterface = null
-        readThread = null
+        tunnelStarted = false
+        // Native code owns the fd: detaching it aborts the reader, which closes the
+        // fd and so tears down the VPN interface (removing the system VPN). Idempotent
+        // on the native side when nothing is attached.
+        neutrinoService.detachTunnel()
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
     }
 

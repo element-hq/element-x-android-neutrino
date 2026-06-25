@@ -9,6 +9,7 @@ package io.element.android.services.neutrino.impl
 
 import android.content.Context
 import android.net.ConnectivityManager
+import android.os.ParcelFileDescriptor
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
@@ -67,5 +68,22 @@ class DefaultNeutrinoService(
 
     override fun isRunning(): Boolean {
         return handle != null
+    }
+
+    override fun attachTunnel(tunFd: Int, mtu: Int) {
+        val handle = handle
+        if (handle == null) {
+            // Tun requires a running homeserver. Don't leak the fd the caller handed
+            // us ownership of: adopt it and close it. (adoptFd takes ownership, so
+            // close() releases the kernel fd.)
+            Timber.w("Neutrino tunnel attach requested but server is not running; closing fd")
+            ParcelFileDescriptor.adoptFd(tunFd).close()
+            return
+        }
+        handle.startTunnel(tunFd, mtu.toUInt())
+    }
+
+    override fun detachTunnel() {
+        handle?.stopTunnel()
     }
 }
