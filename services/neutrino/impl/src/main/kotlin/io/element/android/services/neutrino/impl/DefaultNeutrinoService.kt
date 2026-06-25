@@ -80,7 +80,35 @@ class DefaultNeutrinoService(
             ParcelFileDescriptor.adoptFd(tunFd).close()
             return
         }
+        // Bring the BLE backend up before handing over the fd: in P3 the native
+        // tunnel reader becomes the iroh-over-BLE relay, so blew must be ready
+        // first. Today the reader only logs packets, so this is inert but harmless.
+        initBleNativeOnce()
         handle.startTunnel(tunFd, mtu.toUInt())
+    }
+
+    // Bootstrap blew's Android backend once, replicating what its Tauri
+    // `BlewPlugin.load()` does (we don't use the Tauri plugin):
+    //  1. NativeBle.initialise — registers the JavaVM + app Context with native
+    //     `ndk_context` and runs `init_jvm` (caches the manager classes).
+    //  2. BleCentralManager/BlePeripheralManager.init(context) — hands the app
+    //     Context to the Kotlin managers, which their static
+    //     `areBlePermissionsGranted()` reads; without this the permission check
+    //     runs against a null context and fails even when perms are granted.
+    // Failures are logged, not fatal — the tunnel does not depend on BLE.
+    private var bleNativeInitialised = false
+
+    private fun initBleNativeOnce() {
+        if (bleNativeInitialised) return
+        try {
+            val appContext = context.applicationContext
+            io.element.neutrino.NativeBle.initialise(appContext)
+            org.jakebot.blew.BleCentralManager.init(appContext)
+            org.jakebot.blew.BlePeripheralManager.init(appContext)
+            bleNativeInitialised = true
+        } catch (t: Throwable) {
+            Timber.e(t, "BLE native init failed")
+        }
     }
 
     override fun detachTunnel() {

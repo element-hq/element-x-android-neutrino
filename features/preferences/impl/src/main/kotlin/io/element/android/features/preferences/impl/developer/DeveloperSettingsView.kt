@@ -8,7 +8,9 @@
 
 package io.element.android.features.preferences.impl.developer
 
+import android.Manifest
 import android.app.Activity
+import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -59,6 +61,12 @@ fun DeveloperSettingsView(
     LaunchedEffect(state.packetTunnelConsentIntent) {
         state.packetTunnelConsentIntent?.let { packetTunnelConsentLauncher.launch(it) }
     }
+    // The embedded server's BLE federation transport needs the runtime Bluetooth
+    // permissions (Android 12+). Requested when the tunnel is enabled; results are
+    // observed via the native BLE smoke test's logcat output.
+    val blePermissionsLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { /* no-op: granted perms take effect on the next BLE attempt */ }
     BackHandler(
         enabled = !state.showLoader,
         onBack = onBackClick,
@@ -91,7 +99,17 @@ fun DeveloperSettingsView(
                     checked = state.packetTunnelEnabled,
                 ),
                 onClick = {
-                    state.eventSink(DeveloperSettingsEvents.SetPacketTunnelEnabled(!state.packetTunnelEnabled))
+                    val enabling = !state.packetTunnelEnabled
+                    if (enabling && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        blePermissionsLauncher.launch(
+                            arrayOf(
+                                Manifest.permission.BLUETOOTH_SCAN,
+                                Manifest.permission.BLUETOOTH_CONNECT,
+                                Manifest.permission.BLUETOOTH_ADVERTISE,
+                            )
+                        )
+                    }
+                    state.eventSink(DeveloperSettingsEvents.SetPacketTunnelEnabled(enabling))
                 }
             )
         }
