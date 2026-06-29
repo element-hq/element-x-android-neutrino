@@ -8,17 +8,11 @@
 
 package io.element.android.features.preferences.impl.developer
 
-import android.Manifest
-import android.app.Activity
-import android.os.Build
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.progressSemantics
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -51,22 +45,6 @@ fun DeveloperSettingsView(
     if (state.showLoader) {
         ProgressDialog()
     }
-    // The packet tunnel needs system VPN consent before it can start. When the
-    // presenter surfaces a consent Intent, launch it and report the result back.
-    val packetTunnelConsentLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        state.eventSink(DeveloperSettingsEvents.OnPacketTunnelConsentResult(result.resultCode == Activity.RESULT_OK))
-    }
-    LaunchedEffect(state.packetTunnelConsentIntent) {
-        state.packetTunnelConsentIntent?.let { packetTunnelConsentLauncher.launch(it) }
-    }
-    // The embedded server's BLE federation transport needs the runtime Bluetooth
-    // permissions (Android 12+). Requested when the tunnel is enabled; results are
-    // observed via the native BLE smoke test's logcat output.
-    val blePermissionsLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { /* no-op: granted perms take effect on the next BLE attempt */ }
     BackHandler(
         enabled = !state.showLoader,
         onBack = onBackClick,
@@ -90,27 +68,11 @@ fun DeveloperSettingsView(
         PreferenceCategory(title = "Neutrino") {
             ListItem(
                 headlineContent = {
-                    Text("Packet tunnel")
+                    Text("Server name")
                 },
                 supportingContent = {
-                    Text("Capture this app's traffic to the virtual subnet over a TUN interface (logs packets only)")
+                    Text(state.neutrinoServerName ?: "Starting…")
                 },
-                trailingContent = ListItemContent.Switch(
-                    checked = state.packetTunnelEnabled,
-                ),
-                onClick = {
-                    val enabling = !state.packetTunnelEnabled
-                    if (enabling && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        blePermissionsLauncher.launch(
-                            arrayOf(
-                                Manifest.permission.BLUETOOTH_SCAN,
-                                Manifest.permission.BLUETOOTH_CONNECT,
-                                Manifest.permission.BLUETOOTH_ADVERTISE,
-                            )
-                        )
-                    }
-                    state.eventSink(DeveloperSettingsEvents.SetPacketTunnelEnabled(enabling))
-                }
             )
         }
 

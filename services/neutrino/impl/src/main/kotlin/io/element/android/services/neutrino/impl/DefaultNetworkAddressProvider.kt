@@ -18,7 +18,7 @@ import java.net.NetworkInterface
 /**
  * Enumerates the live, non-loopback network interfaces. Requires no permission.
  * Any [java.net.SocketException] from a transient interface query collapses to an
- * empty list, which [serverIdentity] treats as "offline" (loopback fallback).
+ * empty list, which [selectBindAddr] treats as "offline" (loopback fallback).
  */
 @ContributesBinding(AppScope::class, binding = binding<NetworkAddressProvider>())
 class DefaultNetworkAddressProvider : NetworkAddressProvider {

@@ -39,7 +39,7 @@ fun aDeveloperSettingsState(
     clearCacheAction: AsyncAction<Unit> = AsyncAction.Uninitialized,
     isEnterpriseBuild: Boolean = false,
     showColorPicker: Boolean = false,
-    packetTunnelEnabled: Boolean = false,
+    neutrinoServerName: String? = "a1b2c3d4e5f6",
     eventSink: (DeveloperSettingsEvents) -> Unit = {},
 ) = DeveloperSettingsState(
     appDeveloperSettingsState = appDeveloperSettingsState,
@@ -48,7 +48,6 @@ fun aDeveloperSettingsState(
     clearCacheAction = clearCacheAction,
     isEnterpriseBuild = isEnterpriseBuild,
     showColorPicker = showColorPicker,
-    packetTunnelEnabled = packetTunnelEnabled,
-    packetTunnelConsentIntent = null,
+    neutrinoServerName = neutrinoServerName,
     eventSink = eventSink,
 )

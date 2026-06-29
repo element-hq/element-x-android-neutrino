@@ -1,0 +1,20 @@
+/*
+ * Copyright (c) 2026 Element Creations Ltd.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Element-Commercial.
+ * Please see LICENSE files in the repository root for full details.
+ */
+
+package io.element.android.features.preferences.impl.developer
+
+import io.element.android.services.neutrino.api.NeutrinoService
+
+class FakeNeutrinoService(
+    private val serverNameResult: String? = "a1b2c3d4",
+) : NeutrinoService {
+    override fun start() = Unit
+
+    override fun isRunning(): Boolean = false
+
+    override fun serverName(): String? = serverNameResult
+}

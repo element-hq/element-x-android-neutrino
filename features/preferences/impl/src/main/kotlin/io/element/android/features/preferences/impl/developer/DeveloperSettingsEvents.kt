@@ -15,6 +15,4 @@ sealed interface DeveloperSettingsEvents {
     data class ChangeBrandColor(val color: Color?) : DeveloperSettingsEvents
     data object ClearCache : DeveloperSettingsEvents
     data object VacuumStores : DeveloperSettingsEvents
-    data class SetPacketTunnelEnabled(val enabled: Boolean) : DeveloperSettingsEvents
-    data class OnPacketTunnelConsentResult(val granted: Boolean) : DeveloperSettingsEvents
 }

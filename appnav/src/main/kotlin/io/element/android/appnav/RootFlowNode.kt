@@ -77,8 +77,10 @@ import io.element.android.services.analytics.api.watchers.AnalyticsColdStartWatc
 import io.element.android.services.appnavstate.api.ROOM_OPENED_FROM_NOTIFICATION
 import io.element.android.services.neutrino.api.NeutrinoService
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -122,11 +124,20 @@ class RootFlowNode(
     buildContext = buildContext,
     plugins = plugins
 ) {
+    // Flipped to true by the startup splash ([loadingNode]) once the BLE runtime
+    // permissions are granted. The embedded server binds its iroh-over-BLE
+    // federation transport on start, so we must not start it — nor route past the
+    // splash — until those permissions are in hand (a hard gate).
+    private val neutrinoPermissionsGranted = MutableStateFlow(false)
+
     override fun onBuilt() {
         analyticsColdStartWatcher.start()
-        neutrinoService.start()
         appCoroutineScope.launch {
             matrixSessionCache.restoreWithSavedState(buildContext.savedStateMap)
+            // Hard gate: stay on the splash until BLE permissions are granted, then
+            // start the embedded homeserver before routing anywhere.
+            neutrinoPermissionsGranted.first { it }
+            neutrinoService.start()
             if (buildContext.savedStateMap != null) {
                 restoreSavedState(buildContext.savedStateMap)
                 observeNavState(true)
@@ -370,7 +381,9 @@ class RootFlowNode(
                     ),
                 )
             }
-            NavTarget.SplashScreen -> loadingNode(buildContext)
+            NavTarget.SplashScreen -> loadingNode(buildContext) {
+                neutrinoPermissionsGranted.value = true
+            }
             NavTarget.BugReport -> {
                 val callback = object : BugReportEntryPoint.Callback {
                     override fun onDone() {

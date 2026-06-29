@@ -9,7 +9,6 @@ package io.element.android.services.neutrino.impl
 
 import android.content.Context
 import android.net.ConnectivityManager
-import android.os.ParcelFileDescriptor
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
@@ -37,12 +36,18 @@ class DefaultNeutrinoService(
             return
         }
         val host = selectLanServerHost(networkAddressProvider.currentAddresses())
-        val endpoint = serverIdentity(host)
-        Timber.i("Starting embedded Neutrino server as ${endpoint.serverName} (bind ${endpoint.bindAddr})")
+        val bindAddr = selectBindAddr(host)
+        Timber.i("Starting embedded Neutrino server (bind $bindAddr)")
+        // Bring the BLE backend up before starting the server: the server binds its
+        // iroh-over-BLE federation transport during start, so blew must be
+        // initialised first. The caller (the startup splash) has already gated this
+        // on the BLE runtime permissions being granted.
+        initBleNativeOnce()
         try {
             handle = io.element.neutrino.start(io.element.neutrino.NeutrinoConfig(
-                serverName = endpoint.serverName,
-                bindAddr = endpoint.bindAddr,
+                // server_name is no longer supplied: the homeserver derives it from
+                // its node identity and reports it back via handle.serverName().
+                bindAddr = bindAddr,
                 // The single forced user. The login flow auto-logs-in as this localpart
                 // (see LoginFlowNode's forced-provider path).
                 localpart = "n",
@@ -56,6 +61,7 @@ class DefaultNeutrinoService(
             Timber.e(t, "Neutrino failed to start")
             return
         }
+        Timber.i("Neutrino server started as ${handle?.serverName()}")
         // The server is up. Reset its outbound federation backoff whenever the
         // device regains connectivity, so a returning-online device reconnects
         // promptly instead of waiting out a long backoff.
@@ -70,22 +76,7 @@ class DefaultNeutrinoService(
         return handle != null
     }
 
-    override fun attachTunnel(tunFd: Int, mtu: Int) {
-        val handle = handle
-        if (handle == null) {
-            // Tun requires a running homeserver. Don't leak the fd the caller handed
-            // us ownership of: adopt it and close it. (adoptFd takes ownership, so
-            // close() releases the kernel fd.)
-            Timber.w("Neutrino tunnel attach requested but server is not running; closing fd")
-            ParcelFileDescriptor.adoptFd(tunFd).close()
-            return
-        }
-        // Bring the BLE backend up before handing over the fd: in P3 the native
-        // tunnel reader becomes the iroh-over-BLE relay, so blew must be ready
-        // first. Today the reader only logs packets, so this is inert but harmless.
-        initBleNativeOnce()
-        handle.startTunnel(tunFd, mtu.toUInt())
-    }
+    override fun serverName(): String? = handle?.serverName()
 
     // Bootstrap blew's Android backend once, replicating what its Tauri
     // `BlewPlugin.load()` does (we don't use the Tauri plugin):
@@ -95,7 +86,8 @@ class DefaultNeutrinoService(
     //     Context to the Kotlin managers, which their static
     //     `areBlePermissionsGranted()` reads; without this the permission check
     //     runs against a null context and fails even when perms are granted.
-    // Failures are logged, not fatal — the tunnel does not depend on BLE.
+    // Failures are logged, not fatal — the server still runs (federation just has
+    // no BLE path).
     private var bleNativeInitialised = false
 
     private fun initBleNativeOnce() {
@@ -109,9 +101,5 @@ class DefaultNeutrinoService(
         } catch (t: Throwable) {
             Timber.e(t, "BLE native init failed")
         }
-    }
-
-    override fun detachTunnel() {
-        handle?.stopTunnel()
     }
 }

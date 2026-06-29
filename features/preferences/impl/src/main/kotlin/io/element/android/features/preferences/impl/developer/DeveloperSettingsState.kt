@@ -8,7 +8,6 @@
 
 package io.element.android.features.preferences.impl.developer
 
-import android.content.Intent
 import io.element.android.features.preferences.impl.developer.appsettings.AppDeveloperSettingsState
 import io.element.android.libraries.architecture.AsyncAction
 import io.element.android.libraries.architecture.AsyncData
@@ -21,10 +20,9 @@ data class DeveloperSettingsState(
     val clearCacheAction: AsyncAction<Unit>,
     val isEnterpriseBuild: Boolean,
     val showColorPicker: Boolean,
-    val packetTunnelEnabled: Boolean,
-    // When non-null, the View must launch this VPN consent Intent and report the
-    // result back via [DeveloperSettingsEvents.OnPacketTunnelConsentResult].
-    val packetTunnelConsentIntent: Intent?,
+    // The embedded Neutrino homeserver's federation server_name (its node id), or
+    // null until the server has started and resolved its identity.
+    val neutrinoServerName: String?,
     val eventSink: (DeveloperSettingsEvents) -> Unit
 ) {
     val showLoader = clearCacheAction is AsyncAction.Loading
