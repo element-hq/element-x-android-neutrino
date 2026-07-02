@@ -104,6 +104,8 @@ class DefaultNeutrinoService(
         }
         true
     } catch (t: Throwable) {
+        // Expected while the listener is still binding (e.g. connection refused).
+        Timber.v(t, "Neutrino CS port not open yet")
         false
     }
 
