@@ -17,7 +17,16 @@ import io.element.android.libraries.di.annotations.ApplicationContext
 import io.element.android.services.neutrino.api.NetworkAddressProvider
 import io.element.android.services.neutrino.api.NeutrinoService
 import io.element.neutrino.NeutrinoHandle
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import timber.log.Timber
+import java.net.InetSocketAddress
+import java.net.Socket
+
+private const val READINESS_POLL_INTERVAL_MS = 100L
+private const val READINESS_CONNECT_TIMEOUT_MS = 500
 
 @SingleIn(AppScope::class)
 @ContributesBinding(AppScope::class, binding = binding<NeutrinoService>())
@@ -70,6 +79,32 @@ class DefaultNeutrinoService(
             Timber.i("Connectivity regained; sending KickBackoff to Neutrino")
             handle?.kickBackoff()
         }.apply { register() }
+    }
+
+    override suspend fun awaitReady(timeoutMs: Long) {
+        if (handle == null) return
+        val ready = withTimeoutOrNull(timeoutMs) {
+            while (!withContext(Dispatchers.IO) { isCsPortOpen() }) {
+                delay(READINESS_POLL_INTERVAL_MS)
+            }
+            true
+        } ?: false
+        if (ready) {
+            Timber.i("Neutrino client-server API is accepting connections")
+        } else {
+            Timber.w("Neutrino client-server API not reachable after ${timeoutMs}ms")
+        }
+    }
+
+    // The listener binds asynchronously after `start()` returns; probe the CS port
+    // with a short-timeout TCP connect ("connection refused" until it's bound).
+    private fun isCsPortOpen(): Boolean = try {
+        Socket().use { socket ->
+            socket.connect(InetSocketAddress("localhost", NEUTRINO_PORT), READINESS_CONNECT_TIMEOUT_MS)
+        }
+        true
+    } catch (t: Throwable) {
+        false
     }
 
     override fun isRunning(): Boolean {

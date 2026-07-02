@@ -88,7 +88,12 @@ class DefaultFtueService(
             } else {
                 getNextStep(FtueStep.WaitingForInitialState)
             }
-            FtueStep.WaitingForInitialState -> if (isSessionNotVerified() || userNeedsToConfirmSessionVerificationSuccess.value) {
+            FtueStep.WaitingForInitialState -> if (shouldSetDisplayName()) {
+                FtueStep.SetDisplayName
+            } else {
+                getNextStep(FtueStep.SetDisplayName)
+            }
+            FtueStep.SetDisplayName -> if (isSessionNotVerified() || userNeedsToConfirmSessionVerificationSuccess.value) {
                 FtueStep.SessionVerification
             } else {
                 getNextStep(FtueStep.SessionVerification)
@@ -123,6 +128,13 @@ class DefaultFtueService(
         return sessionPreferencesStore.isSessionVerificationSkipped().first()
     }
 
+    // Prompt for a display name once, at first launch: it is embedded into the
+    // BLE discovery advertisement (so nearby peers can find this user by name)
+    // and persisted on the embedded homeserver via the profile API.
+    private suspend fun shouldSetDisplayName(): Boolean {
+        return !sessionPreferencesStore.isDisplayNamePromptCompleted().first()
+    }
+
     private suspend fun needsAnalyticsOptIn(): Boolean {
         return analyticsService.didAskUserConsentFlow.first().not()
     }
@@ -149,6 +161,7 @@ class DefaultFtueService(
 
 sealed interface FtueStep {
     data object WaitingForInitialState : FtueStep
+    data object SetDisplayName : FtueStep
     data object SessionVerification : FtueStep
     data object NotificationsOptIn : FtueStep
     data object AnalyticsOptIn : FtueStep

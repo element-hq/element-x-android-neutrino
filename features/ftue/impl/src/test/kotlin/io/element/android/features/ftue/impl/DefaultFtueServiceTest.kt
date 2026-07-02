@@ -100,6 +100,38 @@ class DefaultFtueServiceTest {
     }
 
     @Test
+    fun `display name prompt is shown until completed`() = runTest {
+        val sessionVerificationService = FakeSessionVerificationService()
+        val analyticsService = FakeAnalyticsService()
+        val permissionStateProvider = FakePermissionStateProvider(permissionGranted = true)
+        val lockScreenService = FakeLockScreenService()
+        val preferences = InMemorySessionPreferencesStore(isDisplayNamePromptCompleted = false)
+        val service = createDefaultFtueService(
+            sessionVerificationService = sessionVerificationService,
+            analyticsService = analyticsService,
+            permissionStateProvider = permissionStateProvider,
+            lockScreenService = lockScreenService,
+            sessionPreferencesStore = preferences,
+        )
+
+        // Make every other check pass, so the display-name prompt is the only
+        // remaining step.
+        sessionVerificationService.emitVerifiedStatus(SessionVerifiedStatus.Verified)
+        permissionStateProvider.setPermissionGranted()
+        lockScreenService.setIsPinSetup(true)
+        analyticsService.setDidAskUserConsent()
+
+        service.ftueStepStateFlow.test {
+            assertThat(awaitItem()).isEqualTo(InternalFtueState.Unknown)
+            assertThat(awaitItem()).isEqualTo(InternalFtueState.Incomplete(FtueStep.SetDisplayName))
+            // Completing the prompt lets the flow finish.
+            preferences.setDisplayNamePromptCompleted(true)
+            service.updateFtueStep()
+            assertThat(awaitItem()).isEqualTo(InternalFtueState.Complete)
+        }
+    }
+
+    @Test
     fun `traverse flow`() = runTest {
         val sessionVerificationService = FakeSessionVerificationService().apply {
             emitVerifiedStatus(SessionVerifiedStatus.NotVerified)
@@ -197,7 +229,11 @@ internal fun TestScope.createDefaultFtueService(
     analyticsService: AnalyticsService = FakeAnalyticsService(),
     permissionStateProvider: PermissionStateProvider = FakePermissionStateProvider(permissionGranted = false),
     lockScreenService: LockScreenService = FakeLockScreenService(),
-    sessionPreferencesStore: SessionPreferencesStore = InMemorySessionPreferencesStore(),
+    // Default to "prompt already done" so tests unrelated to the display-name step
+    // skip it; the dedicated test below flips this to exercise the step.
+    sessionPreferencesStore: SessionPreferencesStore = InMemorySessionPreferencesStore(
+        isDisplayNamePromptCompleted = true,
+    ),
     // First version where notification permission is required
     sdkIntVersion: Int = Build.VERSION_CODES.TIRAMISU,
 ) = DefaultFtueService(

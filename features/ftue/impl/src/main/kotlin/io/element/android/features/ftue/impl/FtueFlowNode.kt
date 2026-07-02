@@ -24,6 +24,7 @@ import io.element.android.annotations.ContributesNode
 import io.element.android.features.analytics.api.AnalyticsEntryPoint
 import io.element.android.features.ftue.impl.notifications.NotificationsOptInNode
 import io.element.android.features.ftue.impl.sessionverification.FtueSessionVerificationFlowNode
+import io.element.android.features.ftue.impl.setdisplayname.SetDisplayNameNode
 import io.element.android.features.ftue.impl.state.DefaultFtueService
 import io.element.android.features.ftue.impl.state.FtueStep
 import io.element.android.features.ftue.impl.state.InternalFtueState
@@ -59,6 +60,9 @@ class FtueFlowNode(
         data object Placeholder : NavTarget
 
         @Parcelize
+        data object SetDisplayName : NavTarget
+
+        @Parcelize
         data object SessionVerification : NavTarget
 
         @Parcelize
@@ -85,6 +89,14 @@ class FtueFlowNode(
         return when (navTarget) {
             NavTarget.Placeholder -> {
                 emptyNode(buildContext)
+            }
+            NavTarget.SetDisplayName -> {
+                val callback = object : SetDisplayNameNode.Callback {
+                    override fun onDisplayNameSet() {
+                        defaultFtueService.updateFtueStep()
+                    }
+                }
+                createNode<SetDisplayNameNode>(buildContext, listOf(callback))
             }
             is NavTarget.SessionVerification -> {
                 val callback = object : FtueSessionVerificationFlowNode.Callback {
@@ -125,6 +137,9 @@ class FtueFlowNode(
         when (ftueStep) {
             FtueStep.WaitingForInitialState -> {
                 backstack.newRoot(NavTarget.Placeholder)
+            }
+            FtueStep.SetDisplayName -> {
+                backstack.newRoot(NavTarget.SetDisplayName)
             }
             FtueStep.SessionVerification -> {
                 backstack.newRoot(NavTarget.SessionVerification)

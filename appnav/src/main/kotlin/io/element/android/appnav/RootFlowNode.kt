@@ -138,6 +138,10 @@ class RootFlowNode(
             // start the embedded homeserver before routing anywhere.
             neutrinoPermissionsGranted.first { it }
             neutrinoService.start()
+            // `start()` returns before the CS listener is bound; wait for it so the
+            // auto-login below (and the profile write during onboarding) don't race
+            // the bind and fail with "connection refused".
+            neutrinoService.awaitReady()
             if (buildContext.savedStateMap != null) {
                 restoreSavedState(buildContext.savedStateMap)
                 observeNavState(true)

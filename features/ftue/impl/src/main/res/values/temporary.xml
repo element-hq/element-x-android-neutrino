@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Element Creations Ltd.
+  ~
+  ~ SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Element-Commercial.
+  ~ Please see LICENSE files in the repository root for full details.
+  -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+    <string name="screen_set_display_name_title">"Choose a display name"</string>
+    <string name="screen_set_display_name_subtitle">"This is how nearby people discover you. You can change it later."</string>
+    <string name="screen_set_display_name_label">"Display name"</string>
+    <string name="screen_set_display_name_too_long">"A little shorter, please (max 20 bytes)."</string>
+</resources>

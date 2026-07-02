@@ -17,6 +17,17 @@ interface NeutrinoService {
     fun start()
 
     /**
+     * Suspend until the embedded homeserver's client-server API is accepting
+     * connections, or [timeoutMs] elapses.
+     *
+     * [start] returns as soon as the server thread is spawned, but the listener
+     * binds asynchronously a moment later. Anything that makes a CS request
+     * (auto-login, and then the profile/display-name write in onboarding) must
+     * await this first, or it races the bind and fails with "connection refused".
+     */
+    suspend fun awaitReady(timeoutMs: Long = 15_000)
+
+    /**
      * Returns true if the server is already running.
      */
     fun isRunning(): Boolean
