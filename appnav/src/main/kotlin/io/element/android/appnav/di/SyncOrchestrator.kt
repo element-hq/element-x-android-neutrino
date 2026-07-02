@@ -108,7 +108,12 @@ class SyncOrchestrator(
             Timber.tag(tag).d("isAppActive=$isAppActive, isNetworkAvailable=$isNetworkAvailable")
             if (syncState == SyncState.Running && !isAppActive) {
                 SyncStateAction.StopSync
-            } else if (syncState == SyncState.Idle && isAppActive && isNetworkAvailable) {
+            } else if (syncState == SyncState.Idle && isAppActive) {
+                // The homeserver is embedded and reached over localhost, so client-server
+                // connectivity never depends on Android network state; federation reachability
+                // is the server's concern (BLE/iroh). Gating restarts on isNetworkAvailable
+                // permanently wedged the sync loop after lock/unlock on devices without an
+                // internet-validated network.
                 SyncStateAction.StartSync
             } else {
                 SyncStateAction.NoOp

@@ -35,5 +35,13 @@ interface SessionPreferencesStore {
     suspend fun setVideoCompressionPreset(preset: VideoCompressionPreset)
     fun getVideoCompressionPreset(): Flow<VideoCompressionPreset>
 
+    /**
+     * Whether the one-time "set your display name" prompt shown at first launch
+     * has been completed, so it isn't shown again. The name itself lives on the
+     * (embedded) homeserver via the profile API; this is only the "seen it" flag.
+     */
+    suspend fun setDisplayNamePromptCompleted(completed: Boolean)
+    fun isDisplayNamePromptCompleted(): Flow<Boolean>
+
     suspend fun clear()
 }

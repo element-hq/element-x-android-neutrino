@@ -362,23 +362,25 @@ class SyncOrchestratorTest {
     }
 
     @Test
-    fun `when network is offline, sync service should not start`() = runTest {
+    fun `when network is offline, sync service starts anyway (embedded homeserver)`() = runTest {
         val startSyncRecorder = lambdaRecorder<Result<Unit>> { Result.success(Unit) }
         val syncService = FakeSyncService(initialSyncState = SyncState.Idle).apply {
             startSyncLambda = startSyncRecorder
         }
         val networkMonitor = FakeNetworkMonitor(initialStatus = NetworkStatus.Disconnected)
+        val appForegroundStateService = FakeAppForegroundStateService(initialForegroundValue = true)
         val syncOrchestrator = createSyncOrchestrator(
             syncService = syncService,
             networkMonitor = networkMonitor,
+            appForegroundStateService = appForegroundStateService,
         )
 
         // We start observing
         syncOrchestrator.observeStates()
 
-        // This should still not trigger a sync, since there is no network
+        // The homeserver is on localhost, so Android network state must not gate the sync loop
         advanceTimeBy(10.seconds)
-        startSyncRecorder.assertions().isNeverCalled()
+        startSyncRecorder.assertions().isCalledOnce()
     }
 
     private fun TestScope.createSyncOrchestrator(

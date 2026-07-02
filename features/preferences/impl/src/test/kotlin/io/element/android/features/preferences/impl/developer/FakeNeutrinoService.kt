@@ -14,6 +14,8 @@ class FakeNeutrinoService(
 ) : NeutrinoService {
     override fun start() = Unit
 
+    override suspend fun awaitReady(timeoutMs: Long) = Unit
+
     override fun isRunning(): Boolean = false
 
     override fun serverName(): String? = serverNameResult
