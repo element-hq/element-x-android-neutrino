@@ -44,37 +44,17 @@ internal fun selectLanServerHost(candidates: List<InetAddress>): String? {
 }
 
 /**
- * The `server_name` + `bind_addr` pair for a Neutrino launch.
+ * Pick the socket the embedded homeserver's HTTP server binds.
  *
- * - [serverName] is the federation identity baked into the user's MXID
- *   (`@localpart:serverName`). For the LAN demo it is a literal `ip:port`.
- * - [bindAddr] is the socket the server listens on.
+ * The federation `server_name` is no longer derived from the LAN address: the
+ * homeserver derives it from its node identity (an ed25519 public key in hex) and
+ * reports it back via [NeutrinoHandle.serverName][io.element.neutrino.NeutrinoHandle].
+ * Peers are reached over the relay tunnel (BLE/LAN via iroh), not the LAN IPv4
+ * address, so [host] only decides the bind scope: with a LAN [host] the server
+ * binds all interfaces (`0.0.0.0`) so its CS-API is reachable for debugging; with
+ * no LAN address it falls back to loopback. Either way the local client reaches
+ * it over loopback and the in-process sidecar forwards inbound federation to it.
  */
-internal data class NeutrinoEndpoint(
-    val serverName: String,
-    val bindAddr: String,
-)
-
-/**
- * Build the federation endpoint for a launch.
- *
- * The advertised `server_name` is `host:federationPort` — the public port the
- * in-process CoAP sidecar's ingress binds and that peers resolve to. The
- * homeserver's own socket ([bindAddr]) stays on [port]; the local client reaches
- * it over loopback and the sidecar forwards inbound federation to it. With a LAN
- * [host] the server binds all interfaces (`0.0.0.0`) so peers can connect; with
- * no LAN address it falls back to loopback, so the local client still works
- * offline (no peer can reach it, but the device talks to its own server over
- * loopback regardless).
- */
-internal fun serverIdentity(
-    host: String?,
-    port: Int = NEUTRINO_PORT,
-    federationPort: Int = NEUTRINO_FEDERATION_PORT,
-): NeutrinoEndpoint {
-    return if (host == null) {
-        NeutrinoEndpoint(serverName = "localhost:$federationPort", bindAddr = "localhost:$port")
-    } else {
-        NeutrinoEndpoint(serverName = "$host:$federationPort", bindAddr = "0.0.0.0:$port")
-    }
+internal fun selectBindAddr(host: String?, port: Int = NEUTRINO_PORT): String {
+    return if (host == null) "localhost:$port" else "0.0.0.0:$port"
 }

@@ -6,4 +6,7 @@
   -->
 <resources>
     <string name="screen_loading_neutrino">Starting Neutrino…</string>
+    <string name="screen_neutrino_ble_permission_required">Bluetooth permission is needed to relay Matrix to nearby devices over Bluetooth.</string>
+    <string name="screen_neutrino_ble_permission_grant">Grant permission</string>
+    <string name="screen_neutrino_ble_permission_settings">Open settings</string>
 </resources>

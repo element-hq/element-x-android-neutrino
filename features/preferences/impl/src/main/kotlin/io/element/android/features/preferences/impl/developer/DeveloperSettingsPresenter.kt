@@ -8,7 +8,6 @@
 
 package io.element.android.features.preferences.impl.developer
 
-import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -32,7 +31,7 @@ import io.element.android.libraries.architecture.runCatchingUpdatingState
 import io.element.android.libraries.core.data.ByteUnit
 import io.element.android.libraries.matrix.api.analytics.GetDatabaseSizesUseCase
 import io.element.android.libraries.matrix.api.core.SessionId
-import io.element.android.services.neutrino.api.NeutrinoTunnel
+import io.element.android.services.neutrino.api.NeutrinoService
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.CoroutineScope
@@ -48,7 +47,7 @@ class DeveloperSettingsPresenter(
     private val vacuumStoresUseCase: VacuumStoresUseCase,
     private val databaseSizesUseCase: GetDatabaseSizesUseCase,
     private val fileSizeFormatter: FileSizeFormatter,
-    private val neutrinoTunnel: NeutrinoTunnel,
+    private val neutrinoService: NeutrinoService,
 ) : Presenter<DeveloperSettingsState> {
     @Composable
     override fun present(): DeveloperSettingsState {
@@ -63,14 +62,6 @@ class DeveloperSettingsPresenter(
         }
         var showColorPicker by remember {
             mutableStateOf(false)
-        }
-        // Initialise from the actual tunnel state so the toggle reflects reality on
-        // (re)entry, rather than a presenter-local flag that resets to false.
-        var packetTunnelEnabled by remember {
-            mutableStateOf(neutrinoTunnel.isRunning())
-        }
-        var packetTunnelConsentIntent by remember {
-            mutableStateOf<Intent?>(null)
         }
         LaunchedEffect(Unit) {
             computeDatabaseSizes(databaseSizes)
@@ -99,29 +90,6 @@ class DeveloperSettingsPresenter(
                 DeveloperSettingsEvents.VacuumStores -> coroutineScope.launch {
                     vacuumStoresUseCase()
                 }
-                is DeveloperSettingsEvents.SetPacketTunnelEnabled -> {
-                    if (event.enabled) {
-                        val consentIntent = neutrinoTunnel.consentIntent()
-                        if (consentIntent == null) {
-                            // Consent already granted: start immediately.
-                            neutrinoTunnel.start()
-                            packetTunnelEnabled = true
-                        } else {
-                            // Ask the View to launch the system VPN consent dialog.
-                            packetTunnelConsentIntent = consentIntent
-                        }
-                    } else {
-                        neutrinoTunnel.stop()
-                        packetTunnelEnabled = false
-                    }
-                }
-                is DeveloperSettingsEvents.OnPacketTunnelConsentResult -> {
-                    packetTunnelConsentIntent = null
-                    if (event.granted) {
-                        neutrinoTunnel.start()
-                        packetTunnelEnabled = true
-                    }
-                }
             }
         }
 
@@ -133,8 +101,7 @@ class DeveloperSettingsPresenter(
             clearCacheAction = clearCacheAction.value,
             isEnterpriseBuild = enterpriseService.isEnterpriseBuild,
             showColorPicker = showColorPicker,
-            packetTunnelEnabled = packetTunnelEnabled,
-            packetTunnelConsentIntent = packetTunnelConsentIntent,
+            neutrinoServerName = neutrinoService.serverName(),
             eventSink = ::handleEvent,
         )
     }
