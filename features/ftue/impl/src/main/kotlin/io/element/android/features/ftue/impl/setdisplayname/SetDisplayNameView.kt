@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
@@ -44,8 +43,10 @@ fun SetDisplayNameView(
     HeaderFooterPage(
         modifier = modifier
             .statusBarsPadding()
-            .imePadding()
             .fillMaxSize(),
+        // Scrollable so the focused text field scrolls above the keyboard instead
+        // of being hidden behind it (HeaderFooterPage applies imePadding itself).
+        isScrollable = true,
         background = { OnboardingBackground() },
         header = { SetDisplayNameHeader(modifier = Modifier.padding(top = 60.dp, bottom = 28.dp)) },
         footer = { SetDisplayNameFooter(state) },
