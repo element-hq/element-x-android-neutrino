@@ -7,10 +7,12 @@
 
 package io.element.android.features.preferences.impl.developer
 
+import io.element.android.services.neutrino.api.DiscoveredPeer
 import io.element.android.services.neutrino.api.NeutrinoService
 
 class FakeNeutrinoService(
     private val serverNameResult: String? = "a1b2c3d4",
+    private val discoveredPeersResult: () -> List<DiscoveredPeer> = { emptyList() },
 ) : NeutrinoService {
     override fun start() = Unit
 
@@ -19,4 +21,6 @@ class FakeNeutrinoService(
     override fun isRunning(): Boolean = false
 
     override fun serverName(): String? = serverNameResult
+
+    override fun discoveredPeers(): List<DiscoveredPeer> = discoveredPeersResult()
 }

@@ -14,6 +14,7 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
 import io.element.android.libraries.di.annotations.ApplicationContext
+import io.element.android.services.neutrino.api.DiscoveredPeer
 import io.element.android.services.neutrino.api.NetworkAddressProvider
 import io.element.android.services.neutrino.api.NeutrinoService
 import io.element.neutrino.NeutrinoHandle
@@ -114,6 +115,15 @@ class DefaultNeutrinoService(
     }
 
     override fun serverName(): String? = handle?.serverName()
+
+    override fun discoveredPeers(): List<DiscoveredPeer> =
+        handle?.discoveredPeers()?.map { peer ->
+            DiscoveredPeer(
+                serverName = peer.serverName,
+                displayName = peer.displayName,
+                lastSeenMs = peer.lastSeenMs.toLong(),
+            )
+        }.orEmpty()
 
     // Bootstrap blew's Android backend once, replicating what its Tauri
     // `BlewPlugin.load()` does (we don't use the Tauri plugin):

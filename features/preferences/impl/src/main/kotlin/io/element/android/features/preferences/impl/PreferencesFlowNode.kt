@@ -30,6 +30,7 @@ import io.element.android.features.preferences.impl.advanced.AdvancedSettingsNod
 import io.element.android.features.preferences.impl.analytics.AnalyticsSettingsNode
 import io.element.android.features.preferences.impl.blockedusers.BlockedUsersNode
 import io.element.android.features.preferences.impl.developer.DeveloperSettingsNode
+import io.element.android.features.preferences.impl.developer.neutrino.NeutrinoPeersNode
 import io.element.android.features.preferences.impl.labs.LabsNode
 import io.element.android.features.preferences.impl.notifications.NotificationSettingsNode
 import io.element.android.features.preferences.impl.notifications.edit.EditDefaultNotificationSettingNode
@@ -94,6 +95,9 @@ class PreferencesFlowNode(
 
         @Parcelize
         data object PushHistory : NavTarget
+
+        @Parcelize
+        data object NeutrinoPeers : NavTarget
 
         @Parcelize
         data object LockScreenSettings : NavTarget
@@ -191,6 +195,10 @@ class PreferencesFlowNode(
                         backstack.push(NavTarget.PushHistory)
                     }
 
+                    override fun navigateToNeutrinoPeers() {
+                        backstack.push(NavTarget.NeutrinoPeers)
+                    }
+
                     override fun onDone() {
                         if (backstack.canPop()) {
                             backstack.pop()
@@ -269,6 +277,18 @@ class PreferencesFlowNode(
                         }
                     },
                 )
+            }
+            NavTarget.NeutrinoPeers -> {
+                val neutrinoPeersCallback = object : NeutrinoPeersNode.Callback {
+                    override fun onDone() {
+                        if (backstack.canPop()) {
+                            backstack.pop()
+                        } else {
+                            navigateUp()
+                        }
+                    }
+                }
+                createNode<NeutrinoPeersNode>(buildContext, listOf(neutrinoPeersCallback))
             }
             is NavTarget.EditDefaultNotificationSetting -> {
                 val callback = object : EditDefaultNotificationSettingNode.Callback {

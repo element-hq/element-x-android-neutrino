@@ -38,4 +38,13 @@ interface NeutrinoService {
      * server has started and resolved its identity; stable for its lifetime after.
      */
     fun serverName(): String?
+
+    /**
+     * A single-shot snapshot of every peer discovered over the BLE mesh, sorted
+     * by `(displayName, serverName)`. Not live — call again to refresh. A cheap
+     * non-blocking in-memory read (like [serverName]). Empty on a build without
+     * BLE discovery, before the first scan has landed any peers, or before the
+     * server has started.
+     */
+    fun discoveredPeers(): List<DiscoveredPeer>
 }
