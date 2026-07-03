@@ -60,7 +60,6 @@ import io.element.android.libraries.matrix.test.room.aRoomSummary
 import io.element.android.libraries.matrix.test.roomlist.FakeDynamicRoomList
 import io.element.android.libraries.matrix.test.roomlist.FakeRoomListService
 import io.element.android.libraries.matrix.test.sync.FakeSyncService
-import io.element.android.libraries.matrix.test.verification.FakeSessionVerificationService
 import io.element.android.libraries.preferences.api.store.AppPreferencesStore
 import io.element.android.libraries.preferences.api.store.SessionPreferencesStore
 import io.element.android.libraries.preferences.test.InMemoryAppPreferencesStore
@@ -134,75 +133,29 @@ class RoomListPresenterTest {
     }
 
     @Test
-    fun `present - handle DismissRequestVerificationPrompt`() = runTest {
+    fun `present - security banner is always suppressed on Neutrino`() = runTest {
         val roomList = FakeDynamicRoomList(
             loadingState = MutableStateFlow(RoomList.LoadingState.Loaded(1))
         )
         val roomListService = FakeRoomListService(
             createRoomListLambda = { roomList }
         )
+        // A recovery state that would otherwise request the "Back up your chats" banner.
         val encryptionService = FakeEncryptionService().apply {
-            emitRecoveryState(RecoveryState.INCOMPLETE)
+            emitRecoveryState(RecoveryState.DISABLED)
         }
         val syncService = FakeSyncService(initialSyncState = SyncState.Running)
         val presenter = createRoomListPresenter(
             client = FakeMatrixClient(roomListService = roomListService, encryptionService = encryptionService, syncService = syncService),
         )
         presenter.test {
-            val eventWithContentAsRooms = consumeItemsUntilPredicate {
+            val state = consumeItemsUntilPredicate {
                 it.contentState is RoomListContentState.Rooms
             }.last()
-            val eventSink = eventWithContentAsRooms.eventSink
-            assertThat(eventWithContentAsRooms.contentAsRooms().securityBannerState).isEqualTo(SecurityBannerState.RecoveryKeyConfirmation)
-            eventSink(RoomListEvent.DismissRequestVerificationPrompt)
-            assertThat(awaitItem().contentAsRooms().securityBannerState).isEqualTo(SecurityBannerState.None)
-        }
-    }
-
-    @Test
-    fun `present - handle DismissRecoveryKeyPrompt`() = runTest {
-        val encryptionService = FakeEncryptionService().apply {
-            recoveryStateStateFlow.emit(RecoveryState.DISABLED)
-        }
-        val roomList = FakeDynamicRoomList(
-            loadingState = MutableStateFlow(RoomList.LoadingState.Loaded(1))
-        )
-        val roomListService = FakeRoomListService(
-            createRoomListLambda = { roomList }
-        )
-        val matrixClient = FakeMatrixClient(
-            roomListService = roomListService,
-            encryptionService = encryptionService,
-            sessionVerificationService = FakeSessionVerificationService().apply {
-                emitNeedsSessionVerification(false)
-            },
-            syncService = FakeSyncService(initialSyncState = SyncState.Running),
-        )
-        val presenter = createRoomListPresenter(
-            client = matrixClient,
-        )
-        presenter.test {
-            val initialState = consumeItemsUntilPredicate {
-                it.contentState is RoomListContentState.Rooms
-            }.last()
-            assertThat(initialState.contentAsRooms().securityBannerState).isEqualTo(SecurityBannerState.SetUpRecovery)
-            encryptionService.emitRecoveryState(RecoveryState.INCOMPLETE)
-            val nextState = awaitItem()
-            assertThat(nextState.contentAsRooms().securityBannerState).isEqualTo(SecurityBannerState.RecoveryKeyConfirmation)
-            // Also check other states
-            encryptionService.emitRecoveryState(RecoveryState.DISABLED)
-            assertThat(awaitItem().contentAsRooms().securityBannerState).isEqualTo(SecurityBannerState.SetUpRecovery)
-            encryptionService.emitRecoveryState(RecoveryState.WAITING_FOR_SYNC)
-            assertThat(awaitItem().contentAsRooms().securityBannerState).isEqualTo(SecurityBannerState.None)
-            encryptionService.emitRecoveryState(RecoveryState.DISABLED)
-            assertThat(awaitItem().contentAsRooms().securityBannerState).isEqualTo(SecurityBannerState.SetUpRecovery)
-            encryptionService.emitRecoveryState(RecoveryState.ENABLED)
-            assertThat(awaitItem().contentAsRooms().securityBannerState).isEqualTo(SecurityBannerState.None)
-            encryptionService.emitRecoveryState(RecoveryState.DISABLED)
-            assertThat(awaitItem().contentAsRooms().securityBannerState).isEqualTo(SecurityBannerState.SetUpRecovery)
-            nextState.eventSink(RoomListEvent.DismissBanner)
-            val finalState = awaitItem()
-            assertThat(finalState.contentAsRooms().securityBannerState).isEqualTo(SecurityBannerState.None)
+            // Neutrino embeds the homeserver on-device, so recovery/key-backup does
+            // not apply and the security banner is never surfaced.
+            assertThat(state.contentAsRooms().securityBannerState).isEqualTo(SecurityBannerState.None)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 

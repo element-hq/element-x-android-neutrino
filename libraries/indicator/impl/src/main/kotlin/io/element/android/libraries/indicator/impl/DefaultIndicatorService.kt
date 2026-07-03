@@ -17,15 +17,11 @@ import androidx.compose.runtime.remember
 import dev.zacsweers.metro.ContributesBinding
 import io.element.android.libraries.di.SessionScope
 import io.element.android.libraries.indicator.api.IndicatorService
-import io.element.android.libraries.matrix.api.encryption.BackupState
-import io.element.android.libraries.matrix.api.encryption.EncryptionService
-import io.element.android.libraries.matrix.api.encryption.RecoveryState
 import io.element.android.libraries.matrix.api.verification.SessionVerificationService
 
 @ContributesBinding(SessionScope::class)
 class DefaultIndicatorService(
     private val sessionVerificationService: SessionVerificationService,
-    private val encryptionService: EncryptionService,
 ) : IndicatorService {
     @Composable
     override fun showRoomListTopBarIndicator(): State<Boolean> {
@@ -41,20 +37,11 @@ class DefaultIndicatorService(
 
     @Composable
     override fun showSettingChatBackupIndicator(): State<Boolean> {
-        val backupState by encryptionService.backupStateStateFlow.collectAsState()
-        val recoveryState by encryptionService.recoveryStateStateFlow.collectAsState()
-
-        return remember {
-            derivedStateOf {
-                val showForBackup = backupState in listOf(
-                    BackupState.UNKNOWN,
-                )
-                val showForRecovery = recoveryState in listOf(
-                    RecoveryState.DISABLED,
-                    RecoveryState.INCOMPLETE,
-                )
-                showForBackup || showForRecovery
-            }
-        }
+        // Neutrino runs the homeserver on the same device as the client, so key
+        // backup and recovery — which exist to restore your keys after losing
+        // access to all your devices — do not apply. Never surface the chat
+        // backup / "Get recovery key" indicator (the red dot on the profile
+        // bubble and on the Settings → Encryption row).
+        return remember { derivedStateOf { false } }
     }
 }
