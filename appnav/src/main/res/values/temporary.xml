@@ -9,4 +9,6 @@
     <string name="screen_neutrino_ble_permission_required">Bluetooth permission is needed to relay Matrix to nearby devices over Bluetooth.</string>
     <string name="screen_neutrino_ble_permission_grant">Grant permission</string>
     <string name="screen_neutrino_ble_permission_settings">Open settings</string>
+    <string name="screen_neutrino_bluetooth_required">Bluetooth is turned off. It is needed to relay Matrix to nearby devices over Bluetooth.</string>
+    <string name="screen_neutrino_bluetooth_enable">Turn on Bluetooth</string>
 </resources>

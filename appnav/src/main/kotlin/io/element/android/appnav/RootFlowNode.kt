@@ -124,19 +124,20 @@ class RootFlowNode(
     buildContext = buildContext,
     plugins = plugins
 ) {
-    // Flipped to true by the startup splash ([loadingNode]) once the BLE runtime
-    // permissions are granted. The embedded server binds its iroh-over-BLE
-    // federation transport on start, so we must not start it — nor route past the
-    // splash — until those permissions are in hand (a hard gate).
-    private val neutrinoPermissionsGranted = MutableStateFlow(false)
+    // Flipped to true by the startup splash ([loadingNode]) once the Neutrino startup
+    // prerequisites are met: the BLE runtime permissions are granted AND the Bluetooth
+    // adapter is on. The embedded server binds its iroh-over-BLE federation transport on
+    // start, so we must not start it — nor route past the splash — until both are in
+    // hand (a hard gate); otherwise the CS listener never binds and startup hangs.
+    private val neutrinoPrerequisitesMet = MutableStateFlow(false)
 
     override fun onBuilt() {
         analyticsColdStartWatcher.start()
         appCoroutineScope.launch {
             matrixSessionCache.restoreWithSavedState(buildContext.savedStateMap)
-            // Hard gate: stay on the splash until BLE permissions are granted, then
-            // start the embedded homeserver before routing anywhere.
-            neutrinoPermissionsGranted.first { it }
+            // Hard gate: stay on the splash until BLE permissions are granted and
+            // Bluetooth is on, then start the embedded homeserver before routing anywhere.
+            neutrinoPrerequisitesMet.first { it }
             neutrinoService.start()
             // `start()` returns before the CS listener is bound; wait for it so the
             // auto-login below (and the profile write during onboarding) don't race
@@ -386,7 +387,7 @@ class RootFlowNode(
                 )
             }
             NavTarget.SplashScreen -> loadingNode(buildContext) {
-                neutrinoPermissionsGranted.value = true
+                neutrinoPrerequisitesMet.value = true
             }
             NavTarget.BugReport -> {
                 val callback = object : BugReportEntryPoint.Callback {
