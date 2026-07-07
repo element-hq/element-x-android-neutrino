@@ -23,6 +23,12 @@ data class DeveloperSettingsState(
     // The embedded Neutrino homeserver's federation server_name (its node id), or
     // null until the server has started and resolved its identity.
     val neutrinoServerName: String?,
+    // Whether a federation pcap capture is currently running (drives the toggle).
+    val neutrinoCapturing: Boolean,
+    // A human-readable status line for the capture toggle: where it is writing
+    // while on, where the file was saved after stopping, or the failure reason.
+    // Null before the toggle has been used this session.
+    val neutrinoCaptureStatus: String?,
     val eventSink: (DeveloperSettingsEvents) -> Unit
 ) {
     val showLoader = clearCacheAction is AsyncAction.Loading

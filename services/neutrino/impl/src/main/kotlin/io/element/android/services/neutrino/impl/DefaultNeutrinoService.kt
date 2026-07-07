@@ -7,27 +7,37 @@
 
 package io.element.android.services.neutrino.impl
 
+import android.content.ContentValues
 import android.content.Context
 import android.net.ConnectivityManager
+import android.os.Build
+import android.provider.MediaStore
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
 import io.element.android.libraries.di.annotations.ApplicationContext
+import io.element.android.services.neutrino.api.CaptureResult
 import io.element.android.services.neutrino.api.DiscoveredPeer
 import io.element.android.services.neutrino.api.NetworkAddressProvider
 import io.element.android.services.neutrino.api.NeutrinoService
+import io.element.neutrino.CaptureException
 import io.element.neutrino.NeutrinoHandle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import timber.log.Timber
+import java.io.File
 import java.net.InetSocketAddress
 import java.net.Socket
 
 private const val READINESS_POLL_INTERVAL_MS = 100L
 private const val READINESS_CONNECT_TIMEOUT_MS = 500
+
+// Stable capture filename, reused for both the app-private working file and the
+// Downloads export, so the `adb pull` path never changes between runs.
+private const val CAPTURE_FILE_NAME = "neutrino-fed.pcap"
 
 @SingleIn(AppScope::class)
 @ContributesBinding(AppScope::class, binding = binding<NeutrinoService>())
@@ -124,6 +134,83 @@ class DefaultNeutrinoService(
                 lastSeenMs = peer.lastSeenMs.toLong(),
             )
         }.orEmpty()
+
+    // The path of the in-flight capture, so stopCapture can report where it was
+    // written. Null when no capture is running.
+    private var captureFilePath: String? = null
+
+    override fun startCapture(): CaptureResult {
+        val handle = handle ?: return CaptureResult.Failed("Neutrino is not running")
+        // The live capture is written to app-specific external storage (needs no
+        // permission and takes a real filesystem path, which the native handle
+        // requires). On stop it's copied into the public Downloads folder — see
+        // stopCapture — so the developer never has to type the long private path.
+        val dir = context.getExternalFilesDir(null)
+            ?: return CaptureResult.Failed("External storage is unavailable")
+        val file = File(dir, CAPTURE_FILE_NAME)
+        return try {
+            handle.startCapture(file.path)
+            captureFilePath = file.path
+            Timber.i("Neutrino federation capture started: ${file.path}")
+            CaptureResult.Started(file.path)
+        } catch (e: CaptureException) {
+            Timber.e(e, "Neutrino federation capture failed to start")
+            val reason = (e as? CaptureException.Io)?.reason ?: e.message ?: "unknown error"
+            CaptureResult.Failed(reason)
+        }
+    }
+
+    override fun stopCapture(): String? {
+        val wasRunning = handle?.stopCapture() == true
+        val sourcePath = captureFilePath
+        captureFilePath = null
+        if (!wasRunning || sourcePath == null) return null
+        // The native handle has flushed + closed the file (stopCapture joins its
+        // writer), so it's safe to copy the finished pcap into Downloads.
+        val source = File(sourcePath)
+        val downloads = exportToDownloads(source)
+        return if (downloads != null) {
+            source.delete()
+            Timber.i("Neutrino federation capture saved to Downloads: $downloads")
+            downloads
+        } else {
+            Timber.i("Neutrino federation capture stopped: $sourcePath")
+            sourcePath
+        }
+    }
+
+    override fun isCapturing(): Boolean = handle?.isCapturing() == true
+
+    // Copy the finished pcap into the public Downloads collection so it lands at a
+    // short, stable path (`/sdcard/Download/neutrino-fed.pcap`) that's trivial to
+    // `adb pull` and visible in the Files app — far better dev UX than the
+    // app-private external path. Returns the user-facing "Download/<name>"
+    // location, or null (keeping the app-private file) on older devices or error.
+    // MediaStore Downloads is API 29+; needs no storage permission.
+    private fun exportToDownloads(source: File): String? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return null
+        val resolver = context.contentResolver
+        val collection = MediaStore.Downloads.EXTERNAL_CONTENT_URI
+        // Overwrite any prior export so the pull path stays stable across runs.
+        resolver.delete(collection, "${MediaStore.Downloads.DISPLAY_NAME} = ?", arrayOf(CAPTURE_FILE_NAME))
+        val pending = ContentValues().apply {
+            put(MediaStore.Downloads.DISPLAY_NAME, CAPTURE_FILE_NAME)
+            put(MediaStore.Downloads.MIME_TYPE, "application/vnd.tcpdump.pcap")
+            put(MediaStore.Downloads.IS_PENDING, 1)
+        }
+        val uri = resolver.insert(collection, pending) ?: return null
+        return try {
+            resolver.openOutputStream(uri)?.use { output ->
+                source.inputStream().use { it.copyTo(output) }
+            } ?: return null
+            resolver.update(uri, ContentValues().apply { put(MediaStore.Downloads.IS_PENDING, 0) }, null, null)
+            "Download/$CAPTURE_FILE_NAME"
+        } catch (t: Throwable) {
+            Timber.e(t, "Failed to export capture to Downloads")
+            resolver.delete(uri, null, null)
+            null
+        }
+    }
 
     // Bootstrap blew's Android backend once, replicating what its Tauri
     // `BlewPlugin.load()` does (we don't use the Tauri plugin):

@@ -15,4 +15,7 @@ sealed interface DeveloperSettingsEvents {
     data class ChangeBrandColor(val color: Color?) : DeveloperSettingsEvents
     data object ClearCache : DeveloperSettingsEvents
     data object VacuumStores : DeveloperSettingsEvents
+
+    /** Start the federation pcap capture if idle, or stop it if running. */
+    data object ToggleNeutrinoCapture : DeveloperSettingsEvents
 }

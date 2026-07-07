@@ -26,6 +26,7 @@ import io.element.android.libraries.matrix.api.analytics.GetDatabaseSizesUseCase
 import io.element.android.libraries.matrix.api.analytics.SdkStoreSizes
 import io.element.android.libraries.matrix.api.core.SessionId
 import io.element.android.libraries.matrix.test.A_SESSION_ID
+import io.element.android.services.neutrino.api.CaptureResult
 import io.element.android.services.neutrino.api.NeutrinoService
 import io.element.android.tests.testutils.WarmUpRule
 import io.element.android.tests.testutils.lambda.lambdaRecorder
@@ -152,6 +153,49 @@ class DeveloperSettingsPresenterTest {
         )
         presenter.test {
             assertThat(awaitItem().neutrinoServerName).isEqualTo("abcdef123456")
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `present - toggling Neutrino capture starts then stops it`() = runTest {
+        val presenter = createDeveloperSettingsPresenter(
+            neutrinoService = FakeNeutrinoService(
+                startCaptureResult = { CaptureResult.Started("/sdcard/neutrino.pcap") },
+                stopCaptureResult = "Download/neutrino-fed.pcap",
+            ),
+        )
+        presenter.test {
+            val initialState = awaitItem()
+            assertThat(initialState.neutrinoCapturing).isFalse()
+            assertThat(initialState.neutrinoCaptureStatus).isNull()
+
+            initialState.eventSink(DeveloperSettingsEvents.ToggleNeutrinoCapture)
+            val capturing = awaitItem()
+            assertThat(capturing.neutrinoCapturing).isTrue()
+            assertThat(capturing.neutrinoCaptureStatus).isEqualTo("Capturing… saved to Downloads on stop")
+
+            capturing.eventSink(DeveloperSettingsEvents.ToggleNeutrinoCapture)
+            val stopped = awaitItem()
+            assertThat(stopped.neutrinoCapturing).isFalse()
+            assertThat(stopped.neutrinoCaptureStatus).isEqualTo("Saved to Download/neutrino-fed.pcap")
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `present - a failed capture start surfaces the reason`() = runTest {
+        val presenter = createDeveloperSettingsPresenter(
+            neutrinoService = FakeNeutrinoService(
+                startCaptureResult = { CaptureResult.Failed("permission denied") },
+            ),
+        )
+        presenter.test {
+            val initialState = awaitItem()
+            initialState.eventSink(DeveloperSettingsEvents.ToggleNeutrinoCapture)
+            val failed = awaitItem()
+            assertThat(failed.neutrinoCapturing).isFalse()
+            assertThat(failed.neutrinoCaptureStatus).isEqualTo("Failed: permission denied")
             cancelAndIgnoreRemainingEvents()
         }
     }
