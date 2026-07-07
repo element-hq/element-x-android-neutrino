@@ -12,29 +12,24 @@ import app.cash.molecule.RecompositionMode
 import app.cash.molecule.moleculeFlow
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import io.element.android.libraries.matrix.api.encryption.BackupState
-import io.element.android.libraries.matrix.api.encryption.RecoveryState
-import io.element.android.libraries.matrix.test.encryption.FakeEncryptionService
 import io.element.android.libraries.matrix.test.verification.FakeSessionVerificationService
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
 class DefaultIndicatorServiceTest {
     @Test
-    fun `test - showRoomListTopBarIndicator`() = runTest {
-        val encryptionService = FakeEncryptionService()
+    fun `test - showRoomListTopBarIndicator only reflects session verification`() = runTest {
         val sessionVerificationService = FakeSessionVerificationService()
         val sut = DefaultIndicatorService(
             sessionVerificationService = sessionVerificationService,
-            encryptionService = encryptionService,
         )
         moleculeFlow(RecompositionMode.Immediate) {
             sut.showRoomListTopBarIndicator().value
         }.test {
-            assertThat(awaitItem()).isTrue()
+            // The fake requires session verification by default; collapse the
+            // leading pre-collection frame(s) and assert the settled value.
+            assertThat(expectMostRecentItem()).isTrue()
             sessionVerificationService.emitNeedsSessionVerification(false)
-            encryptionService.emitBackupState(BackupState.ENABLED)
-            encryptionService.emitRecoveryState(RecoveryState.ENABLED)
             assertThat(awaitItem()).isFalse()
             sessionVerificationService.emitNeedsSessionVerification(true)
             assertThat(awaitItem()).isTrue()
@@ -42,62 +37,17 @@ class DefaultIndicatorServiceTest {
     }
 
     @Test
-    fun `test - showSettingChatBackupIndicator is true when BackupState is UNKNOWN`() = runTest {
-        val encryptionService = FakeEncryptionService()
+    fun `test - showSettingChatBackupIndicator is always suppressed on Neutrino`() = runTest {
         val sessionVerificationService = FakeSessionVerificationService()
         val sut = DefaultIndicatorService(
             sessionVerificationService = sessionVerificationService,
-            encryptionService = encryptionService,
         )
         moleculeFlow(RecompositionMode.Immediate) {
             sut.showSettingChatBackupIndicator().value
         }.test {
-            assertThat(awaitItem()).isTrue()
-            encryptionService.emitBackupState(BackupState.ENABLED)
-            encryptionService.emitRecoveryState(RecoveryState.ENABLED)
+            // Key backup / recovery don't apply to an on-device homeserver, so
+            // the indicator is never shown.
             assertThat(awaitItem()).isFalse()
-            encryptionService.emitBackupState(BackupState.UNKNOWN)
-            assertThat(awaitItem()).isTrue()
-        }
-    }
-
-    @Test
-    fun `test - showSettingChatBackupIndicator is true when recoveryState is DISABLED`() = runTest {
-        val encryptionService = FakeEncryptionService()
-        val sessionVerificationService = FakeSessionVerificationService()
-        val sut = DefaultIndicatorService(
-            sessionVerificationService = sessionVerificationService,
-            encryptionService = encryptionService,
-        )
-        moleculeFlow(RecompositionMode.Immediate) {
-            sut.showSettingChatBackupIndicator().value
-        }.test {
-            assertThat(awaitItem()).isTrue()
-            encryptionService.emitBackupState(BackupState.ENABLED)
-            encryptionService.emitRecoveryState(RecoveryState.ENABLED)
-            assertThat(awaitItem()).isFalse()
-            encryptionService.emitRecoveryState(RecoveryState.DISABLED)
-            assertThat(awaitItem()).isTrue()
-        }
-    }
-
-    @Test
-    fun `test - showSettingChatBackupIndicator is true when recoveryState is INCOMPLETE`() = runTest {
-        val encryptionService = FakeEncryptionService()
-        val sessionVerificationService = FakeSessionVerificationService()
-        val sut = DefaultIndicatorService(
-            sessionVerificationService = sessionVerificationService,
-            encryptionService = encryptionService,
-        )
-        moleculeFlow(RecompositionMode.Immediate) {
-            sut.showSettingChatBackupIndicator().value
-        }.test {
-            assertThat(awaitItem()).isTrue()
-            encryptionService.emitBackupState(BackupState.ENABLED)
-            encryptionService.emitRecoveryState(RecoveryState.ENABLED)
-            assertThat(awaitItem()).isFalse()
-            encryptionService.emitRecoveryState(RecoveryState.INCOMPLETE)
-            assertThat(awaitItem()).isTrue()
         }
     }
 }

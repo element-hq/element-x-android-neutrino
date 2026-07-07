@@ -211,9 +211,12 @@ class RoomListPresenter(
             return SecurityBannerState.None
         }
 
+        // Neutrino runs the homeserver on the same device as the client, so key
+        // backup and recovery do not apply and the "Back up your chats" security
+        // banner is never relevant — regardless of the reported recovery state.
         when (recoveryState) {
-            RecoveryState.DISABLED -> return SecurityBannerState.SetUpRecovery
-            RecoveryState.INCOMPLETE -> return SecurityBannerState.RecoveryKeyConfirmation
+            RecoveryState.DISABLED,
+            RecoveryState.INCOMPLETE,
             RecoveryState.UNKNOWN,
             RecoveryState.WAITING_FOR_SYNC,
             RecoveryState.ENABLED -> Unit

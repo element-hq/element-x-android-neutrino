@@ -39,6 +39,7 @@ fun DeveloperSettingsView(
     state: DeveloperSettingsState,
     onOpenShowkase: () -> Unit,
     onPushHistoryClick: () -> Unit,
+    onNeutrinoPeersClick: () -> Unit,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -73,6 +74,12 @@ fun DeveloperSettingsView(
                 supportingContent = {
                     Text(state.neutrinoServerName ?: "Starting…")
                 },
+            )
+            ListItem(
+                headlineContent = {
+                    Text("Discovered peers")
+                },
+                onClick = onNeutrinoPeersClick,
             )
         }
 
@@ -184,6 +191,7 @@ internal fun DeveloperSettingsViewPreview(
         state = state,
         onOpenShowkase = {},
         onPushHistoryClick = {},
+        onNeutrinoPeersClick = {},
         onBackClick = {},
     )
 }
