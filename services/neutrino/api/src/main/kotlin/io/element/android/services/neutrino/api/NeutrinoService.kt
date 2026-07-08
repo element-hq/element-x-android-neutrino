@@ -47,4 +47,25 @@ interface NeutrinoService {
      * server has started.
      */
     fun discoveredPeers(): List<DiscoveredPeer>
+
+    /**
+     * Start mirroring federation datagrams into a Wireshark-readable pcap file in
+     * host-owned external storage (so it can be pulled with `adb pull` without
+     * root). The service owns the path. Re-arming while already capturing rotates
+     * to a fresh file. Returns where it is writing, or why it could not start.
+     */
+    fun startCapture(): CaptureResult
+
+    /**
+     * Stop capturing and flush + close the file, which is ready to `adb pull` the
+     * moment this returns. Returns the finalized file path, or `null` if no
+     * capture was running.
+     */
+    fun stopCapture(): String?
+
+    /**
+     * Whether a federation pcap capture is currently running. Drives the toggle
+     * state in developer settings.
+     */
+    fun isCapturing(): Boolean
 }

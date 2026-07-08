@@ -31,6 +31,7 @@ import io.element.android.libraries.architecture.runCatchingUpdatingState
 import io.element.android.libraries.core.data.ByteUnit
 import io.element.android.libraries.matrix.api.analytics.GetDatabaseSizesUseCase
 import io.element.android.libraries.matrix.api.core.SessionId
+import io.element.android.services.neutrino.api.CaptureResult
 import io.element.android.services.neutrino.api.NeutrinoService
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableMap
@@ -63,6 +64,14 @@ class DeveloperSettingsPresenter(
         var showColorPicker by remember {
             mutableStateOf(false)
         }
+        // Seed the capture toggle from the running server so the switch reflects
+        // reality when the screen (re)opens.
+        var neutrinoCapturing by remember {
+            mutableStateOf(neutrinoService.isCapturing())
+        }
+        var neutrinoCaptureStatus by remember {
+            mutableStateOf<String?>(null)
+        }
         LaunchedEffect(Unit) {
             computeDatabaseSizes(databaseSizes)
         }
@@ -90,6 +99,27 @@ class DeveloperSettingsPresenter(
                 DeveloperSettingsEvents.VacuumStores -> coroutineScope.launch {
                     vacuumStoresUseCase()
                 }
+                DeveloperSettingsEvents.ToggleNeutrinoCapture -> {
+                    if (neutrinoCapturing) {
+                        val path = neutrinoService.stopCapture()
+                        neutrinoCapturing = false
+                        // The service reports the short Downloads location on stop.
+                        neutrinoCaptureStatus = path?.let { "Saved to $it" } ?: "Not capturing"
+                    } else {
+                        when (val result = neutrinoService.startCapture()) {
+                            is CaptureResult.Started -> {
+                                neutrinoCapturing = true
+                                // Don't surface the long working path — the file
+                                // lands in Downloads on stop.
+                                neutrinoCaptureStatus = "Capturing… saved to Downloads on stop"
+                            }
+                            is CaptureResult.Failed -> {
+                                neutrinoCapturing = false
+                                neutrinoCaptureStatus = "Failed: ${result.reason}"
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -102,6 +132,8 @@ class DeveloperSettingsPresenter(
             isEnterpriseBuild = enterpriseService.isEnterpriseBuild,
             showColorPicker = showColorPicker,
             neutrinoServerName = neutrinoService.serverName(),
+            neutrinoCapturing = neutrinoCapturing,
+            neutrinoCaptureStatus = neutrinoCaptureStatus,
             eventSink = ::handleEvent,
         )
     }

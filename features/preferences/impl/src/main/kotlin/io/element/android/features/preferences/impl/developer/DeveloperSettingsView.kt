@@ -81,6 +81,18 @@ fun DeveloperSettingsView(
                 },
                 onClick = onNeutrinoPeersClick,
             )
+            ListItem(
+                headlineContent = {
+                    Text("Capture federation traffic")
+                },
+                supportingContent = state.neutrinoCaptureStatus?.let { status ->
+                    { Text(status) }
+                },
+                trailingContent = ListItemContent.Switch(
+                    checked = state.neutrinoCapturing,
+                ),
+                onClick = { state.eventSink(DeveloperSettingsEvents.ToggleNeutrinoCapture) },
+            )
         }
 
         if (state.isEnterpriseBuild) {

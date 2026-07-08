@@ -31,6 +31,10 @@ open class DeveloperSettingsStateProvider : PreviewParameterProvider<DeveloperSe
                 //  at io.mhssn.colorpicker.pickers.ClassicColorPickerKt$ClassicColorPicker$1$1.invokeSuspend(ClassicColorPicker.kt:53)
                 showColorPicker = false,
             ),
+            aDeveloperSettingsState(
+                neutrinoCapturing = true,
+                neutrinoCaptureStatus = "Capturing… saved to Downloads on stop",
+            ),
         )
 }
 
@@ -40,6 +44,8 @@ fun aDeveloperSettingsState(
     isEnterpriseBuild: Boolean = false,
     showColorPicker: Boolean = false,
     neutrinoServerName: String? = "a1b2c3d4e5f6",
+    neutrinoCapturing: Boolean = false,
+    neutrinoCaptureStatus: String? = null,
     eventSink: (DeveloperSettingsEvents) -> Unit = {},
 ) = DeveloperSettingsState(
     appDeveloperSettingsState = appDeveloperSettingsState,
@@ -49,5 +55,7 @@ fun aDeveloperSettingsState(
     isEnterpriseBuild = isEnterpriseBuild,
     showColorPicker = showColorPicker,
     neutrinoServerName = neutrinoServerName,
+    neutrinoCapturing = neutrinoCapturing,
+    neutrinoCaptureStatus = neutrinoCaptureStatus,
     eventSink = eventSink,
 )
