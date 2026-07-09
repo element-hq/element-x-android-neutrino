@@ -1,6 +1,6 @@
 # Element X Android (Neutrino)
 
-Internal fork of [Element X Android](https://github.com/element-hq/element-x-android), imported as a snapshot of `v26.05.2`.
+P2P Fork of [Element X Android](https://github.com/element-hq/element-x-android), imported as a snapshot of `v26.05.2`.
 
 Element X Android is a [Matrix](https://matrix.org/) client built on the [Matrix Rust SDK](https://github.com/matrix-org/matrix-rust-sdk), targeting devices running Android 7+. The UI layer is written using [Jetpack Compose](https://developer.android.com/jetpack/compose), and the navigation is managed using [Appyx](https://github.com/bumble-tech/appyx).
 
@@ -33,7 +33,7 @@ onboarding](docs/_developer_onboarding.md#building-the-sdk-locally) instructions
 
 ## Copyright and License
 
-Copyright (c) 2025 Element Creations Ltd.
+Copyright (c) 2025 - 2026 Element Creations Ltd.
 Copyright (c) 2022 - 2025 New Vector Ltd.
 
 This software is dual licensed by Element Creations Ltd (Element). It can be used either:
