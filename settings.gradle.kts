@@ -18,13 +18,13 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         mavenLocal()
-        // Neutrino bindings are published to GitHub Packages on the (private) element-hq/neutrino
+        // Neutrino bindings are published to GitHub Packages on element-hq/neutrino
         // repository. Authenticate with a token that has the read:packages scope, either via the
         // gpr.user/gpr.key Gradle properties (e.g. in ~/.gradle/gradle.properties) or via the
         // GITHUB_ACTOR/GITHUB_TOKEN environment variables (used on CI).
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/element-hq/neutrino")
+            url = uri("https://maven.pkg.github.com/element-hq/neutrino-iroh")
             credentials {
                 username = providers.gradleProperty("gpr.user").orNull ?: System.getenv("GITHUB_ACTOR")
                 password = providers.gradleProperty("gpr.key").orNull ?: System.getenv("GITHUB_TOKEN")
