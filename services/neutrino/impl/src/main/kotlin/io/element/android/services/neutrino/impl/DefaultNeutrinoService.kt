@@ -31,13 +31,22 @@ import timber.log.Timber
 import java.io.File
 import java.net.InetSocketAddress
 import java.net.Socket
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 private const val READINESS_POLL_INTERVAL_MS = 100L
 private const val READINESS_CONNECT_TIMEOUT_MS = 500
 
-// Stable capture filename, reused for both the app-private working file and the
-// Downloads export, so the `adb pull` path never changes between runs.
-private const val CAPTURE_FILE_NAME = "neutrino-fed.pcap"
+// Capture filenames are timestamped (neutrino-YYYYMMDD-HHMMSS.pcap) rather than
+// stable: MediaStore rows created by a previous install can't be replaced (an app
+// may only delete rows it owns, and ownership is lost on reinstall), so a stable
+// name silently collides and gets auto-renamed to "name (1).pcap" — leaving the
+// old file at the stable path, where `adb pull` fetches it as if it were fresh.
+private fun newCaptureFileName(): String {
+    val stamp = SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date())
+    return "neutrino-$stamp.pcap"
+}
 
 @SingleIn(AppScope::class)
 @ContributesBinding(AppScope::class, binding = binding<NeutrinoService>())
@@ -76,6 +85,8 @@ class DefaultNeutrinoService(
                 // Run the in-process low-bandwidth (CoAP/UDP) federation sidecar on
                 // the federation port; null would mean direct federation instead.
                 lbFederationPort = NEUTRINO_FEDERATION_PORT.toUShort(),
+                // Add signatures to events
+                trustedNetwork = false,
             ))
         } catch (t: Throwable) {
             Timber.e(t, "Neutrino failed to start")
@@ -147,7 +158,7 @@ class DefaultNeutrinoService(
         // stopCapture — so the developer never has to type the long private path.
         val dir = context.getExternalFilesDir(null)
             ?: return CaptureResult.Failed("External storage is unavailable")
-        val file = File(dir, CAPTURE_FILE_NAME)
+        val file = File(dir, newCaptureFileName())
         return try {
             handle.startCapture(file.path)
             captureFilePath = file.path
@@ -182,19 +193,19 @@ class DefaultNeutrinoService(
     override fun isCapturing(): Boolean = handle?.isCapturing() == true
 
     // Copy the finished pcap into the public Downloads collection so it lands at a
-    // short, stable path (`/sdcard/Download/neutrino-fed.pcap`) that's trivial to
+    // short path (`/sdcard/Download/neutrino-<timestamp>.pcap`) that's trivial to
     // `adb pull` and visible in the Files app — far better dev UX than the
-    // app-private external path. Returns the user-facing "Download/<name>"
-    // location, or null (keeping the app-private file) on older devices or error.
+    // app-private external path. Returns the user-facing "Download/<name>" location
+    // — read back from MediaStore, since an insert that collides with an existing
+    // row is silently renamed ("name (1).pcap") rather than overwriting — or null
+    // (keeping the app-private file) on older devices or error.
     // MediaStore Downloads is API 29+; needs no storage permission.
     private fun exportToDownloads(source: File): String? {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return null
         val resolver = context.contentResolver
         val collection = MediaStore.Downloads.EXTERNAL_CONTENT_URI
-        // Overwrite any prior export so the pull path stays stable across runs.
-        resolver.delete(collection, "${MediaStore.Downloads.DISPLAY_NAME} = ?", arrayOf(CAPTURE_FILE_NAME))
         val pending = ContentValues().apply {
-            put(MediaStore.Downloads.DISPLAY_NAME, CAPTURE_FILE_NAME)
+            put(MediaStore.Downloads.DISPLAY_NAME, source.name)
             put(MediaStore.Downloads.MIME_TYPE, "application/vnd.tcpdump.pcap")
             put(MediaStore.Downloads.IS_PENDING, 1)
         }
@@ -204,7 +215,18 @@ class DefaultNeutrinoService(
                 source.inputStream().use { it.copyTo(output) }
             } ?: return null
             resolver.update(uri, ContentValues().apply { put(MediaStore.Downloads.IS_PENDING, 0) }, null, null)
-            "Download/$CAPTURE_FILE_NAME"
+            // The name MediaStore actually stored the file under, which is not
+            // necessarily the requested one (collision → "name (1).pcap").
+            val actualName = resolver.query(
+                uri,
+                arrayOf(MediaStore.Downloads.DISPLAY_NAME),
+                null,
+                null,
+                null,
+            )?.use { cursor ->
+                if (cursor.moveToFirst()) cursor.getString(0) else null
+            } ?: source.name
+            "Download/$actualName"
         } catch (t: Throwable) {
             Timber.e(t, "Failed to export capture to Downloads")
             resolver.delete(uri, null, null)
