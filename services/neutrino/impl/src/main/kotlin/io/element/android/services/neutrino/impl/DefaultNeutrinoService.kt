@@ -73,7 +73,7 @@ class DefaultNeutrinoService(
         // on the BLE runtime permissions being granted.
         initBleNativeOnce()
         try {
-            handle = io.element.neutrino.start(io.element.neutrino.NeutrinoConfig(
+            handle = io.element.neutrino.ble.startBle(io.element.neutrino.NeutrinoConfig(
                 // server_name is no longer supplied: the homeserver derives it from
                 // its node identity and reports it back via handle.serverName().
                 bindAddr = bindAddr,
