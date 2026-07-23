@@ -87,6 +87,8 @@ class DefaultNeutrinoService(
                 lbFederationPort = NEUTRINO_FEDERATION_PORT.toUShort(),
                 // Add signatures to events
                 trustedNetwork = false,
+                // derive the server name from the random secret
+                serverName = null,
             ))
         } catch (t: Throwable) {
             Timber.e(t, "Neutrino failed to start")
@@ -107,6 +109,12 @@ class DefaultNeutrinoService(
         if (handle == null) return
         val ready = withTimeoutOrNull(timeoutMs) {
             while (!withContext(Dispatchers.IO) { isCsPortOpen() }) {
+                // A fatal startup failure is published asynchronously after start()
+                // returns (e.g. a server_name mismatch against existing data); the
+                // CS listener will then never bind, so stop waiting immediately and
+                // let the caller surface lastError() instead of blocking the full
+                // timeout on a server that is never coming up.
+                if (handle?.lastError() != null) return@withTimeoutOrNull false
                 delay(READINESS_POLL_INTERVAL_MS)
             }
             true
@@ -136,6 +144,8 @@ class DefaultNeutrinoService(
     }
 
     override fun serverName(): String? = handle?.serverName()
+
+    override fun lastError(): String? = handle?.lastError()
 
     override fun discoveredPeers(): List<DiscoveredPeer> =
         handle?.discoveredPeers()?.map { peer ->

@@ -13,6 +13,7 @@ import io.element.android.services.neutrino.api.NeutrinoService
 
 class FakeNeutrinoService(
     private val serverNameResult: String? = "a1b2c3d4",
+    private val lastErrorResult: String? = null,
     private val discoveredPeersResult: () -> List<DiscoveredPeer> = { emptyList() },
     private val startCaptureResult: () -> CaptureResult = { CaptureResult.Started(A_CAPTURE_PATH) },
     // The location stopCapture reports (the real service copies to Downloads, so
@@ -28,6 +29,8 @@ class FakeNeutrinoService(
     override fun isRunning(): Boolean = false
 
     override fun serverName(): String? = serverNameResult
+
+    override fun lastError(): String? = lastErrorResult
 
     override fun discoveredPeers(): List<DiscoveredPeer> = discoveredPeersResult()
 

@@ -33,6 +33,15 @@ interface NeutrinoService {
     fun isRunning(): Boolean
 
     /**
+     * The fatal error the embedded homeserver exited with, or `null` while it is
+     * starting or running normally. Startup can fail asynchronously a moment
+     * after [start] returns — e.g. the `server_name` persisted in the database no
+     * longer matches the identity the server is booting under — in which case
+     * [awaitReady] gives up early and this returns the message to show the user.
+     */
+    fun lastError(): String?
+
+    /**
      * The homeserver's federation `server_name` — its node identity (an ed25519
      * public key in hex), the domain of the local user's MXID. `null` until the
      * server has started and resolved its identity; stable for its lifetime after.
