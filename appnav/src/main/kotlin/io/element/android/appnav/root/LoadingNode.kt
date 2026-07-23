@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,10 +46,13 @@ import com.bumble.appyx.core.node.Node
 import com.bumble.appyx.core.node.node
 import io.element.android.appnav.R
 import io.element.android.compound.theme.ElementTheme
+import io.element.android.libraries.designsystem.components.dialogs.ErrorDialog
 import io.element.android.libraries.designsystem.theme.components.Button
 import io.element.android.libraries.designsystem.theme.components.CircularProgressIndicator
 import io.element.android.libraries.designsystem.theme.components.OutlinedButton
 import io.element.android.libraries.designsystem.theme.components.Text
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * The startup splash for the embedded Neutrino homeserver. It hard-gates startup on two
@@ -62,9 +66,10 @@ import io.element.android.libraries.designsystem.theme.components.Text
  */
 fun loadingNode(
     buildContext: BuildContext,
+    startupError: StateFlow<String?> = MutableStateFlow(null),
     onNeutrinoReadyToStart: () -> Unit = {},
 ): Node = node(buildContext) { modifier ->
-    NeutrinoStartupView(onNeutrinoReadyToStart, modifier)
+    NeutrinoStartupView(startupError, onNeutrinoReadyToStart, modifier)
 }
 
 // BLE runtime permissions only exist on Android 12 (API 31)+; below that they are
@@ -82,10 +87,12 @@ private val blePermissions: Array<String> =
 
 @Composable
 private fun NeutrinoStartupView(
+    startupError: StateFlow<String?>,
     onNeutrinoReadyToStart: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
+    val fatalError by startupError.collectAsState()
     var granted by remember { mutableStateOf(context.hasBlePermissions()) }
     var bluetoothOn by remember { mutableStateOf(context.isBluetoothOn()) }
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -146,6 +153,18 @@ private fun NeutrinoStartupView(
             modifier = modifier,
         )
         else -> LoadingView(modifier)
+    }
+    // A fatal startup failure the server reports asynchronously (e.g. a server_name
+    // mismatch against the data already on disk) leaves the CS listener unbound, so
+    // the spinner would otherwise stay up forever. Surface the message over it.
+    var errorDismissed by remember { mutableStateOf(false) }
+    fatalError?.let { error ->
+        if (!errorDismissed) {
+            ErrorDialog(
+                content = error,
+                onSubmit = { errorDismissed = true },
+            )
+        }
     }
 }
 

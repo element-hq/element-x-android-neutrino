@@ -131,6 +131,12 @@ class RootFlowNode(
     // hand (a hard gate); otherwise the CS listener never binds and startup hangs.
     private val neutrinoPrerequisitesMet = MutableStateFlow(false)
 
+    // The embedded server's fatal startup error, surfaced on the splash as a dialog.
+    // Set when the homeserver fails to come up (e.g. its persisted server_name no
+    // longer matches the identity it is booting under); we then stay on the splash
+    // rather than routing into an app with no reachable homeserver behind it.
+    private val neutrinoStartupError = MutableStateFlow<String?>(null)
+
     override fun onBuilt() {
         analyticsColdStartWatcher.start()
         appCoroutineScope.launch {
@@ -143,6 +149,15 @@ class RootFlowNode(
             // auto-login below (and the profile write during onboarding) don't race
             // the bind and fail with "connection refused".
             neutrinoService.awaitReady()
+            // Startup can fail fatally on the server's background thread after
+            // start() returns (awaitReady bails early in that case). Surface the
+            // message on the splash and stop here — routing on would only lead to
+            // an auto-login against a homeserver that never came up.
+            neutrinoService.lastError()?.let { error ->
+                Timber.e("Neutrino failed to start: $error")
+                neutrinoStartupError.value = error
+                return@launch
+            }
             if (buildContext.savedStateMap != null) {
                 restoreSavedState(buildContext.savedStateMap)
                 observeNavState(true)
@@ -386,7 +401,7 @@ class RootFlowNode(
                     ),
                 )
             }
-            NavTarget.SplashScreen -> loadingNode(buildContext) {
+            NavTarget.SplashScreen -> loadingNode(buildContext, neutrinoStartupError) {
                 neutrinoPrerequisitesMet.value = true
             }
             NavTarget.BugReport -> {
