@@ -8,7 +8,9 @@
 
 package io.element.android.features.ftue.impl.notifications
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import com.bumble.appyx.core.modality.BuildContext
 import com.bumble.appyx.core.node.Node
@@ -35,13 +37,25 @@ class NotificationsOptInNode(
 
     private val presenter: NotificationsOptInPresenter = presenterFactory.create(callback)
 
+    // No screen is displayed: the system permission dialog is requested right away and
+    // the step finishes with its result.
     @Composable
     override fun View(modifier: Modifier) {
         val state = presenter.present()
-        NotificationsOptInView(
-            state = state,
-            onBack = { callback.onNotificationsOptInFinished() },
-            modifier = modifier
-        )
+        val permissionsState = state.notificationsPermissionState
+        val alreadyAsked = permissionsState.permissionAlreadyAsked
+        LaunchedEffect(alreadyAsked) {
+            if (!permissionsState.permissionGranted) {
+                if (alreadyAsked) {
+                    // The system dialog has been answered without granting the permission:
+                    // record the denial, as the removed "Not now" button did, so that the
+                    // step is not displayed again.
+                    state.eventSink(NotificationsOptInEvents.NotNowClicked)
+                } else {
+                    state.eventSink(NotificationsOptInEvents.ContinueClicked)
+                }
+            }
+        }
+        Box(modifier)
     }
 }
