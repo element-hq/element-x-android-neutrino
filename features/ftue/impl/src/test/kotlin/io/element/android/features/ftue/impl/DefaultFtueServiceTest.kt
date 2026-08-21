@@ -24,12 +24,10 @@ import io.element.android.libraries.permissions.api.PermissionStateProvider
 import io.element.android.libraries.permissions.test.FakePermissionStateProvider
 import io.element.android.libraries.preferences.api.store.SessionPreferencesStore
 import io.element.android.libraries.preferences.test.InMemorySessionPreferencesStore
-import io.element.android.services.analytics.api.AnalyticsService
-import io.element.android.services.analytics.noop.NoopAnalyticsService
-import io.element.android.services.analytics.test.FakeAnalyticsService
 import io.element.android.services.toolbox.test.sdk.FakeBuildVersionSdkIntProvider
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import org.junit.Ignore
 import org.junit.Test
 
 class DefaultFtueServiceTest {
@@ -54,19 +52,16 @@ class DefaultFtueServiceTest {
 
     @Test
     fun `given all checks being true, FtueState is Complete`() = runTest {
-        val analyticsService = FakeAnalyticsService()
         val sessionVerificationService = FakeSessionVerificationService()
         val permissionStateProvider = FakePermissionStateProvider(permissionGranted = true)
         val lockScreenService = FakeLockScreenService()
         val service = createDefaultFtueService(
             sessionVerificationService = sessionVerificationService,
-            analyticsService = analyticsService,
             permissionStateProvider = permissionStateProvider,
             lockScreenService = lockScreenService,
         )
 
         sessionVerificationService.emitVerifiedStatus(SessionVerifiedStatus.Verified)
-        analyticsService.setDidAskUserConsent()
         permissionStateProvider.setPermissionGranted()
         lockScreenService.setIsPinSetup(true)
         service.updateFtueStep()
@@ -77,14 +72,13 @@ class DefaultFtueServiceTest {
     }
 
     @Test
+    @Ignore("Analytics no longer takes part in the Ftue flow, so this is now the same test as above.")
     fun `given all checks being true with no analytics, FtueState is Complete`() = runTest {
-        val analyticsService = NoopAnalyticsService()
         val sessionVerificationService = FakeSessionVerificationService()
         val permissionStateProvider = FakePermissionStateProvider(permissionGranted = true)
         val lockScreenService = FakeLockScreenService()
         val service = createDefaultFtueService(
             sessionVerificationService = sessionVerificationService,
-            analyticsService = analyticsService,
             permissionStateProvider = permissionStateProvider,
             lockScreenService = lockScreenService,
         )
@@ -102,13 +96,11 @@ class DefaultFtueServiceTest {
     @Test
     fun `display name prompt is shown until completed`() = runTest {
         val sessionVerificationService = FakeSessionVerificationService()
-        val analyticsService = FakeAnalyticsService()
         val permissionStateProvider = FakePermissionStateProvider(permissionGranted = true)
         val lockScreenService = FakeLockScreenService()
         val preferences = InMemorySessionPreferencesStore(isDisplayNamePromptCompleted = false)
         val service = createDefaultFtueService(
             sessionVerificationService = sessionVerificationService,
-            analyticsService = analyticsService,
             permissionStateProvider = permissionStateProvider,
             lockScreenService = lockScreenService,
             sessionPreferencesStore = preferences,
@@ -119,7 +111,6 @@ class DefaultFtueServiceTest {
         sessionVerificationService.emitVerifiedStatus(SessionVerifiedStatus.Verified)
         permissionStateProvider.setPermissionGranted()
         lockScreenService.setIsPinSetup(true)
-        analyticsService.setDidAskUserConsent()
 
         service.ftueStepStateFlow.test {
             assertThat(awaitItem()).isEqualTo(InternalFtueState.Unknown)
@@ -136,12 +127,10 @@ class DefaultFtueServiceTest {
         val sessionVerificationService = FakeSessionVerificationService().apply {
             emitVerifiedStatus(SessionVerifiedStatus.NotVerified)
         }
-        val analyticsService = FakeAnalyticsService()
         val permissionStateProvider = FakePermissionStateProvider(permissionGranted = false)
         val lockScreenService = FakeLockScreenService()
         val service = createDefaultFtueService(
             sessionVerificationService = sessionVerificationService,
-            analyticsService = analyticsService,
             permissionStateProvider = permissionStateProvider,
             lockScreenService = lockScreenService,
         )
@@ -163,10 +152,7 @@ class DefaultFtueServiceTest {
             lockScreenService.setIsPinSetup(true)
             // Simulate event from LockScreenEntryPoint.Callback.onSetupDone()
             service.updateFtueStep()
-            // Analytics opt in
-            assertThat(awaitItem()).isEqualTo(InternalFtueState.Incomplete(FtueStep.AnalyticsOptIn))
-            analyticsService.setDidAskUserConsent()
-            // Final step
+            // Final step: the analytics opt in step is never displayed
             assertThat(awaitItem()).isEqualTo(InternalFtueState.Complete)
         }
     }
@@ -174,12 +160,10 @@ class DefaultFtueServiceTest {
     @Test
     fun `if a check for a step is true, start from the next one`() = runTest {
         val sessionVerificationService = FakeSessionVerificationService()
-        val analyticsService = FakeAnalyticsService()
         val permissionStateProvider = FakePermissionStateProvider(permissionGranted = false)
         val lockScreenService = FakeLockScreenService()
         val service = createDefaultFtueService(
             sessionVerificationService = sessionVerificationService,
-            analyticsService = analyticsService,
             permissionStateProvider = permissionStateProvider,
             lockScreenService = lockScreenService,
         )
@@ -191,9 +175,7 @@ class DefaultFtueServiceTest {
 
         service.ftueStepStateFlow.test {
             assertThat(awaitItem()).isEqualTo(InternalFtueState.Unknown)
-            // Analytics opt in
-            assertThat(awaitItem()).isEqualTo(InternalFtueState.Incomplete(FtueStep.AnalyticsOptIn))
-            analyticsService.setDidAskUserConsent()
+            // No analytics opt in step: the flow is over
             assertThat(awaitItem()).isEqualTo(InternalFtueState.Complete)
         }
     }
@@ -201,13 +183,11 @@ class DefaultFtueServiceTest {
     @Test
     fun `if version is older than 13 we don't display the notification opt in screen`() = runTest {
         val sessionVerificationService = FakeSessionVerificationService()
-        val analyticsService = FakeAnalyticsService()
         val lockScreenService = FakeLockScreenService()
 
         val service = createDefaultFtueService(
             sdkIntVersion = Build.VERSION_CODES.M,
             sessionVerificationService = sessionVerificationService,
-            analyticsService = analyticsService,
             lockScreenService = lockScreenService,
         )
 
@@ -216,9 +196,7 @@ class DefaultFtueServiceTest {
 
         service.ftueStepStateFlow.test {
             assertThat(awaitItem()).isEqualTo(InternalFtueState.Unknown)
-            // Analytics opt in
-            assertThat(awaitItem()).isEqualTo(InternalFtueState.Incomplete(FtueStep.AnalyticsOptIn))
-            analyticsService.setDidAskUserConsent()
+            // The notification permission is neither granted nor denied, but the step is skipped
             assertThat(awaitItem()).isEqualTo(InternalFtueState.Complete)
         }
     }
@@ -226,7 +204,6 @@ class DefaultFtueServiceTest {
 
 internal fun TestScope.createDefaultFtueService(
     sessionVerificationService: SessionVerificationService = FakeSessionVerificationService(),
-    analyticsService: AnalyticsService = FakeAnalyticsService(),
     permissionStateProvider: PermissionStateProvider = FakePermissionStateProvider(permissionGranted = false),
     lockScreenService: LockScreenService = FakeLockScreenService(),
     // Default to "prompt already done" so tests unrelated to the display-name step
@@ -240,7 +217,6 @@ internal fun TestScope.createDefaultFtueService(
     sessionCoroutineScope = backgroundScope,
     sessionVerificationService = sessionVerificationService,
     sdkVersionProvider = FakeBuildVersionSdkIntProvider(sdkIntVersion),
-    analyticsService = analyticsService,
     permissionStateProvider = permissionStateProvider,
     lockScreenService = lockScreenService,
     sessionPreferencesStore = sessionPreferencesStore,

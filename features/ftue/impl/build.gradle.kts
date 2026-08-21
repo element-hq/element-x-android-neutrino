@@ -42,7 +42,6 @@ dependencies {
     implementation(projects.features.logout.api)
     implementation(projects.features.securebackup.api)
     implementation(projects.features.verifysession.api)
-    implementation(projects.services.analytics.api)
     implementation(projects.features.lockscreen.api)
     implementation(projects.libraries.permissions.api)
     implementation(projects.libraries.permissions.noop)
@@ -51,8 +50,6 @@ dependencies {
 
     testCommonDependencies(libs, true)
     testImplementation(projects.libraries.matrix.test)
-    testImplementation(projects.services.analytics.test)
-    testImplementation(projects.services.analytics.noop)
     testImplementation(projects.libraries.permissions.test)
     testImplementation(projects.libraries.preferences.test)
     testImplementation(projects.features.lockscreen.test)

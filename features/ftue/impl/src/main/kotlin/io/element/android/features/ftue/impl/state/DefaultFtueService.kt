@@ -22,12 +22,10 @@ import io.element.android.libraries.matrix.api.verification.SessionVerificationS
 import io.element.android.libraries.matrix.api.verification.SessionVerifiedStatus
 import io.element.android.libraries.permissions.api.PermissionStateProvider
 import io.element.android.libraries.preferences.api.store.SessionPreferencesStore
-import io.element.android.services.analytics.api.AnalyticsService
 import io.element.android.services.toolbox.api.sdk.BuildVersionSdkIntProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -38,7 +36,6 @@ import kotlinx.coroutines.launch
 class DefaultFtueService(
     private val sdkVersionProvider: BuildVersionSdkIntProvider,
     @SessionCoroutineScope private val sessionCoroutineScope: CoroutineScope,
-    private val analyticsService: AnalyticsService,
     private val permissionStateProvider: PermissionStateProvider,
     private val lockScreenService: LockScreenService,
     private val sessionVerificationService: SessionVerificationService,
@@ -66,8 +63,7 @@ class DefaultFtueService(
                 }
             },
             userNeedsToConfirmSessionVerificationSuccess,
-            analyticsService.didAskUserConsentFlow.distinctUntilChanged(),
-        ) {
+        ) { _, _ ->
             updateFtueStep()
         }
             .launchIn(sessionCoroutineScope)
@@ -108,11 +104,8 @@ class DefaultFtueService(
             } else {
                 getNextStep(FtueStep.LockscreenSetup)
             }
-            FtueStep.LockscreenSetup -> if (needsAnalyticsOptIn()) {
-                FtueStep.AnalyticsOptIn
-            } else {
-                getNextStep(FtueStep.AnalyticsOptIn)
-            }
+            // The analytics opt-in prompt is never displayed.
+            FtueStep.LockscreenSetup -> getNextStep(FtueStep.AnalyticsOptIn)
             FtueStep.AnalyticsOptIn -> null
         }
 
@@ -133,10 +126,6 @@ class DefaultFtueService(
     // and persisted on the embedded homeserver via the profile API.
     private suspend fun shouldSetDisplayName(): Boolean {
         return !sessionPreferencesStore.isDisplayNamePromptCompleted().first()
-    }
-
-    private suspend fun needsAnalyticsOptIn(): Boolean {
-        return analyticsService.didAskUserConsentFlow.first().not()
     }
 
     private suspend fun shouldAskNotificationPermissions(): Boolean {
