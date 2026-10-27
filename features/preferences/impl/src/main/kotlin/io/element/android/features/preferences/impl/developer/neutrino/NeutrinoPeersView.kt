@@ -41,7 +41,7 @@ fun NeutrinoPeersView(
             )
             ListItem(
                 headlineContent = { Text("Refresh") },
-                onClick = { state.eventSink(NeutrinoPeersEvents.Refresh) },
+                onClick = { state.eventSink(NeutrinoPeersEvent.Refresh) },
             )
         }
         PreferenceCategory(title = "Peers (${state.peers.size})") {
@@ -68,7 +68,7 @@ private fun formatScanTime(millis: Long): String {
 @PreviewsDayNight
 @Composable
 internal fun NeutrinoPeersViewPreview(
-    @PreviewParameter(NeutrinoPeersStateProvider::class) state: NeutrinoPeersState
+    @PreviewParameter(NeutrinoPeersStatePreviewParam::class) state: NeutrinoPeersState
 ) = ElementPreview {
     NeutrinoPeersView(
         state = state,

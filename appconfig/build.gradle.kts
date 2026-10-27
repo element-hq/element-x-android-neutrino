@@ -36,7 +36,6 @@ android {
 }
 
 dependencies {
-    implementation(libs.coroutines.core)
     implementation(libs.androidx.annotationjvm)
     implementation(libs.androidx.corektx)
     implementation(projects.libraries.matrix.api)

@@ -8,6 +8,7 @@
 
 package io.element.android.libraries.matrix.impl.room
 
+import io.element.android.appconfig.TimelineConfig
 import io.element.android.libraries.core.coroutine.CoroutineDispatchers
 import io.element.android.libraries.core.coroutine.childScope
 import io.element.android.libraries.core.extensions.mapFailure
@@ -52,6 +53,7 @@ import io.element.android.libraries.matrix.impl.room.threads.RustThreadsListServ
 import io.element.android.libraries.matrix.impl.roomdirectory.map
 import io.element.android.libraries.matrix.impl.timeline.RustTimeline
 import io.element.android.libraries.matrix.impl.timeline.item.event.TimelineEventContentMapper
+import io.element.android.libraries.matrix.impl.user.map
 import io.element.android.libraries.matrix.impl.util.MessageEventContent
 import io.element.android.libraries.matrix.impl.util.mxCallbackFlow
 import io.element.android.libraries.matrix.impl.widget.RustWidgetDriver
@@ -156,6 +158,7 @@ class JoinedRustRoom(
         inner = innerRoom.threadListService(),
         contentMapper = TimelineEventContentMapper(),
         roomCoroutineScope = roomCoroutineScope,
+        roomDispatcher = roomDispatcher,
     )
 
     override val syncUpdateFlow = flow {
@@ -218,11 +221,18 @@ class JoinedRustRoom(
                     RoomMessageEventMessageType.IMAGE,
                     RoomMessageEventMessageType.VIDEO,
                     RoomMessageEventMessageType.AUDIO,
+                    RoomMessageEventMessageType.GALLERY,
                 )
             )
             is CreateTimelineParams.Focused,
             CreateTimelineParams.PinnedOnly,
-            is CreateTimelineParams.Threaded -> TimelineFilter.All
+            is CreateTimelineParams.Threaded -> {
+                RustTimelineEventFilterFactory().create(
+                    joinRule = roomInfoFlow.value.joinRule,
+                    isEncrypted = roomInfoFlow.value.isEncrypted,
+                    excludedStateTypes = TimelineConfig.excludedEvents,
+                )?.let(TimelineFilter::EventFilter) ?: TimelineFilter.All
+            }
         }
 
         val internalIdPrefix = when (createTimelineParams) {
@@ -256,7 +266,7 @@ class JoinedRustRoom(
                     filter = filter,
                     internalIdPrefix = internalIdPrefix,
                     dateDividerMode = dateDividerMode,
-                    trackReadReceipts = if (trackReadReceipts) TimelineReadReceiptTracking.ALL_EVENTS else TimelineReadReceiptTracking.DISABLED,
+                    trackReadReceipts = if (trackReadReceipts) TimelineReadReceiptTracking.MESSAGE_LIKE_EVENTS else TimelineReadReceiptTracking.DISABLED,
                     reportUtds = true,
                 )
             ).let { innerTimeline ->
@@ -421,6 +431,8 @@ class JoinedRustRoom(
                 roomAvatar = roomPowerLevelsValues.roomAvatar,
                 roomTopic = roomPowerLevelsValues.roomTopic,
                 spaceChild = roomPowerLevelsValues.spaceChild,
+                beacon = roomPowerLevelsValues.beacon,
+                beaconInfo = roomPowerLevelsValues.beaconInfo,
             )
             innerRoom.applyPowerLevelChanges(changes)
         }
@@ -467,7 +479,7 @@ class JoinedRustRoom(
                 widgetSettings = widgetSettings,
                 room = innerRoom,
                 widgetCapabilitiesProvider = object : WidgetCapabilitiesProvider {
-                    override fun acquireCapabilities(capabilities: WidgetCapabilities): WidgetCapabilities {
+                    override suspend fun acquireCapabilities(capabilities: WidgetCapabilities): WidgetCapabilities {
                         return getElementCallRequiredPermissions(sessionId.value, baseRoom.deviceId.value)
                     }
                 },
@@ -543,6 +555,12 @@ class JoinedRustRoom(
                 is LiveLocationException -> throwable.map()
                 else -> throwable
             }
+        }
+    }
+
+    override suspend fun setOwnMemberDisplayName(displayName: String): Result<Unit> = withContext(roomDispatcher) {
+        runCatchingExceptions {
+            innerRoom.setOwnMemberDisplayName(displayName)
         }
     }
 

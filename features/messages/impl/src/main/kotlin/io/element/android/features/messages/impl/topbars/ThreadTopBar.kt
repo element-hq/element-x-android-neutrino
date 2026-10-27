@@ -12,13 +12,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -42,7 +42,6 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ThreadTopBar(
     roomName: String?,
@@ -58,7 +57,18 @@ internal fun ThreadTopBar(
             BackButton(onClick = onBackClick)
         },
         title = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            val name = roomName ?: stringResource(CommonStrings.common_no_room_name)
+            val description = stringResource(
+                CommonStrings.a11y_thread_in_room,
+                name,
+            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.clearAndSetSemantics {
+                    heading()
+                    contentDescription = description
+                },
+            ) {
                 Avatar(
                     avatarData = roomAvatarData,
                     avatarType = AvatarType.Room(
@@ -69,17 +79,14 @@ internal fun ThreadTopBar(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 8.dp)
-                        .semantics {
-                            heading()
-                        },
+                        .padding(horizontal = 8.dp),
                 ) {
                     Text(
                         text = stringResource(CommonStrings.common_thread),
                         style = ElementTheme.typography.fontBodyLgMedium,
                     )
                     Text(
-                        text = roomName ?: stringResource(CommonStrings.common_no_room_name),
+                        text = name,
                         style = ElementTheme.typography.fontBodySmRegular,
                         fontStyle = FontStyle.Italic.takeIf { roomName == null },
                         color = ElementTheme.colors.textSecondary,

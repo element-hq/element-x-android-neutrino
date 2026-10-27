@@ -30,9 +30,9 @@ class NeutrinoPeersPresenter(
             neutrinoService.discoveredPeers().toImmutableList()
         }
 
-        fun handleEvent(event: NeutrinoPeersEvents) {
+        fun handleEvent(event: NeutrinoPeersEvent) {
             when (event) {
-                NeutrinoPeersEvents.Refresh -> refreshCount++
+                NeutrinoPeersEvent.Refresh -> refreshCount++
             }
         }
 
