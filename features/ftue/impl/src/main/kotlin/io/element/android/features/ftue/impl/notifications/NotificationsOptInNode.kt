@@ -50,9 +50,9 @@ class NotificationsOptInNode(
                     // The system dialog has been answered without granting the permission:
                     // record the denial, as the removed "Not now" button did, so that the
                     // step is not displayed again.
-                    state.eventSink(NotificationsOptInEvents.NotNowClicked)
+                    state.eventSink(NotificationsOptInEvent.NotNowClicked)
                 } else {
-                    state.eventSink(NotificationsOptInEvents.ContinueClicked)
+                    state.eventSink(NotificationsOptInEvent.ContinueClicked)
                 }
             }
         }

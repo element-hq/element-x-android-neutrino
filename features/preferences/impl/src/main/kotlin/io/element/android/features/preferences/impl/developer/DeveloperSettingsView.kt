@@ -95,7 +95,7 @@ fun DeveloperSettingsView(
 
         PreferenceCategory(title = "Neutrino") {
             ListItem(
-                headlineContent = {
+                content = {
                     Text("Server name")
                 },
                 supportingContent = {
@@ -103,13 +103,13 @@ fun DeveloperSettingsView(
                 },
             )
             ListItem(
-                headlineContent = {
+                content = {
                     Text("Discovered peers")
                 },
                 onClick = onNeutrinoPeersClick,
             )
             ListItem(
-                headlineContent = {
+                content = {
                     Text("Capture federation traffic")
                 },
                 supportingContent = state.neutrinoCaptureStatus?.let { status ->
