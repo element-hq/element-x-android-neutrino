@@ -218,7 +218,6 @@ androidComponents {
     configureLicensesTasks(reportingExtension)
 }
 
-
 setupDependencyInjection()
 
 dependencies {
