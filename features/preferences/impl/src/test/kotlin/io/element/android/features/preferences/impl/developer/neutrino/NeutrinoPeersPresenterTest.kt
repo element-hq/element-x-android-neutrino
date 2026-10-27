@@ -66,7 +66,7 @@ class NeutrinoPeersPresenterTest {
         presenter.test {
             val initialState = awaitItem()
             assertThat(initialState.peers).isEmpty()
-            initialState.eventSink(NeutrinoPeersEvents.Refresh)
+            initialState.eventSink(NeutrinoPeersEvent.Refresh)
             awaitItem().also { state ->
                 assertThat(state.peers).hasSize(1)
                 assertThat(state.lastScannedMs).isEqualTo(2_000L)

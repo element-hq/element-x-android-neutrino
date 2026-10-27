@@ -60,10 +60,13 @@ class RoomCallStatePresenter(
                         isUserLocallyInTheCall = isUserLocallyInTheCall,
                         isAudioCall = roomInfo.activeCallIntentConsensus.isAudio(),
                     )
-                    else -> RoomCallState.StandBy(
-                        canStartCall = canJoinCall,
-                        isDM = roomInfo.isDm
-                    )
+                    else -> {
+                        val isEmptyDm = roomInfo.isDm && roomInfo.joinedMembersCount <= 1
+                        RoomCallState.StandBy(
+                            canStartCall = canJoinCall && !isEmptyDm,
+                            isDM = roomInfo.isDm
+                        )
+                    }
                 }
             }
         }

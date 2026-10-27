@@ -12,7 +12,7 @@ import java.net.InetAddress
 
 /**
  * Port the embedded homeserver's HTTP listens on: the CS-API for the local
- * client (reached over loopback — see `DefaultEnterpriseService.defaultHomeserverList`)
+ * client (reached over loopback — see `DefaultEnterpriseService.accountProviderAllowList`)
  * and the loopback upstream the in-process sidecar forwards inbound federation to.
  */
 internal const val NEUTRINO_PORT = 8008

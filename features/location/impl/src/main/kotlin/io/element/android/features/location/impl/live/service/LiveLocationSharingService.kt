@@ -14,6 +14,7 @@ import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
 import android.os.IBinder
 import androidx.core.app.ServiceCompat
 import dev.zacsweers.metro.Inject
+import io.element.android.features.location.impl.common.userlocation.createLocationProvider
 import io.element.android.features.location.impl.di.LocationBindings
 import io.element.android.features.location.impl.live.notification.LiveLocationSharingNotificationCreator
 import io.element.android.libraries.architecture.bindings
@@ -29,13 +30,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import org.maplibre.compose.location.AndroidLocationProvider
-import org.maplibre.compose.location.DesiredAccuracy
+import kotlinx.coroutines.launch
+import org.maplibre.compose.location.LocationAccuracy
+import org.maplibre.compose.location.LocationEvent
+import org.maplibre.compose.location.LocationRequest
+import org.maplibre.compose.location.LocationUnavailableReason
+import org.maplibre.spatialk.units.extensions.inMeters
+import org.maplibre.spatialk.units.extensions.meters
 import timber.log.Timber
 import kotlin.time.Duration.Companion.seconds
 import io.element.android.features.location.api.Location as ApiLocation
@@ -46,7 +50,6 @@ class LiveLocationSharingService : Service() {
     @Inject lateinit var coordinator: LiveLocationSharingCoordinator
     @Inject lateinit var notificationCreator: LiveLocationSharingNotificationCreator
     @Inject lateinit var appPreferencesStore: AppPreferencesStore
-
     @Inject lateinit var appForegroundStateService: AppForegroundStateService
 
     @AppCoroutineScope
@@ -60,8 +63,8 @@ class LiveLocationSharingService : Service() {
     override fun onCreate() {
         super.onCreate()
         Timber.d("LiveLocationSharingService onCreate")
+        bindings<LocationBindings>().inject(this)
         runCatchingExceptions {
-            bindings<LocationBindings>().inject(this)
             appForegroundStateService.updateIsSharingLiveLocation(true)
             coroutineScope = appCoroutineScope.childScope(Dispatchers.Default, "LiveLocationSharingService")
             val notificationId = NotificationIdProvider.getForegroundServiceNotificationId(ForegroundServiceType.LIVE_LOCATION)
@@ -79,6 +82,7 @@ class LiveLocationSharingService : Service() {
             startLocationUpdatesListener()
         }.onFailure {
             Timber.e(it, "Failed to start live location sharing service")
+            appCoroutineScope.launch { coordinator.dispatchUnrecoverableError() }
             stopSelf()
         }
     }
@@ -86,26 +90,41 @@ class LiveLocationSharingService : Service() {
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun startLocationUpdatesListener() {
         Timber.d("LiveLocationSharingService listening to location updates")
+        val locationProvider = createLocationProvider(context = applicationContext)
         appPreferencesStore.getLiveLocationMinimumDistanceInMetersUpdateFlow()
             .flatMapLatest { minDistanceMeters ->
-                val locationProvider = AndroidLocationProvider(
-                    context = applicationContext,
-                    updateInterval = UPDATE_INTERVAL_IN_SECOND.seconds,
-                    minDistanceMeters = minDistanceMeters.toFloat(),
-                    desiredAccuracy = DesiredAccuracy.Balanced,
-                    coroutineScope = coroutineScope
-                )
-                locationProvider.location
+                val locationRequest = LocationRequest {
+                    accuracy = LocationAccuracy.Balanced
+                    minimumInterval = UPDATE_INTERVAL_IN_SECOND.seconds
+                    minimumDistance = minDistanceMeters.meters
+                }
+                locationProvider.updates(locationRequest)
             }
-            .filterNotNull()
-            .map { location ->
-                ApiLocation(
-                    lat = location.position.latitude,
-                    lon = location.position.longitude,
-                    accuracy = location.accuracy.toFloat(),
-                )
+            .onEach { locationEvent ->
+                when (locationEvent) {
+                    is LocationEvent.Update -> {
+                        val location = ApiLocation(
+                            lat = locationEvent.measurement.position.latitude,
+                            lon = locationEvent.measurement.position.longitude,
+                            accuracy = locationEvent.measurement.horizontalAccuracy?.inMeters?.toFloat(),
+                        )
+                        coordinator.dispatch(location)
+                    }
+                    is LocationEvent.Unavailable -> {
+                        when (locationEvent.reason) {
+                            LocationUnavailableReason.ServicesDisabled,
+                            LocationUnavailableReason.TemporarilyUnavailable -> Unit
+                            LocationUnavailableReason.Unsupported,
+                            LocationUnavailableReason.PermissionDenied,
+                            // The provider has no classification for the failure, it is unexpected.
+                            null -> coordinator.dispatchUnrecoverableError()
+                            // Reasons added in a future library version: keep sharing rather than hard failing.
+                            else -> Timber.w("Unhandled location unavailable reason: ${locationEvent.reason}")
+                        }
+                    }
+                    else -> Timber.w("Unhandled location event: $locationEvent")
+                }
             }
-            .onEach(coordinator::dispatch)
             .launchIn(coroutineScope)
     }
 

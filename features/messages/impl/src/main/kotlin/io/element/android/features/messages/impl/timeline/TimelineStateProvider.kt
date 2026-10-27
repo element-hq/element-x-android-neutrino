@@ -21,9 +21,11 @@ import io.element.android.features.messages.impl.timeline.model.TimelineItemRead
 import io.element.android.features.messages.impl.timeline.model.TimelineItemThreadInfo
 import io.element.android.features.messages.impl.timeline.model.anAggregatedReaction
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemEventContent
+import io.element.android.features.messages.impl.timeline.model.event.TimelineItemRedactedContent
 import io.element.android.features.messages.impl.timeline.model.event.aTimelineItemStateEventContent
 import io.element.android.features.messages.impl.timeline.model.event.aTimelineItemTextContent
 import io.element.android.features.messages.impl.timeline.model.virtual.aTimelineItemDaySeparatorModel
+import io.element.android.features.messages.impl.timeline.sendfailure.SendFailureDialogState
 import io.element.android.features.messages.impl.typing.TypingNotificationState
 import io.element.android.features.messages.impl.typing.aTypingNotificationState
 import io.element.android.features.roomcall.api.aStandByCallState
@@ -51,14 +53,18 @@ import kotlin.random.Random
 fun aTimelineState(
     timelineItems: ImmutableList<TimelineItem> = persistentListOf(),
     timelineMode: Timeline.Mode = Timeline.Mode.Live,
-    renderReadReceipts: Boolean = false,
     timelineRoomInfo: TimelineRoomInfo = aTimelineRoomInfo(),
     focusedEventIndex: Int = -1,
     isLive: Boolean = true,
     messageShield: MessageShield? = null,
     resolveVerifiedUserSendFailureState: ResolveVerifiedUserSendFailureState = aResolveVerifiedUserSendFailureState(),
+    sendFailureDialogState: SendFailureDialogState = SendFailureDialogState.Hidden,
     displayThreadSummaries: Boolean = false,
-    displayFloatingDateBadge: Boolean = false,
+    displayJumpToUnread: Boolean = false,
+    jumpToUnread: JumpToUnreadState = JumpToUnreadState.Hidden,
+    newEventState: NewEventState = NewEventState.None,
+    selectionState: SelectionState = SelectionState.Disabled,
+    useNewTimelineEventRenderer: Boolean = false,
     eventSink: (TimelineEvent) -> Unit = {},
 ): TimelineState {
     val focusedEventId = timelineItems.filterIsInstance<TimelineItem.Event>().getOrNull(focusedEventIndex)?.eventId
@@ -71,14 +77,17 @@ fun aTimelineState(
         timelineItems = timelineItems,
         timelineMode = timelineMode,
         timelineRoomInfo = timelineRoomInfo,
-        renderReadReceipts = renderReadReceipts,
-        newEventState = NewEventState.None,
+        newEventState = newEventState,
         isLive = isLive,
         focusRequestState = focusRequestState,
         messageShieldDialogData = messageShield?.let { MessageShieldData(it) },
         resolveVerifiedUserSendFailureState = resolveVerifiedUserSendFailureState,
+        sendFailureDialogState = sendFailureDialogState,
         displayThreadSummaries = displayThreadSummaries,
-        displayFloatingDateBadge = displayFloatingDateBadge,
+        displayJumpToUnread = displayJumpToUnread,
+        jumpToUnread = jumpToUnread,
+        selectionState = selectionState,
+        useNewTimelineEventRenderer = useNewTimelineEventRenderer,
         eventSink = eventSink,
     )
 }
@@ -150,6 +159,8 @@ internal fun aTimelineItemEvent(
     content: TimelineItemEventContent = aTimelineItemTextContent(),
     groupPosition: TimelineItemGroupPosition = TimelineItemGroupPosition.None,
     sendState: LocalEventSendState? = null,
+    editSendState: LocalEventSendState? = null,
+    redactionSendState: LocalEventSendState? = null,
     inReplyTo: InReplyToDetails? = null,
     threadInfo: TimelineItemThreadInfo? = null,
     debugInfo: TimelineItemDebugInfo = aTimelineItemDebugInfo(),
@@ -176,6 +187,8 @@ internal fun aTimelineItemEvent(
         ),
         groupPosition = groupPosition,
         localSendState = sendState,
+        editSendState = editSendState,
+        redactionSendState = redactionSendState,
         inReplyTo = inReplyTo,
         threadInfo = threadInfo,
         origin = null,
@@ -254,7 +267,25 @@ internal fun aGroupedEvents(
     )
 }
 
+internal fun aRedactedMessagesGroupedEvents(
+    id: UniqueId = UniqueId("redacted_group"),
+    count: Int = 4,
+): TimelineItem.GroupedEvents {
+    val events = (0 until count).map { index ->
+        aTimelineItemEvent(
+            eventId = EventId("\$redacted_$index"),
+            content = TimelineItemRedactedContent,
+        )
+    }
+    return TimelineItem.GroupedEvents(
+        id = id,
+        events = events.toImmutableList(),
+        aggregatedReadReceipts = persistentListOf(),
+    )
+}
+
 internal fun aTimelineRoomInfo(
+    currentUserId: UserId = UserId("@user:domain"),
     name: String = ROOM_NAME,
     isDm: Boolean = false,
     userHasPermissionToSendMessage: Boolean = true,
@@ -262,6 +293,7 @@ internal fun aTimelineRoomInfo(
     typingNotificationState: TypingNotificationState = aTypingNotificationState(),
     predecessorRoom: PredecessorRoom? = null,
 ) = TimelineRoomInfo(
+    currentUserId = currentUserId,
     isDm = isDm,
     name = name,
     userHasPermissionToSendMessage = userHasPermissionToSendMessage,

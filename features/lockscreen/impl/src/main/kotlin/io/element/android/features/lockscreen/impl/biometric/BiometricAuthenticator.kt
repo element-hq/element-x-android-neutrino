@@ -59,6 +59,7 @@ class DefaultBiometricAuthentication(
     private var cryptoObject: CryptoObject? = null
 
     override suspend fun setup() {
+        Timber.d("Setup biometric authentication")
         try {
             val secretKey = ensureKey()
             val cipher = encryptionDecryptionService.createEncryptionCipher(secretKey)
@@ -109,7 +110,9 @@ private class AuthenticationCallback(
 
     override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
         super.onAuthenticationSucceeded(result)
-        if (result.cryptoObject?.cipher.isValid()) {
+        if (result.authenticationType == BiometricPrompt.AUTHENTICATION_RESULT_TYPE_BIOMETRIC &&
+            result.cryptoObject?.cipher.isValid() ||
+            result.authenticationType == BiometricPrompt.AUTHENTICATION_RESULT_TYPE_DEVICE_CREDENTIAL) {
             callbacks.forEach { it.onBiometricAuthenticationSuccess() }
             deferredAuthenticationResult.complete(BiometricAuthenticator.AuthenticationResult.Success)
         } else {
@@ -123,6 +126,9 @@ private class AuthenticationCallback(
         if (this == null) return false
         return runCatchingExceptions {
             doFinal("biometric_challenge".toByteArray())
-        }.isSuccess
+        }.onFailure {
+            Timber.e(it, "Failed to validate cipher")
+        }
+            .isSuccess
     }
 }

@@ -52,13 +52,13 @@ class SetDisplayNamePresenter(
             !isTooLong &&
             submitAction.value !is AsyncAction.Loading
 
-        fun handleEvent(event: SetDisplayNameEvents) {
+        fun handleEvent(event: SetDisplayNameEvent) {
             when (event) {
-                is SetDisplayNameEvents.UpdateDisplayName -> displayName = event.displayName
-                SetDisplayNameEvents.Submit -> if (canSubmit) {
+                is SetDisplayNameEvent.UpdateDisplayName -> displayName = event.displayName
+                SetDisplayNameEvent.Submit -> if (canSubmit) {
                     coroutineScope.submit(trimmed, submitAction)
                 }
-                SetDisplayNameEvents.ClearError -> submitAction.value = AsyncAction.Uninitialized
+                SetDisplayNameEvent.ClearError -> submitAction.value = AsyncAction.Uninitialized
             }
         }
 

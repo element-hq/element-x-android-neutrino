@@ -15,5 +15,5 @@ data class NeutrinoPeersState(
     // no peers have been discovered yet). Rendered as a single "Last Scanned" time.
     val lastScannedMs: Long?,
     val peers: ImmutableList<DiscoveredPeer>,
-    val eventSink: (NeutrinoPeersEvents) -> Unit,
+    val eventSink: (NeutrinoPeersEvent) -> Unit,
 )

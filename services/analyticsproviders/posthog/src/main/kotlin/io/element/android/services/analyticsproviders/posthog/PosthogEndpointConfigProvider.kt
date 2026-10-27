@@ -9,14 +9,14 @@
 package io.element.android.services.analyticsproviders.posthog
 
 import dev.zacsweers.metro.Inject
-import io.element.android.features.enterprise.api.EnterpriseService
+import io.element.android.libraries.core.meta.BuildMeta
 
 @Inject
 class PosthogEndpointConfigProvider(
-    private val enterpriseService: EnterpriseService,
+    private val buildMeta: BuildMeta,
 ) {
     fun provide(): PosthogEndpointConfig? {
-        return if (enterpriseService.isEnterpriseBuild) {
+        return if (buildMeta.isEnterpriseBuild) {
             PosthogEndpointConfig(
                 host = BuildConfig.POSTHOG_HOST,
                 apiKey = BuildConfig.POSTHOG_APIKEY,

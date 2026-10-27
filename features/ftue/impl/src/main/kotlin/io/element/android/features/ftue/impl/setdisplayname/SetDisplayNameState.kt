@@ -14,12 +14,12 @@ import io.element.android.libraries.architecture.AsyncAction
  * @param isTooLong whether [displayName] exceeds the advertised byte budget.
  * @param canSubmit whether the name is valid and can be submitted.
  * @param submitAction progress of persisting the name to the homeserver.
- * @param eventSink callback used to send [SetDisplayNameEvents] to the presenter.
+ * @param eventSink callback used to send [SetDisplayNameEvent] to the presenter.
  */
 data class SetDisplayNameState(
     val displayName: String,
     val isTooLong: Boolean,
     val canSubmit: Boolean,
     val submitAction: AsyncAction<Unit>,
-    val eventSink: (SetDisplayNameEvents) -> Unit,
+    val eventSink: (SetDisplayNameEvent) -> Unit,
 )

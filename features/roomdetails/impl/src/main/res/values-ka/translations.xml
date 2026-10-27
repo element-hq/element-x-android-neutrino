@@ -79,7 +79,6 @@
   <string name="screen_room_notification_settings_error_setting_mode">"რეჟიმის დაყენება ვერ მოხერხდა, გთხოვთ, სცადოთ ხელახლა."</string>
   <string name="screen_room_notification_settings_mentions_only_disclaimer">"თქვენი სახლის სერვერი არ უჭერს მხარს ამ პარამეტრს დაშიფრულ ოთახებში, თქვენ არ მიიღებთ შეტყობინებას ამ ოთახში."</string>
   <string name="screen_room_notification_settings_mode_all_messages">"ყველა შეტყობინება"</string>
-  <string name="screen_room_notification_settings_mode_mentions_and_keywords">"მხოლოდ ხსენებები და საკვანძო სიტყვები"</string>
   <string name="screen_room_notification_settings_room_custom_settings_title">"ამ ოთახში, შემატყობინეთ:"</string>
   <string name="screen_room_roles_and_permissions_admins">"ადმინისტრატორები"</string>
   <string name="screen_room_roles_and_permissions_change_my_role">"ჩემი როლის შეცვლა"</string>
@@ -94,4 +93,6 @@
   <string name="screen_room_roles_and_permissions_roles_header">"როლები"</string>
   <string name="screen_room_roles_and_permissions_room_details">"ოთახის დეტალები"</string>
   <string name="screen_room_roles_and_permissions_title">"როლები და ნებართვები"</string>
+  <string name="screen_roomlist_mark_as_read">"წაკითხულად მონიშვნა"</string>
+  <string name="screen_roomlist_mark_as_unread">"წაუკითხავად მონიშვნა"</string>
 </resources>

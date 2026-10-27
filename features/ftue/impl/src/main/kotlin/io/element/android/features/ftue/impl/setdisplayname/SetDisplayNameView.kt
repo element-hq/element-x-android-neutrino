@@ -56,7 +56,7 @@ fun SetDisplayNameView(
     AsyncActionView(
         async = state.submitAction,
         onSuccess = {},
-        onErrorDismiss = { state.eventSink(SetDisplayNameEvents.ClearError) },
+        onErrorDismiss = { state.eventSink(SetDisplayNameEvent.ClearError) },
     )
 }
 
@@ -85,7 +85,7 @@ private fun SetDisplayNameContent(state: SetDisplayNameState) {
             label = stringResource(R.string.screen_set_display_name_label),
             value = state.displayName,
             singleLine = true,
-            onValueChange = { state.eventSink(SetDisplayNameEvents.UpdateDisplayName(it)) },
+            onValueChange = { state.eventSink(SetDisplayNameEvent.UpdateDisplayName(it)) },
         )
         if (state.isTooLong) {
             Text(
@@ -104,7 +104,7 @@ private fun SetDisplayNameFooter(state: SetDisplayNameState) {
             modifier = Modifier.fillMaxWidth(),
             text = stringResource(CommonStrings.action_continue),
             enabled = state.canSubmit,
-            onClick = { state.eventSink(SetDisplayNameEvents.Submit) },
+            onClick = { state.eventSink(SetDisplayNameEvent.Submit) },
         )
     }
 }
@@ -112,7 +112,7 @@ private fun SetDisplayNameFooter(state: SetDisplayNameState) {
 @PreviewsDayNight
 @Composable
 internal fun SetDisplayNameViewPreview(
-    @PreviewParameter(SetDisplayNameStateProvider::class) state: SetDisplayNameState,
+    @PreviewParameter(SetDisplayNameStatePreviewParam::class) state: SetDisplayNameState,
 ) {
     ElementPreview {
         SetDisplayNameView(state = state)
