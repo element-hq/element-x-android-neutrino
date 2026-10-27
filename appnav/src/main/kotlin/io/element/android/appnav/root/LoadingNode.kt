@@ -33,6 +33,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -92,6 +93,7 @@ private fun NeutrinoStartupView(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
+    val latestOnNeutrinoReadyToStart by rememberUpdatedState(onNeutrinoReadyToStart)
     val fatalError by startupError.collectAsState()
     var granted by remember { mutableStateOf(context.hasBlePermissions()) }
     var bluetoothOn by remember { mutableStateOf(context.isBluetoothOn()) }
@@ -138,7 +140,7 @@ private fun NeutrinoStartupView(
     // idempotent (a one-shot flag in the parent), so a later toggle is harmless.
     LaunchedEffect(granted, bluetoothOn) {
         if (granted && bluetoothOn) {
-            onNeutrinoReadyToStart()
+            latestOnNeutrinoReadyToStart()
         }
     }
     when {
