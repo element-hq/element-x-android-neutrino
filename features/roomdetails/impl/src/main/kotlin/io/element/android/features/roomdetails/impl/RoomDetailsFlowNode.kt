@@ -176,6 +176,10 @@ class RoomDetailsFlowNode(
         return when (navTarget) {
             NavTarget.RoomDetails -> {
                 val roomDetailsCallback = object : RoomDetailsNode.Callback {
+                    override fun navigateBack() {
+                        callback.onDone()
+                    }
+
                     override fun navigateToRoomMemberList() {
                         backstack.push(NavTarget.RoomMemberList)
                     }
@@ -253,6 +257,10 @@ class RoomDetailsFlowNode(
 
                     override fun navigateToInviteMembers() {
                         backstack.push(NavTarget.InviteMembers)
+                    }
+
+                    override fun navigateToAvatarPreview(username: String, avatarUrl: String) {
+                        overlay.show(NavTarget.AvatarPreview(username, avatarUrl))
                     }
                 }
                 createNode<RoomMemberListNode>(buildContext, listOf(roomMemberListCallback))

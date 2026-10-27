@@ -11,16 +11,23 @@ package io.element.android.libraries.mediaviewer.impl.viewer
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.ProduceStateScope
 import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.rememberUpdatedState
+import io.element.android.features.contentscanner.api.ContentScannerService
 import io.element.android.libraries.architecture.AsyncData
 import io.element.android.libraries.core.extensions.mapCatchingExceptions
+import io.element.android.libraries.matrix.api.core.EventId
 import io.element.android.libraries.matrix.api.media.MatrixMediaLoader
 import io.element.android.libraries.matrix.api.media.MediaFile
 import io.element.android.libraries.matrix.api.media.MediaSource
 import io.element.android.libraries.matrix.api.timeline.Timeline
+import io.element.android.libraries.matrix.ui.media.contentvalidation.ContentValidationState
+import io.element.android.libraries.matrix.ui.media.contentvalidation.DefaultContentValidationState
+import io.element.android.libraries.matrix.ui.media.contentvalidation.EventContentValidationCache
 import io.element.android.libraries.mediaviewer.api.MediaViewerEntryPoint.MediaViewerMode
 import io.element.android.libraries.mediaviewer.api.local.LocalMedia
 import io.element.android.libraries.mediaviewer.api.local.LocalMediaFactory
@@ -37,32 +44,40 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.util.concurrent.ConcurrentHashMap
 
 class MediaViewerDataSource(
     mode: MediaViewerMode,
+    coroutineScope: CoroutineScope,
     private val dispatcher: CoroutineDispatcher,
     private val galleryDataSource: MediaGalleryDataSource,
     private val mediaLoader: MatrixMediaLoader,
     private val localMediaFactory: LocalMediaFactory,
     private val systemClock: SystemClock,
     private val pagerKeysHandler: PagerKeysHandler,
+    private val contentScannerService: ContentScannerService,
+    private val contentValidationCache: EventContentValidationCache,
 ) {
     // List of media files that are currently being loaded
     private val mediaFiles: ConcurrentHashMap<MediaSource, MediaFile> = ConcurrentHashMap()
 
     private val galleryMode = when (mode) {
-        MediaViewerMode.SingleMedia,
         is MediaViewerMode.TimelineImagesAndVideos -> MediaGalleryMode.Images
         is MediaViewerMode.TimelineFilesAndAudios -> MediaGalleryMode.Files
+        is MediaViewerMode.EventGallery -> MediaGalleryMode.Images
     }
 
     // Map of sourceUrl to local media state
     private val localMediaStates: MutableMap<String, MutableState<AsyncData<LocalMedia>>> =
+        mutableMapOf()
+
+    private val mediaValidationState: MutableMap<String, ContentValidationState> =
         mutableMapOf()
 
     fun setup(coroutineScope: CoroutineScope) {
@@ -76,40 +91,62 @@ class MediaViewerDataSource(
         localMediaStates.clear()
     }
 
+    /**
+     * Helper function to translate the [dataFlow] result to a Compose [State] that can be observed in the UI.
+     */
     @Composable
-    fun collectAsState(): State<ImmutableList<MediaViewerPageData>> {
-        return remember { dataFlow() }.collectAsState(initialData())
+    fun produceState(
+        producer: suspend ProduceStateScope<ImmutableList<MediaViewerPageData>>.(StateFlow<ImmutableList<MediaViewerPageData>>) -> Unit
+    ): State<ImmutableList<MediaViewerPageData>> {
+        val latestProducer by rememberUpdatedState(producer)
+        return produceState(initialValue = initialData()) {
+            latestProducer(dataFlow)
+        }
+    }
+
+    /**
+     * Find the index of the page corresponding to the given eventId, or null if not found.
+     */
+    fun findEventIndex(eventId: EventId?, mediaSource: MediaSource? = null): Int? {
+        if (eventId == null) return null
+        return dataFlow.value.indexOfFirst {
+            val pageData = it as? MediaViewerPageData.MediaViewerData
+            pageData?.eventId == eventId && (mediaSource == null || pageData.mediaSource == mediaSource)
+        }.takeIf { it >= 0 }
     }
 
     @VisibleForTesting
-    internal fun dataFlow(): Flow<ImmutableList<MediaViewerPageData>> {
-        return galleryDataSource.groupedMediaItemsFlow()
-            .map { groupedItems ->
-                when (groupedItems) {
-                    AsyncData.Uninitialized,
-                    is AsyncData.Loading -> {
-                        persistentListOf(
-                            MediaViewerPageData.Loading(
-                                direction = Timeline.PaginationDirection.BACKWARDS,
-                                timestamp = systemClock.epochMillis(),
-                                pagerKey = Long.MIN_VALUE,
-                            )
+    internal val dataFlow: StateFlow<ImmutableList<MediaViewerPageData>> = galleryDataSource.groupedMediaItemsFlow()
+        .map { groupedItems ->
+            when (groupedItems) {
+                AsyncData.Uninitialized,
+                is AsyncData.Loading -> {
+                    persistentListOf(
+                        MediaViewerPageData.Loading(
+                            direction = Timeline.PaginationDirection.BACKWARDS,
+                            timestamp = systemClock.epochMillis(),
+                            pagerKey = Long.MIN_VALUE,
                         )
-                    }
-                    is AsyncData.Failure -> {
-                        persistentListOf(
-                            MediaViewerPageData.Failure(groupedItems.error),
-                        )
-                    }
-                    is AsyncData.Success -> {
-                        withContext(dispatcher) {
-                            val mediaItems = groupedItems.data.getItems(galleryMode)
-                            buildMediaViewerPageList(mediaItems)
-                        }
+                    )
+                }
+                is AsyncData.Failure -> {
+                    persistentListOf(
+                        MediaViewerPageData.Failure(groupedItems.error),
+                    )
+                }
+                is AsyncData.Success -> {
+                    withContext(dispatcher) {
+                        val mediaItems = groupedItems.data.getItems(galleryMode)
+                        buildMediaViewerPageList(mediaItems)
                     }
                 }
             }
-    }
+        }
+        .stateIn(
+            scope = CoroutineScope(coroutineScope.coroutineContext + dispatcher),
+            started = SharingStarted.Lazily,
+            initialValue = initialData(),
+        )
 
     private fun initialData(): ImmutableList<MediaViewerPageData> {
         val initialMediaItems =
@@ -134,6 +171,9 @@ class MediaViewerDataSource(
                     val localMedia = localMediaStates.getOrPut(sourceUrl) {
                         mutableStateOf(AsyncData.Uninitialized)
                     }
+                    val validationState = mediaValidationState.getOrPut(sourceUrl) {
+                        mediaItem.eventId()?.let { contentValidationCache[it] } ?: DefaultContentValidationState()
+                    }
                     add(
                         MediaViewerPageData.MediaViewerData(
                             eventId = mediaItem.eventId(),
@@ -142,13 +182,14 @@ class MediaViewerDataSource(
                             thumbnailSource = mediaItem.thumbnailSource(),
                             downloadedMedia = localMedia,
                             pagerKey = pagerKeysHandler.getKey(mediaItem),
+                            validationState = validationState,
                         )
                     )
                 }
                 is MediaItem.LoadingIndicator -> add(
                     MediaViewerPageData.Loading(
                         direction = mediaItem.direction,
-                        timestamp = systemClock.epochMillis(),
+                        timestamp = mediaItem.timestamp,
                         pagerKey = pagerKeysHandler.getKey(mediaItem),
                     )
                 )
@@ -161,7 +202,9 @@ class MediaViewerDataSource(
     }
 
     suspend fun loadMore(direction: Timeline.PaginationDirection) {
-        galleryDataSource.loadMore(direction)
+        if (galleryDataSource.isReady) {
+            galleryDataSource.loadMore(direction)
+        }
     }
 
     suspend fun loadMedia(data: MediaViewerPageData.MediaViewerData) {
@@ -197,6 +240,17 @@ class MediaViewerDataSource(
             .onFailure {
                 localMediaState.value = AsyncData.Failure(it)
             }
+    }
+
+    fun validateMedia(mediaSource: MediaSource, thumbnailMediaSource: MediaSource?) {
+        val validationState = mediaValidationState[mediaSource.safeUrl] ?: return
+        val currentState = validationState.getCurrentOverallState()
+
+        if (currentState.isLoading() || currentState.isValid()) {
+            return
+        }
+
+        contentScannerService.scan(listOfNotNull(mediaSource, thumbnailMediaSource), validationState)
     }
 
     fun cancelLoadingMedia(data: MediaViewerPageData.MediaViewerData) {

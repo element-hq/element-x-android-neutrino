@@ -34,25 +34,25 @@ fun NeutrinoPeersView(
     ) {
         PreferenceCategory(title = "Discovery") {
             ListItem(
-                headlineContent = { Text("Last Scanned") },
+                content = { Text("Last Scanned") },
                 supportingContent = {
                     Text(state.lastScannedMs?.let(::formatScanTime) ?: "never")
                 },
             )
             ListItem(
-                headlineContent = { Text("Refresh") },
-                onClick = { state.eventSink(NeutrinoPeersEvents.Refresh) },
+                content = { Text("Refresh") },
+                onClick = { state.eventSink(NeutrinoPeersEvent.Refresh) },
             )
         }
         PreferenceCategory(title = "Peers (${state.peers.size})") {
             if (state.peers.isEmpty()) {
                 ListItem(
-                    headlineContent = { Text("No peers discovered") },
+                    content = { Text("No peers discovered") },
                 )
             } else {
                 for (peer in state.peers) {
                     ListItem(
-                        headlineContent = { Text(peer.displayName) },
+                        content = { Text(peer.displayName) },
                         supportingContent = { Text(peer.serverName) },
                     )
                 }
@@ -68,7 +68,7 @@ private fun formatScanTime(millis: Long): String {
 @PreviewsDayNight
 @Composable
 internal fun NeutrinoPeersViewPreview(
-    @PreviewParameter(NeutrinoPeersStateProvider::class) state: NeutrinoPeersState
+    @PreviewParameter(NeutrinoPeersStatePreviewParam::class) state: NeutrinoPeersState
 ) = ElementPreview {
     NeutrinoPeersView(
         state = state,

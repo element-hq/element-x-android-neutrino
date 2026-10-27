@@ -8,11 +8,13 @@
 
 package io.element.android.features.messages.impl.timeline.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
@@ -20,23 +22,27 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.hideFromAccessibility
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.toggleableState
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.features.messages.impl.timeline.TimelineEvent
 import io.element.android.features.messages.impl.timeline.TimelineRoomInfo
 import io.element.android.features.messages.impl.timeline.components.event.TimelineItemEventContentView
-import io.element.android.features.messages.impl.timeline.components.layout.ContentAvoidingLayoutData
 import io.element.android.features.messages.impl.timeline.model.TimelineItem
+import io.element.android.features.messages.impl.timeline.model.TimelineItemSelectionData
+import io.element.android.features.messages.impl.timeline.model.event.RtcNotificationState
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemLegacyCallInviteContent
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemPollContent
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemRtcNotificationContent
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemStateContent
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemVoiceContent
-import io.element.android.features.messages.impl.timeline.protection.TimelineProtectionEvent
 import io.element.android.features.messages.impl.timeline.protection.TimelineProtectionState
 import io.element.android.libraries.designsystem.colors.gradientSubtleColors
 import io.element.android.libraries.designsystem.modifiers.onKeyboardContextMenuAction
@@ -46,6 +52,7 @@ import io.element.android.libraries.designsystem.text.toPx
 import io.element.android.libraries.matrix.api.core.EventId
 import io.element.android.libraries.matrix.api.timeline.Timeline
 import io.element.android.libraries.matrix.api.user.MatrixUser
+import io.element.android.libraries.ui.common.layout.ContentAvoidingLayoutData
 import io.element.android.libraries.ui.strings.CommonStrings
 import io.element.android.libraries.ui.utils.a11y.isTalkbackActive
 import io.element.android.wysiwyg.link.Link
@@ -56,7 +63,112 @@ internal fun TimelineItemRow(
     timelineItem: TimelineItem,
     timelineMode: Timeline.Mode,
     timelineRoomInfo: TimelineRoomInfo,
-    renderReadReceipts: Boolean,
+    isLastOutgoingMessage: Boolean,
+    timelineProtectionState: TimelineProtectionState,
+    focusedEventId: EventId?,
+    displayThreadSummaries: Boolean,
+    selectionData: TimelineItemSelectionData,
+    onUserDataClick: (MatrixUser) -> Unit,
+    onLinkClick: (Link) -> Unit,
+    onLinkLongClick: (Link) -> Unit,
+    onContentClick: (TimelineItem.Event) -> Unit,
+    onGalleryItemClick: (TimelineItem.Event, Int) -> Unit,
+    onLongClick: (TimelineItem.Event) -> Unit,
+    inReplyToClick: (EventId) -> Unit,
+    onReactionClick: (key: String, TimelineItem.Event) -> Unit,
+    onReactionLongClick: (key: String, TimelineItem.Event) -> Unit,
+    onMoreReactionsClick: (TimelineItem.Event) -> Unit,
+    onReadReceiptClick: (TimelineItem.Event) -> Unit,
+    onJoinCallClick: (isAudioCall: Boolean) -> Unit,
+    onSwipeToReply: (TimelineItem.Event) -> Unit,
+    eventSink: (TimelineEvent.TimelineItemEvent) -> Unit,
+    modifier: Modifier = Modifier,
+    eventContentView: @Composable (TimelineItem.Event, Modifier, (ContentAvoidingLayoutData) -> Unit) -> Unit =
+        { event, contentModifier, onContentLayoutChange ->
+            TimelineItemEventContentView(
+                eventId = event.eventId,
+                content = event.content,
+                timelineProtectionState = timelineProtectionState,
+                onContentClick = { onContentClick(event) },
+                onGalleryItemClick = { index -> onGalleryItemClick(event, index) },
+                onLongClick = { onLongClick(event) },
+                onLinkClick = onLinkClick,
+                onLinkLongClick = onLinkLongClick,
+                eventSink = eventSink,
+                modifier = contentModifier,
+                onContentLayoutChange = onContentLayoutChange,
+            )
+        },
+) {
+    val isSelectionModeActive = selectionData.isSelectionModeActive
+    val isSelected = selectionData.isSelected
+    val backgroundModifier = when {
+        timelineItem.isEvent(focusedEventId) && !isSelectionModeActive -> {
+            val focusedEventOffset =
+                if ((timelineItem as? TimelineItem.Event)?.showSenderInformation == true) {
+                    14.dp
+                } else {
+                    2.dp
+                }
+            Modifier.focusedEvent(focusedEventOffset)
+        }
+        else -> {
+            Modifier
+        }
+    }
+    val selectableEvent = (timelineItem as? TimelineItem.Event)?.takeIf { selectionData.canBeSelected }
+    Box(modifier = modifier.then(backgroundModifier)) {
+        TimelineItemRowContent(
+            modifier = Modifier.fillMaxWidth(),
+            selectionData = selectionData,
+            timelineItem = timelineItem,
+            timelineMode = timelineMode,
+            timelineRoomInfo = timelineRoomInfo,
+            timelineProtectionState = timelineProtectionState,
+            isLastOutgoingMessage = isLastOutgoingMessage,
+            focusedEventId = focusedEventId,
+            displayThreadSummaries = displayThreadSummaries,
+            onUserDataClick = onUserDataClick,
+            onLinkClick = onLinkClick,
+            onLinkLongClick = onLinkLongClick,
+            onContentClick = onContentClick,
+            onGalleryItemClick = onGalleryItemClick,
+            onLongClick = onLongClick,
+            inReplyToClick = inReplyToClick,
+            onReactionClick = onReactionClick,
+            onReactionLongClick = onReactionLongClick,
+            onMoreReactionsClick = onMoreReactionsClick,
+            onReadReceiptClick = onReadReceiptClick,
+            onJoinCallClick = onJoinCallClick,
+            onSwipeToReply = onSwipeToReply,
+            eventSink = eventSink,
+            eventContentView = eventContentView,
+        )
+        if (isSelectionModeActive) {
+            // In selection mode the whole row toggles selection.
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clickable(enabled = selectionData.canBeSelected, role = Role.Checkbox) {
+                        if (selectableEvent != null) {
+                            onContentClick(selectableEvent)
+                        }
+                    }
+                    .semantics { hideFromAccessibility() }
+            )
+        }
+    }
+}
+
+/** Width reserved for the selection indicator : the row content slides by this amount. */
+internal val SELECTION_COLUMN_WIDTH = 36.dp
+
+@Suppress("LongMethod")
+@Composable
+private fun TimelineItemRowContent(
+    timelineItem: TimelineItem,
+    timelineMode: Timeline.Mode,
+    timelineRoomInfo: TimelineRoomInfo,
     isLastOutgoingMessage: Boolean,
     timelineProtectionState: TimelineProtectionState,
     focusedEventId: EventId?,
@@ -65,42 +177,21 @@ internal fun TimelineItemRow(
     onLinkClick: (Link) -> Unit,
     onLinkLongClick: (Link) -> Unit,
     onContentClick: (TimelineItem.Event) -> Unit,
+    onGalleryItemClick: (TimelineItem.Event, Int) -> Unit,
     onLongClick: (TimelineItem.Event) -> Unit,
     inReplyToClick: (EventId) -> Unit,
     onReactionClick: (key: String, TimelineItem.Event) -> Unit,
     onReactionLongClick: (key: String, TimelineItem.Event) -> Unit,
     onMoreReactionsClick: (TimelineItem.Event) -> Unit,
     onReadReceiptClick: (TimelineItem.Event) -> Unit,
+    onJoinCallClick: (isAudioCall: Boolean) -> Unit,
     onSwipeToReply: (TimelineItem.Event) -> Unit,
     eventSink: (TimelineEvent.TimelineItemEvent) -> Unit,
     modifier: Modifier = Modifier,
-    eventContentView: @Composable (TimelineItem.Event, Modifier, (ContentAvoidingLayoutData) -> Unit) -> Unit =
-        { event, contentModifier, onContentLayoutChange ->
-            TimelineItemEventContentView(
-                content = event.content,
-                hideMediaContent = timelineProtectionState.hideMediaContent(event.eventId),
-                onShowContentClick = { timelineProtectionState.eventSink(TimelineProtectionEvent.ShowContent(event.eventId)) },
-                onContentClick = { onContentClick(event) },
-                onLongClick = { onLongClick(event) },
-                onLinkClick = onLinkClick,
-                onLinkLongClick = onLinkLongClick,
-                eventSink = eventSink,
-                modifier = contentModifier,
-                onContentLayoutChange = onContentLayoutChange
-            )
-        },
+    selectionData: TimelineItemSelectionData = TimelineItemSelectionData(),
+    eventContentView: @Composable (TimelineItem.Event, Modifier, (ContentAvoidingLayoutData) -> Unit) -> Unit,
 ) {
-    val backgroundModifier = if (timelineItem.isEvent(focusedEventId)) {
-        val focusedEventOffset = if ((timelineItem as? TimelineItem.Event)?.showSenderInformation == true) {
-            14.dp
-        } else {
-            2.dp
-        }
-        Modifier.focusedEvent(focusedEventOffset)
-    } else {
-        Modifier
-    }
-    Box(modifier = modifier.then(backgroundModifier)) {
+    Box(modifier) {
         when (timelineItem) {
             is TimelineItem.Virtual -> {
                 TimelineItemVirtualRow(
@@ -114,25 +205,40 @@ internal fun TimelineItemRow(
                     is TimelineItemStateContent, is TimelineItemLegacyCallInviteContent -> {
                         TimelineItemStateEventRow(
                             event = timelineItem,
-                            renderReadReceipts = renderReadReceipts,
                             isLastOutgoingMessage = isLastOutgoingMessage,
                             onClick = { onContentClick(timelineItem) },
                             onReadReceiptsClick = onReadReceiptClick,
                             onLongClick = { onLongClick(timelineItem) },
+                            timelineProtectionState = timelineProtectionState,
                             eventSink = eventSink,
                         )
                     }
                     is TimelineItemRtcNotificationContent -> {
-                        TimelineItemCallNotifyView(
-                            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
-                            timelineRoomInfo = timelineRoomInfo,
-                            event = timelineItem,
-                            content = timelineItem.content,
-                            onLongClick = onLongClick,
-                        )
+                        when (timelineItem.content.state) {
+                            is RtcNotificationState.Active -> ActiveCallTimelineItemView(
+                                timelineRoomInfo = timelineRoomInfo,
+                                event = timelineItem,
+                                state = timelineItem.content.state,
+                                isLastOutgoingMessage = isLastOutgoingMessage,
+                                onLongClick = onLongClick,
+                                onReadReceiptsClick = onReadReceiptClick,
+                                onJoinCallClick = onJoinCallClick,
+                            )
+                            is RtcNotificationState.Started, is RtcNotificationState.Declined ->
+                                TimelineItemCallNotifyView(
+                                    timelineRoomInfo = timelineRoomInfo,
+                                    event = timelineItem,
+                                    content = timelineItem.content,
+                                    state = timelineItem.content.state,
+                                    isLastOutgoingMessage = isLastOutgoingMessage,
+                                    onLongClick = onLongClick,
+                                    onReadReceiptsClick = onReadReceiptClick,
+                                )
+                        }
                     }
                     else -> {
                         val a11yVoiceMessage = stringResource(CommonStrings.a11y_voice_message)
+                        val isSelectionToggle = selectionData.isSelectionModeActive && selectionData.canBeSelected
                         TimelineItemEventRow(
                             modifier = Modifier
                                 .semantics(mergeDescendants = true) {
@@ -142,6 +248,9 @@ internal fun TimelineItemRow(
                                     } else {
                                         timelineItem.safeSenderName
                                     }
+                                    if (isSelectionToggle) {
+                                        toggleableState = ToggleableState(selectionData.isSelected)
+                                    }
                                     // For Polls, allow the answers to be traversed by Talkback
                                     isTraversalGroup = timelineItem.content is TimelineItemPollContent ||
                                         timelineItem.failedToSend ||
@@ -150,22 +259,23 @@ internal fun TimelineItemRow(
                                 }
                                 // Custom clickable that applies over the whole item for accessibility
                                 .then(
-                                    if (isTalkbackActive()) {
-                                        Modifier
+                                    when {
+                                        !isTalkbackActive() -> Modifier
+                                        // While selecting, the row only toggles the selection. The context menu cannot be opened, so the long press
+                                        // that opens it is neither offered nor advertised.
+                                        isSelectionToggle -> Modifier.clickable { onContentClick(timelineItem) }
+                                        else -> Modifier
                                             .combinedClickable(
                                                 onClick = { onContentClick(timelineItem) },
                                                 onLongClick = { onLongClick(timelineItem) },
                                                 onLongClickLabel = stringResource(CommonStrings.action_open_context_menu),
                                             )
                                             .onKeyboardContextMenuAction { onLongClick(timelineItem) }
-                                    } else {
-                                        Modifier
                                     }
                                 ),
                             event = timelineItem,
                             timelineMode = timelineMode,
                             timelineRoomInfo = timelineRoomInfo,
-                            renderReadReceipts = renderReadReceipts,
                             timelineProtectionState = timelineProtectionState,
                             isLastOutgoingMessage = isLastOutgoingMessage,
                             displayThreadSummaries = displayThreadSummaries,
@@ -180,7 +290,9 @@ internal fun TimelineItemRow(
                             onMoreReactionsClick = onMoreReactionsClick,
                             onReadReceiptClick = onReadReceiptClick,
                             onSwipeToReply = { onSwipeToReply(timelineItem) },
+                            onGalleryItemClick = { index -> onGalleryItemClick(timelineItem, index) },
                             eventSink = eventSink,
+                            selectionData = selectionData,
                             eventContentView = { contentModifier, onContentLayoutChange ->
                                 eventContentView(timelineItem, contentModifier, onContentLayoutChange)
                             },
@@ -194,7 +306,6 @@ internal fun TimelineItemRow(
                     timelineMode = timelineMode,
                     timelineRoomInfo = timelineRoomInfo,
                     timelineProtectionState = timelineProtectionState,
-                    renderReadReceipts = renderReadReceipts,
                     isLastOutgoingMessage = isLastOutgoingMessage,
                     focusedEventId = focusedEventId,
                     displayThreadSummaries = displayThreadSummaries,

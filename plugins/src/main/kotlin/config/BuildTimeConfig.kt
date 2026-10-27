@@ -11,10 +11,8 @@ package config
 object BuildTimeConfig {
     const val APPLICATION_ID = "io.element.android.xneutrino"
     const val APPLICATION_NAME = "Element X Neutrino"
-    const val GOOGLE_APP_ID_RELEASE = ""
-    const val GOOGLE_APP_ID_DEBUG = ""
-
     val METADATA_HOST_REVERSED: String? = null
+    val OAUTH_CLIENT_URL_PATH: String? = "apps/android"
     val URL_WEBSITE: String? = null
     val URL_LOGO: String? = null
     val URL_COPYRIGHT: String? = null
@@ -32,6 +30,9 @@ object BuildTimeConfig {
     val BUG_REPORT_URL: String? = null
     val BUG_REPORT_APP_NAME: String? = null
 
-    const val PUSH_CONFIG_INCLUDE_FIREBASE = false
-    const val PUSH_CONFIG_INCLUDE_UNIFIED_PUSH = true
+    const val PUSH_CONFIG_INCLUDE_FIREBASE: Boolean = false
+    const val PUSH_CONFIG_INCLUDE_UNIFIED_PUSH: Boolean = true
+    val PUSHER_APP_ID_RELEASE: String? = "io.element.android.xneutrino"
+    val PUSHER_APP_ID_DEBUG: String? = "io.element.android.xneutrino"
+    val PUSHER_APP_ID_NIGHTLY: String? = null
 }

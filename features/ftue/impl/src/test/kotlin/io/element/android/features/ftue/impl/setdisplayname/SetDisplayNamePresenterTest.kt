@@ -47,7 +47,7 @@ class SetDisplayNamePresenterTest {
         moleculeFlow(RecompositionMode.Immediate) {
             presenter.present()
         }.test {
-            awaitItem().eventSink(SetDisplayNameEvents.UpdateDisplayName("Alice"))
+            awaitItem().eventSink(SetDisplayNameEvent.UpdateDisplayName("Alice"))
             val state = awaitItem()
             assertThat(state.displayName).isEqualTo("Alice")
             assertThat(state.isTooLong).isFalse()
@@ -62,7 +62,7 @@ class SetDisplayNamePresenterTest {
             presenter.present()
         }.test {
             awaitItem().eventSink(
-                SetDisplayNameEvents.UpdateDisplayName("this name is definitely too long")
+                SetDisplayNameEvent.UpdateDisplayName("this name is definitely too long")
             )
             val state = awaitItem()
             assertThat(state.isTooLong).isTrue()
@@ -78,8 +78,8 @@ class SetDisplayNamePresenterTest {
         moleculeFlow(RecompositionMode.Immediate) {
             presenter.present()
         }.test {
-            awaitItem().eventSink(SetDisplayNameEvents.UpdateDisplayName("Alice"))
-            awaitItem().eventSink(SetDisplayNameEvents.Submit)
+            awaitItem().eventSink(SetDisplayNameEvent.UpdateDisplayName("Alice"))
+            awaitItem().eventSink(SetDisplayNameEvent.Submit)
             var state = awaitItem()
             while (state.submitAction !is AsyncAction.Success) {
                 state = awaitItem()

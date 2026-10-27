@@ -14,9 +14,11 @@ import com.google.common.truth.Truth.assertThat
 import io.element.android.features.location.api.Location
 import io.element.android.features.location.api.ShowLocationEntryPoint
 import io.element.android.features.location.api.ShowLocationMode
+import io.element.android.features.location.impl.common.FakeUserLocationStateFactory
 import io.element.android.features.location.impl.common.actions.FakeLocationActions
 import io.element.android.features.location.impl.common.permissions.FakePermissionsPresenter
 import io.element.android.features.location.test.FakeActiveLiveLocationShareManager
+import io.element.android.features.location.test.FakeLocationService
 import io.element.android.libraries.dateformatter.test.FakeDateFormatter
 import io.element.android.libraries.matrix.api.core.UserId
 import io.element.android.libraries.matrix.test.core.aBuildMeta
@@ -39,8 +41,8 @@ class DefaultShowLocationEntryPointTest {
             ShowLocationNode(
                 buildContext = buildContext,
                 plugins = plugins,
-                presenterFactory = object : ShowLocationPresenter.Factory {
-                    override fun create(mode: ShowLocationMode) = ShowLocationPresenter(
+                presenterFactory = { mode ->
+                    ShowLocationPresenter(
                         mode = mode,
                         permissionsPresenterFactory = { FakePermissionsPresenter() },
                         locationActions = FakeLocationActions(),
@@ -49,6 +51,8 @@ class DefaultShowLocationEntryPointTest {
                         stringProvider = FakeStringProvider(),
                         joinedRoom = joinedRoom,
                         liveLocationShareManager = FakeActiveLiveLocationShareManager(),
+                        userLocationStateFactory = FakeUserLocationStateFactory(),
+                        locationService = FakeLocationService(),
                     )
                 },
                 analyticsService = FakeAnalyticsService(),
